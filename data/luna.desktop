@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=Luna
+GenericName=Explorador de archivos
+Comment=Explora y gestiona tus archivos
+Exec=luna %U
+Icon=luna
+Terminal=false
+StartupNotify=true
+StartupWMClass=luna
+Categories=System;Utility;Core;FileManager;FileTools;
+MimeType=inode/directory;
+Keywords=archivos;explorador;carpetas;files;file manager;nautilus;luna;
+Actions=new-window;
+
+[Desktop Action new-window]
+Name=Ventana nueva
+Exec=luna

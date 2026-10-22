@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="sky" cx="50%" cy="38%" r="68%">
+      <stop offset="0" stop-color="#2d3c6b"/>
+      <stop offset="1" stop-color="#11162c"/>
+    </radialGradient>
+    <radialGradient id="fur" cx="50%" cy="40%" r="62%">
+      <stop offset="0" stop-color="#fdf6ea"/>
+      <stop offset="0.65" stop-color="#eedcc0"/>
+      <stop offset="1" stop-color="#c8a782"/>
+    </radialGradient>
+    <radialGradient id="mask" cx="50%" cy="58%" r="50%">
+      <stop offset="0" stop-color="#2f2018"/>
+      <stop offset="0.5" stop-color="#4a3226" stop-opacity="0.96"/>
+      <stop offset="0.82" stop-color="#7a5640" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#9b7458" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#24170f"/>
+      <stop offset="1" stop-color="#5a3e2d"/>
+    </linearGradient>
+    <radialGradient id="iris" cx="42%" cy="38%" r="65%">
+      <stop offset="0" stop-color="#b9e6ff"/>
+      <stop offset="0.55" stop-color="#4fa6ee"/>
+      <stop offset="1" stop-color="#1d5fae"/>
+    </radialGradient>
+    <mask id="crescent">
+      <circle cx="198" cy="64" r="30" fill="#fff"/>
+      <circle cx="212" cy="52" r="27" fill="#000"/>
+    </mask>
+  </defs>
+
+  <circle cx="128" cy="128" r="122" fill="url(#sky)"/>
+  <circle cx="198" cy="64" r="30" fill="#f6e8b1" mask="url(#crescent)"/>
+  <g fill="#f6e8b1">
+    <circle cx="50" cy="62" r="2.6"/>
+    <circle cx="74" cy="34" r="1.8"/>
+    <circle cx="36" cy="104" r="1.6"/>
+    <circle cx="222" cy="122" r="2"/>
+    <circle cx="160" cy="28" r="1.5"/>
+  </g>
+
+  <!-- ears -->
+  <path d="M56 128 L66 46 Q69 33 80 40 L124 88 Z" fill="url(#ear)"/>
+  <path d="M200 128 L190 46 Q187 33 176 40 L132 88 Z" fill="url(#ear)"/>
+  <path d="M72 106 L77 58 Q79 51 85 56 L110 86 Z" fill="#7d5845" opacity="0.85"/>
+  <path d="M184 106 L179 58 Q177 51 171 56 L146 86 Z" fill="#7d5845" opacity="0.85"/>
+
+  <!-- head -->
+  <ellipse cx="128" cy="148" rx="82" ry="72" fill="url(#fur)"/>
+  <!-- seal-point mask -->
+  <ellipse cx="128" cy="164" rx="60" ry="54" fill="url(#mask)"/>
+
+  <!-- eyes -->
+  <g>
+    <path d="M78 142 Q96 122 116 140 Q97 156 78 142 Z" fill="url(#iris)"/>
+    <path d="M178 142 Q160 122 140 140 Q159 156 178 142 Z" fill="url(#iris)"/>
+    <ellipse cx="97" cy="140" rx="3.4" ry="10" fill="#0e0b0a"/>
+    <ellipse cx="159" cy="140" rx="3.4" ry="10" fill="#0e0b0a"/>
+    <circle cx="101" cy="135" r="2.6" fill="#fff" opacity="0.9"/>
+    <circle cx="163" cy="135" r="2.6" fill="#fff" opacity="0.9"/>
+    <path d="M78 142 Q96 122 116 140" fill="none" stroke="#1a110c" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M178 142 Q160 122 140 140" fill="none" stroke="#1a110c" stroke-width="2.4" stroke-linecap="round"/>
+  </g>
+
+  <!-- nose and mouth -->
+  <path d="M119 170 Q128 166 137 170 Q133 178 128 180 Q123 178 119 170 Z" fill="#1c120d"/>
+  <path d="M128 180 L128 187 M128 187 Q121 194 113 190 M128 187 Q135 194 143 190" fill="none" stroke="#1c120d" stroke-width="2.6" stroke-linecap="round"/>
+
+  <!-- whiskers -->
+  <g stroke="#f7efe1" stroke-width="1.8" stroke-linecap="round" opacity="0.85" fill="none">
+    <path d="M100 178 Q72 172 40 168"/>
+    <path d="M100 184 Q72 184 42 190"/>
+    <path d="M156 178 Q184 172 216 168"/>
+    <path d="M156 184 Q184 184 214 190"/>
+  </g>
+</svg>
