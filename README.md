@@ -5,7 +5,21 @@ Nautilus, pensada para el escritorio [Omarchy](https://omarchy.org) (usa los col
 de su tema y lanza las aplicaciones como él), pero que funciona en cualquier
 escritorio. Lleva el nombre de Luna, una gata siamesa, que es también su icono.
 
-![Icono de Luna](data/luna.svg)
+<img src="data/luna.svg" alt="Icono de Luna" width="96">
+
+![Luna mostrando fotos en la vista de iconos](docs/capturas/iconos.png)
+
+| Lista detallada | Vista dividida |
+|---|---|
+| ![Lista detallada con tamaño, tipo, fecha, permisos y propietario](docs/capturas/detallada.png) | ![Dos paneles en la misma ventana](docs/capturas/dividida.png) |
+| **Columnas** | **Conectar a un servidor** |
+| ![Vista de columnas](docs/capturas/columnas.png) | ![Diálogo de conexión SSH/SFTP, FTP, SMB y NFS](docs/capturas/conectar.png) |
+| **Metadatos de una foto (EXIF y GPS)** | **Permisos** |
+| ![Pestaña de metadatos en Propiedades](docs/capturas/metadatos.png) | ![Pestaña de permisos con casillas y valor octal](docs/capturas/permisos.png) |
+
+![Ajustes](docs/capturas/ajustes.png)
+
+*Las capturas usan una carpeta personal de ejemplo y el tema Cobalt2 de Omarchy.*
 
 ## Qué hace
 
