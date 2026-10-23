@@ -67,12 +67,15 @@ int main(int argc, char **argv)
     app.setStyle(new LunaStyle(QStyleFactory::create("Fusion")));
     th.applyToApp();
 
-    QStringList paths;
+    QStringList paths, remotes;
     for (int i = 1; i < argc; ++i) {
         QString a = QString::fromLocal8Bit(argv[i]);
         if (a.startsWith('-')) continue;
         if (a.startsWith("file://")) a = QUrl(a).toLocalFile();
-        else if (a.contains("://")) continue;
+        else if (a.contains("://")) {   // sftp://, smb://… mounted once the window is up
+            remotes << a;
+            continue;
+        }
         paths << QFileInfo(a).absoluteFilePath();
     }
     struct MetaCallLogger : QObject {
@@ -92,6 +95,7 @@ int main(int argc, char **argv)
     auto *w = new MainWindow(paths);
     w->setAttribute(Qt::WA_DeleteOnClose);
     w->show();
+    for (const QString &uri : remotes) QTimer::singleShot(0, w, [w, uri] { w->connectServer(uri); });
     // Thumbnail benchmark: LUNA_THUMBTEST=1 luna <folder>
     if (qEnvironmentVariableIsSet("LUNA_THUMBTEST")) {
         auto *t = new QElapsedTimer;

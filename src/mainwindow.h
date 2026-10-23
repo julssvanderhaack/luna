@@ -42,6 +42,8 @@ public:
     Pane *pane() const;
     TabPage *page() const;
     int newTab(const QString &path, bool activate = true);
+    // Mounts a sftp:// smb:// … address (asks for it when empty) and opens it
+    void connectServer(const QString &uri);
 
 protected:
     void closeEvent(QCloseEvent *e) override;
@@ -58,7 +60,6 @@ private:
     void addShortcuts();
     void showShortcuts();
     void showAbout();
-    void connectServer(const QString &uri);
     void syncViewButton();
     void applyHeaderStyle();
     void rebuildHeader();

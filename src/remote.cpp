@@ -5,6 +5,9 @@
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QDir>
+#include <QElapsedTimer>
+#include <QFile>
+#include <QFileInfo>
 #include <QFormLayout>
 #include <QInputDialog>
 #include <QLabel>
@@ -17,6 +20,8 @@
 #include <QRegularExpression>
 #include <QSettings>
 #include <QSpinBox>
+#include <QThread>
+#include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
 #include <unistd.h>
@@ -37,6 +42,39 @@ Remote &Remote::get()
 }
 
 QString Remote::gvfsRoot() { return QString("/run/user/%1/gvfs").arg(getuid()); }
+
+// gvfsd starts the FUSE bridge only once, at login; if it ever exits, "gio mount"
+// still works (Nautilus talks to GIO directly) but /run/user/UID/gvfs stays an
+// empty folder and there is nothing for Luna to browse.
+bool Remote::fuseRunning()
+{
+    QFile f("/proc/self/mounts");
+    if (!f.open(QIODevice::ReadOnly)) return false;
+    const QByteArray needle = ' ' + gvfsRoot().toUtf8() + " fuse.gvfsd-fuse ";
+    return f.readAll().contains(needle);
+}
+
+bool Remote::ensureFuse()
+{
+    if (fuseRunning()) return true;
+    QString bin;
+    for (const char *c : {"/usr/lib/gvfsd-fuse", "/usr/libexec/gvfsd-fuse", "/usr/lib/gvfs/gvfsd-fuse", "/usr/libexec/gvfs/gvfsd-fuse"})
+        if (QFileInfo(QString::fromLatin1(c)).isExecutable()) {
+            bin = QString::fromLatin1(c);
+            break;
+        }
+    if (bin.isEmpty()) return false;
+    QDir().mkpath(gvfsRoot());
+    // As its own user unit so it outlives Luna's app scope
+    if (QProcess::execute("systemd-run", {"--user", "--collect", "--quiet", "--unit=luna-gvfsd-fuse", bin, "-f", gvfsRoot()}) != 0)
+        QProcess::startDetached(bin, {gvfsRoot()});
+    QElapsedTimer t;
+    t.start();
+    while (!fuseRunning() && t.elapsed() < 3000) QThread::msleep(50);
+    // Its root lists nothing until it has asked gvfsd for the mounts
+    QTimer::singleShot(600, &get(), [] { emit get().mountsChanged(); });
+    return fuseRunning();
+}
 
 bool Remote::isRemotePath(const QString &path)
 {
@@ -70,6 +108,11 @@ QString Remote::describe(const QString &dir, QString *scheme, QString *uri)
 QList<Remote::Mount> Remote::mounts() const
 {
     QList<Mount> out;
+    static bool fuseTried = false;   // also lists mounts made from Nautilus
+    if (!fuseTried) {
+        fuseTried = true;
+        ensureFuse();
+    }
     QDir d(gvfsRoot());
     for (const QString &name : d.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
         Mount m;
@@ -112,6 +155,13 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
     QUrl url(uri);
     if (!url.isValid() || url.host().isEmpty()) {
         QMessageBox::warning(parent, "Conectar", QString::fromUtf8("La dirección «%1» no es válida.").arg(uri0));
+        done({});
+        return;
+    }
+    if (!ensureFuse()) {
+        QMessageBox::warning(parent, "Conectar",
+                             QString::fromUtf8("No se pudo poner en marcha gvfsd-fuse, el puente de GVFS que Luna usa para abrir "
+                                               "carpetas remotas en %1.").arg(gvfsRoot()));
         done({});
         return;
     }
@@ -184,7 +234,9 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
     connect(proc, &QProcess::finished, proc, [=](int code) {
         const QString out = buffer->trimmed();
         proc->deleteLater();
-        if (code != 0 && !out.contains("already mounted", Qt::CaseInsensitive)) {
+        // The daemon answers in the user's language whatever LC_ALL says
+        static const QRegularExpression alreadyRe(QString::fromUtf8("already mounted|ya está montad"), QRegularExpression::CaseInsensitiveOption);
+        if (code != 0 && !out.contains(alreadyRe)) {
             QString msg = out.section('\n', -1).trimmed().section(": ", -1);
             if (msg.isEmpty()) msg = QString::fromUtf8("No se pudo conectar.");
             QMessageBox::warning(owner, "Conectar", QString::fromUtf8("No se pudo conectar con %1:\n%2").arg(url.host(), msg));
@@ -193,7 +245,14 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
         }
         addRecent(uri);
         emit mountsChanged();
-        done(localPathFor(uri));
+        const QString path = localPathFor(uri);
+        if (path.isEmpty() || !QFileInfo(path).exists()) {
+            QMessageBox::warning(owner, "Conectar",
+                                 QString::fromUtf8("Se ha conectado con %1, pero su carpeta no aparece en %2.").arg(url.host(), gvfsRoot()));
+            done({});
+            return;
+        }
+        done(path);
     });
     proc->start("gio", {"mount", uri});
 }

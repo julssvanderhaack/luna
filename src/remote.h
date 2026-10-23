@@ -21,6 +21,9 @@ public:
     static Remote &get();
     static QString gvfsRoot();
     static bool isRemotePath(const QString &path);
+    static bool fuseRunning();
+    // Starts gvfsd-fuse if it is not serving gvfsRoot(); true when it is.
+    static bool ensureFuse();
     static QString describe(const QString &mountDir, QString *scheme = nullptr, QString *uri = nullptr);
     QList<Mount> mounts() const;
     // Mounts (if needed) and calls back with the local FUSE path, or empty on failure.
