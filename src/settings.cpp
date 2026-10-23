@@ -25,7 +25,7 @@ int Settings::listIconSizeFor(int zoom)
 
 QStringList Settings::toolbarItems()
 {
-    return {"back", "forward", "up", "path", "search", "view", "split", "sidebar", "menu"};
+    return {"back", "forward", "up", "path", "search", "menu"};
 }
 
 QStringList Settings::normalizeToolbar(const QStringList &layout)
@@ -112,14 +112,10 @@ void Settings::load()
     tbForward = q.value("toolbar/forward", tbForward).toBool();
     tbUp = q.value("toolbar/up", tbUp).toBool();
     tbSearch = q.value("toolbar/search", tbSearch).toBool();
-    tbView = q.value("toolbar/view", tbView).toBool();
-    tbSplit = q.value("toolbar/split", tbSplit).toBool();
-    tbSidebar = q.value("toolbar/sidebar", tbSidebar).toBool();
     toolbarLayout = q.value("toolbar/layout").toStringList();
     if (toolbarLayout.isEmpty()) {   // from the older per-button switches
         auto item = [](const char *name, bool on) { return (on ? QString() : QStringLiteral("-")) + name; };
-        toolbarLayout = {"back", item("forward", tbForward), item("up", tbUp), "|", "path", "|", item("search", tbSearch),
-                         item("view", tbView), item("split", tbSplit), item("sidebar", tbSidebar), "menu"};
+        toolbarLayout = {"back", item("forward", tbForward), item("up", tbUp), "|", "path", "|", item("search", tbSearch), "menu"};
     }
     toolbarLayout = normalizeToolbar(toolbarLayout);
     accentColor = q.value("look/accent", accentColor).toString();
@@ -176,9 +172,7 @@ void Settings::save() const
     q.setValue("toolbar/forward", tbForward);
     q.setValue("toolbar/up", tbUp);
     q.setValue("toolbar/search", tbSearch);
-    q.setValue("toolbar/view", tbView);
-    q.setValue("toolbar/split", tbSplit);
-    q.setValue("toolbar/sidebar", tbSidebar);
+    for (const char *k : {"toolbar/view", "toolbar/split", "toolbar/sidebar"}) q.remove(k);   // these buttons live in the status bar now
     q.setValue("toolbar/layout", toolbarLayout);
     q.setValue("look/accent", accentColor);
     q.setValue("look/viewFontPt", viewFontPt);

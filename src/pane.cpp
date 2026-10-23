@@ -172,6 +172,11 @@ Pane::Pane(QWidget *parent) : QFrame(parent)
     th->setContentsMargins(8, 3, 8, 3);
     m_titleLabel = new QLabel;
     m_titleLabel->setTextFormat(Qt::RichText);
+    // A rich-text label is as wide as its whole text at least: a long path
+    // made each split pane demand ~500 px and pushed the window wider than
+    // its tile, cutting the header's menu button off. It shrinks freely and
+    // updateTitle() elides the text instead.
+    m_titleLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     th->addWidget(m_titleLabel, 1);
     m_title->installEventFilter(this);
     m_title->hide();
@@ -564,8 +569,7 @@ void Pane::setPath(const QString &path0, bool record, const QStringList &select)
     }
     closeFilter();
     m_path = path;
-    m_titleLabel->setText(QString("<b>%1</b>&nbsp;&nbsp;<span style=\"color:%2\">%3</span>")
-                              .arg(Places::displayName(path).toHtmlEscaped(), Theme::get().fgDim.name(), isVirtual() ? QString() : path.toHtmlEscaped()));
+    updateTitle();
     m_trashBar->setVisible(isTrash());
     m_recursive->setVisible(!isVirtual());
     if (isVirtual()) m_model->setPaths(path, Places::contents(path));
@@ -623,6 +627,24 @@ void Pane::refresh()
         return;
     }
     m_model->refresh();
+}
+
+// "<b>Name</b>  /full/path", elided to the label's width: the path first
+// (in the middle), then the name.
+void Pane::updateTitle()
+{
+    const QString name = Places::displayName(m_path);
+    const QString path = isVirtual() ? QString() : m_path;
+    m_titleLabel->setToolTip(path);
+    const int avail = m_titleLabel->contentsRect().width();
+    QFont bold = m_titleLabel->font();
+    bold.setBold(true);
+    const QFontMetrics fb(bold), fm(m_titleLabel->font());
+    const QString shownName = fb.elidedText(name, Qt::ElideRight, std::max(avail, 0));
+    const int rest = avail - fb.horizontalAdvance(shownName) - 2 * fm.horizontalAdvance(' ');
+    const QString shownPath = rest > fm.horizontalAdvance(QString::fromUtf8("/…/")) ? fm.elidedText(path, Qt::ElideMiddle, rest) : QString();
+    m_titleLabel->setText(QString("<b>%1</b>&nbsp;&nbsp;<span style=\"color:%2\">%3</span>")
+                              .arg(shownName.toHtmlEscaped(), Theme::get().fgDim.name(), shownPath.toHtmlEscaped()));
 }
 
 void Pane::setSplitMode(bool split) { m_title->setVisible(split); }
@@ -1355,6 +1377,7 @@ bool Pane::eventFilter(QObject *o, QEvent *e)
         showFolderMenu(static_cast<QContextMenuEvent *>(e)->globalPos());
         return true;
     }
+    if (o == m_title && e->type() == QEvent::Resize) updateTitle();
     if (o == m_title && e->type() == QEvent::MouseButtonPress) {
         emit activated(this);
         focusView();

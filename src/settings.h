@@ -58,7 +58,7 @@ public:
     // Barra superior
     int toolbarStyle = 0;          // 0 solo iconos, 1 iconos y texto, 2 iconos juntos
     int toolbarIconSize = 1;       // 0 pequeño, 1 mediano, 2 grande
-    bool tbForward = true, tbUp = true, tbSearch = true, tbView = true, tbSplit = true, tbSidebar = true;   // pre-layout, migrated
+    bool tbForward = true, tbUp = true, tbSearch = true;   // pre-layout, migrated
     // Order of the header items, left to right: "|" starts a new group and a
     // leading "-" hides an item but keeps its place. "path" and "menu" are
     // always shown. See toolbarItems().

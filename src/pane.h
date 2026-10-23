@@ -95,6 +95,7 @@ private:
     QMenu *transferMenu(bool move, QWidget *parent);
     void handleDrop(const QList<QUrl> &urls, const QString &dest);
     void updateStatus();
+    void updateTitle();
     void updateOverlay();
     void selectPaths(const QStringList &paths, bool edit = false);
     void setupView(QAbstractItemView *v);
