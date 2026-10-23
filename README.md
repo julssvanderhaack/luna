@@ -54,8 +54,8 @@ distribución basada en Arch al día.
 sudo pacman -S --needed qt6-base qt6-svg libmediainfo exiv2 poppler-qt6
 # opcionales: miniaturas de vídeo, servidores remotos y comprimir/extraer
 sudo pacman -S --needed ffmpegthumbnailer gvfs gvfs-smb libarchive 7zip
-unzip luna-1.0.0-linux-x86_64.zip
-cd luna-1.0.0-linux-x86_64
+unzip luna-1.1.0-linux-x86_64.zip
+cd luna-1.1.0-linux-x86_64
 ./install.sh            # en ~/.local (sin sudo)
 # sudo ./install.sh --system   # para todos los usuarios, en /usr/local
 ```
