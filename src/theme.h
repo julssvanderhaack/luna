@@ -7,6 +7,7 @@
 struct Theme {
     QColor bg, bgDark, bgLight, fg, fgDim, accent, selection, muted;
     QColor red, yellow, green, cyan, blue, magenta, orange;
+    QColor ansi[16];   // terminal palette (the theme's ghostty.conf, else colors.toml)
     bool dark = true;
     QString mono, nerd;   // monospace UI font, Nerd Font for glyph icons
 

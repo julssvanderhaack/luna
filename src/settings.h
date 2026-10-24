@@ -69,6 +69,7 @@ public:
     bool pathbarText = false;
     // Terminal
     QString terminal = "xdg-terminal-exec";
+    int terminalHeight = 200;      // px, the docked terminal (F4)
     // Sesión
     QStringList sessionTabs;
     bool startSplit = false;

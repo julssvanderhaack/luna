@@ -37,6 +37,9 @@
 #include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
+#ifdef LUNA_TERMINAL
+#include "terminal.h"
+#endif
 #include "fsmodel.h"
 #include "places.h"
 #include "undo.h"
@@ -243,7 +246,16 @@ MainWindow::MainWindow(const QStringList &paths)
     m_main->setChildrenCollapsible(false);
     m_pages = new QStackedWidget;
     m_sidebar = new Sidebar;
-    m_main->addWidget(m_pages);
+    m_center = new QSplitter(Qt::Vertical);
+    m_center->setChildrenCollapsible(false);
+    m_center->addWidget(m_pages);
+    connect(m_center, &QSplitter::splitterMoved, this, [this] {
+        if (m_term && m_term->isVisible()) {
+            Settings::get().terminalHeight = m_term->height();
+            Settings::get().changed();
+        }
+    });
+    m_main->addWidget(m_center);
     m_main->addWidget(m_sidebar);
     v->addWidget(m_main, 1);
 
@@ -254,8 +266,15 @@ MainWindow::MainWindow(const QStringList &paths)
     v->addWidget(m_jobs);
     setCentralWidget(central);
 
-    // Sidebar, split and view mode always sit in the bottom-left corner.
-    for (QToolButton *b : {m_sideBtn, m_split, m_viewBtn}) {
+    m_termBtn = toolButton("terminal", "Terminal (F4)");
+    m_termBtn->setCheckable(true);
+    connect(m_termBtn, &QToolButton::clicked, this, &MainWindow::showTerminal);
+#ifndef LUNA_TERMINAL
+    m_termBtn->hide();   // built without libvterm
+#endif
+    // Sidebar, split, view mode and terminal always sit in the bottom-left
+    // corner; the folder's figures go to the right.
+    for (QToolButton *b : {m_sideBtn, m_split, m_viewBtn, m_termBtn}) {
         b->setIconSize(QSize(16, 16));
         b->setToolButtonStyle(Qt::ToolButtonIconOnly);
         b->setFixedSize(24, 22);
@@ -263,6 +282,9 @@ MainWindow::MainWindow(const QStringList &paths)
         statusBar()->addWidget(b);
     }
     m_status = new QLabel;
+    m_status->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_status->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);   // a long message must not widen the window
+    m_status->setContentsMargins(0, 0, 6, 0);
     statusBar()->addWidget(m_status, 1);
     statusBar()->setSizeGripEnabled(false);
 
@@ -413,6 +435,38 @@ void MainWindow::wirePane(Pane *p)
     connect(p, &Pane::propertiesRequested, this, [this](const QStringList &paths) { (new PropertiesDialog(paths, this))->show(); });
 }
 
+void MainWindow::showTerminal(bool show)
+{
+#ifdef LUNA_TERMINAL
+    if (show && !m_term) {
+        m_term = new Terminal(pane()->path());
+        m_center->addWidget(m_term);
+        m_center->setStretchFactor(0, 1);
+        m_center->setStretchFactor(1, 0);
+        connect(m_term, &Terminal::finished, this, [this] {   // "exit": close the panel, a new shell next time
+            m_term->deleteLater();
+            m_term = nullptr;
+            m_termBtn->setChecked(false);
+            pane()->focusView();
+        });
+    }
+    if (m_term) {
+        m_term->setVisible(show);
+        if (show) {
+            const int h = std::clamp(Settings::get().terminalHeight, 80, std::max(80, m_center->height() - 120));
+            m_center->setSizes({m_center->height() - h, h});
+            m_term->setDirectory(pane()->path());
+            m_term->setFocus();
+        } else {
+            pane()->focusView();
+        }
+    }
+    m_termBtn->setChecked(show && m_term);
+#else
+    Q_UNUSED(show);
+#endif
+}
+
 void MainWindow::syncHeader()
 {
     Pane *p = pane();
@@ -425,6 +479,9 @@ void MainWindow::syncHeader()
     m_split->setChecked(page()->isSplit());
     m_sideBtn->setChecked(m_sidebar->isVisible());
     m_sidebar->setCurrentPath(p->path());
+#ifdef LUNA_TERMINAL
+    if (m_term && m_term->isVisible()) m_term->setDirectory(p->path());
+#endif
     setWindowTitle(Places::displayName(p->path()) + QString::fromUtf8(" — Luna"));
 }
 
@@ -442,7 +499,7 @@ void MainWindow::layoutSidebar()
     const int want = s.sidebarRight ? 1 : 0;
     const bool moved = sideIndex != want;
     if (moved) m_main->insertWidget(want, m_sidebar);
-    m_main->setStretchFactor(m_main->indexOf(m_pages), 1);
+    m_main->setStretchFactor(m_main->indexOf(m_center), 1);
     m_main->setStretchFactor(m_main->indexOf(m_sidebar), 0);
     if (show && (!wasVisible || moved)) {
         const int sw = narrow() ? std::min(200, width() / 2) : 220;
@@ -757,7 +814,8 @@ void MainWindow::addShortcuts()
         QStringList s = pane()->selectedPaths();
         (new PropertiesDialog(s.isEmpty() ? QStringList{pane()->path()} : s, this))->show();
     });
-    sc(QKeySequence("F4"), [this] { pane()->openTerminal(); });
+    sc(QKeySequence("F4"), [this] { showTerminal(!(m_term && m_term->isVisible())); });
+    sc(QKeySequence("Shift+F4"), [this] { pane()->openTerminal(); });
     sc(QKeySequence("F3"), [this] {
         page()->setSplit(!page()->isSplit());
         syncHeader();
@@ -826,7 +884,7 @@ void MainWindow::showShortcuts()
         {"Ctrl+1 … Ctrl+6", "Iconos, compacta, lista, detallada, árbol, columnas"}, {"Ctrl + rueda, Ctrl+/−", "Tamaño de los iconos"},
         {"Ctrl+H", "Mostrar ocultos"}, {"F2", "Renombrar (en lote si hay varios)"},
         {"Supr / Mayús+Supr", "Papelera / eliminar definitivamente"}, {"Ctrl+C / X / V", "Copiar / cortar / pegar"},
-        {"Ctrl+Mayús+N", "Nueva carpeta"}, {"Alt+Intro", "Propiedades"}, {"F4", "Terminal aquí"},
+        {"Ctrl+Mayús+N", "Nueva carpeta"}, {"Alt+Intro", "Propiedades"}, {"F4", "Terminal integrado"}, {"Mayús+F4", "Terminal aparte"},
         {"Ctrl+Z / Ctrl+Mayús+Z", "Deshacer / rehacer"},
         {"Ctrl+D", "Añadir a marcadores"}, {"Ctrl+,", "Ajustes"}, {"Arrastrar + Ctrl / Mayús / ambos", "Copiar / mover / enlazar"},
     };

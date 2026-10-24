@@ -55,6 +55,24 @@ void Theme::load()
     blue = col("blue", "#7aa2f7");
     magenta = col("magenta", "#bb9af7");
     orange = col("orange", "#ff9e64");
+    // Terminal palette: the themes ship it complete for ghostty; colors.toml
+    // lacks black/white, so it is only the fallback.
+    const QColor base[8] = {bgDark, red, green, yellow, blue, magenta, cyan, fg};
+    const char *bright[8] = {"", "bright_red", "bright_green", "bright_yellow", "bright_blue", "bright_magenta", "bright_cyan", ""};
+    for (int i = 0; i < 8; ++i) {
+        ansi[i] = base[i];
+        ansi[i + 8] = i == 0 ? muted : i == 7 ? col("bright_foreground", fg.name()) : col(bright[i], base[i].name());
+    }
+    for (const QString &p : {QDir::homePath() + "/.local/state/omarchy/current/theme/ghostty.conf",
+                             QDir::homePath() + "/.config/omarchy/current/theme/ghostty.conf"}) {
+        QFile f(p);
+        if (!f.open(QIODevice::ReadOnly)) continue;
+        static const QRegularExpression re("^\\s*palette\\s*=\\s*(\\d+)\\s*=\\s*(#[0-9A-Fa-f]{6})");
+        QTextStream in(&f);
+        while (!in.atEnd())
+            if (auto m = re.match(in.readLine()); m.hasMatch() && m.captured(1).toInt() < 16) ansi[m.captured(1).toInt()] = QColor(m.captured(2));
+        break;
+    }
     if (const QColor own(Settings::get().accentColor); own.isValid()) accent = own;   // the user's choice wins
     dark = bg.lightness() < 128;
 

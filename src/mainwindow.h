@@ -54,6 +54,7 @@ private:
     void wirePane(Pane *p);
     void closeTab(int index);
     void syncHeader();
+    void showTerminal(bool show);
     void layoutSidebar();
     void applySettings();
     void trackJob(Job *job);
@@ -71,6 +72,9 @@ private:
     QStackedWidget *m_pages;
     Sidebar *m_sidebar = nullptr;
     QSplitter *m_main;
+    QSplitter *m_center = nullptr;   // the pages above, the terminal below
+    class Terminal *m_term = nullptr;   // created the first time it is shown
+    QToolButton *m_termBtn = nullptr;
     QToolButton *m_back = nullptr, *m_forward = nullptr, *m_up = nullptr, *m_split = nullptr, *m_sideBtn = nullptr, *m_viewBtn = nullptr,
                 *m_search = nullptr, *m_menuBtn = nullptr;
     QList<QFrame *> m_groups;        // header button groups, see rebuildHeader()
