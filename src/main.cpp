@@ -17,6 +17,7 @@
 #include <QFileInfo>
 #include <QPalette>
 #include <QPixmapCache>
+#include <QPainter>
 #include <QProxyStyle>
 #include <QStyleFactory>
 #include <QAbstractItemView>
@@ -41,6 +42,25 @@ public:
     {
         if (h == SH_DialogButtonBox_ButtonsHaveIcons) return 0;
         return QProxyStyle::styleHint(h, o, w, r);
+    }
+    // Tree view expanders: a thin chevron in the text colour. (A style sheet
+    // rule on QTreeView::branch would take over and draw no arrow at all.)
+    void drawPrimitive(PrimitiveElement pe, const QStyleOption *o, QPainter *p, const QWidget *w) const override
+    {
+        if (pe != PE_IndicatorBranch) return QProxyStyle::drawPrimitive(pe, o, p, w);
+        if (!(o->state & State_Children)) return;   // no guide lines, like Nautilus
+        const QPointF c = QRectF(o->rect).center();
+        const qreal r = 3.5;
+        QPolygonF chevron;
+        if (o->state & State_Open) chevron << QPointF(c.x() - r, c.y() - r / 2) << QPointF(c.x(), c.y() + r / 2) << QPointF(c.x() + r, c.y() - r / 2);
+        else chevron << QPointF(c.x() - r / 2, c.y() - r) << QPointF(c.x() + r / 2, c.y()) << QPointF(c.x() - r / 2, c.y() + r);
+        QColor col = o->palette.color(QPalette::Text);
+        if (!(o->state & State_MouseOver)) col.setAlphaF(0.6);
+        p->save();
+        p->setRenderHint(QPainter::Antialiasing);
+        p->setPen(QPen(col, 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        p->drawPolyline(chevron);
+        p->restore();
     }
 };
 }
