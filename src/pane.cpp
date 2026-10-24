@@ -1310,7 +1310,7 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             m.addAction(ic.ui("edit"), QString::fromUtf8("Nuevo archivo vacío"), this, &Pane::newFile);
             m.addAction(ic.ui("paste"), "Pegar", QKeySequence::Paste, this, &Pane::paste)->setEnabled(!FileOps::fromClipboard(nullptr).isEmpty());
             m.addSeparator();
-            m.addAction(ic.ui("terminal"), "Abrir terminal aquí", QKeySequence("F4"), this, &Pane::openTerminal);
+            m.addAction(ic.ui("terminal"), "Abrir terminal aquí", QKeySequence("Shift+F4"), this, &Pane::openTerminal);
             m.addAction(ic.ui("copy"), "Copiar ruta de la carpeta", this, &Pane::copyPath);
         }
         m.addAction(QString::fromUtf8("Seleccionar todo"), QKeySequence::SelectAll, this, &Pane::selectAll);

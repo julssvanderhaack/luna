@@ -44,6 +44,16 @@ add_executable(luna
 )
 target_link_libraries(luna PRIVATE Qt6::Widgets Qt6::Svg PkgConfig::MEDIA)
 
+# Docked terminal (F4): optional, only with libvterm (Arch: libvterm).
+pkg_check_modules(VTERM IMPORTED_TARGET vterm)
+if(VTERM_FOUND)
+  target_sources(luna PRIVATE src/terminal.h src/terminal.cpp)
+  target_compile_definitions(luna PRIVATE LUNA_TERMINAL)
+  target_link_libraries(luna PRIVATE PkgConfig::VTERM util)
+else()
+  message(STATUS "libvterm not found: building without the docked terminal")
+endif()
+
 install(TARGETS luna RUNTIME DESTINATION bin)
 install(FILES data/luna.desktop DESTINATION share/applications)
 install(FILES data/luna.svg DESTINATION share/icons/hicolor/scalable/apps)

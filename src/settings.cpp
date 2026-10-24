@@ -106,6 +106,7 @@ void Settings::load()
     thumbVideos = q.value("thumbs/videos", thumbVideos).toBool();
     thumbPdf = q.value("thumbs/pdf", thumbPdf).toBool();
     terminal = q.value("terminal/command", terminal).toString();
+    terminalHeight = q.value("terminal/height", terminalHeight).toInt();
     pathbarText = q.value("view/pathbarText", pathbarText).toBool();
     toolbarStyle = q.value("toolbar/style", toolbarStyle).toInt();
     toolbarIconSize = q.value("toolbar/iconSize", toolbarIconSize).toInt();
@@ -166,6 +167,7 @@ void Settings::save() const
     q.setValue("thumbs/videos", thumbVideos);
     q.setValue("thumbs/pdf", thumbPdf);
     q.setValue("terminal/command", terminal);
+    q.setValue("terminal/height", terminalHeight);
     q.setValue("view/pathbarText", pathbarText);
     q.setValue("toolbar/style", toolbarStyle);
     q.setValue("toolbar/iconSize", toolbarIconSize);
