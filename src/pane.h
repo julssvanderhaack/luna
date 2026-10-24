@@ -122,6 +122,7 @@ private:
     QLabel *m_overlay = nullptr;
     QStringList m_pendingSelect;
     bool m_pendingEdit = false;
+    bool m_skipActivate = false;   // tree: the double click already toggled the folder
     qint64 m_freeBytes = -1;
     QList<int> m_sortKey;   // sort/filter settings last applied to the proxy
     QPointer<Pane> m_other;

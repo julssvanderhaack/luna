@@ -6,6 +6,7 @@
 #include "places.h"
 #include "theme.h"
 #include "undo.h"
+#include <utility>
 #include <QApplication>
 #include <QClipboard>
 #include <QColumnView>
@@ -397,11 +398,25 @@ void Pane::setupView(QAbstractItemView *v)
             qWarning("menu: after select: items=%lld paths=%lld", qlonglong(selectedItems().size()), qlonglong(selectedPaths().size()));
         contextMenu(v->viewport()->mapToGlobal(pos), ix.isValid());
     });
+    // In the tree, clicking a folder opens it in place (expands/collapses)
+    // instead of entering it; Enter still enters it.
+    auto toggleInTree = [this](const QModelIndex &ix) {
+        if (m_mode != ViewMode::Tree || !ix.isValid() || !ix.data(FsModel::IsDirRole).toBool()) return false;
+        const QModelIndex row = ix.sibling(ix.row(), 0);
+        m_tree->setExpanded(row, !m_tree->isExpanded(row));
+        return true;
+    };
+    connect(v, &QAbstractItemView::doubleClicked, this, [this, toggleInTree](const QModelIndex &ix) {
+        // QTreeView emits doubleClicked and then activated for the same click
+        if (!Settings::get().singleClick && toggleInTree(ix)) m_skipActivate = true;
+    });
     connect(v, &QAbstractItemView::activated, this, [this](const QModelIndex &ix) {
+        if (std::exchange(m_skipActivate, false)) return;
         if (!Settings::get().singleClick) activateIndex(ix);
     });
-    connect(v, &QAbstractItemView::clicked, this, [this](const QModelIndex &ix) {
-        if (Settings::get().singleClick && !(QApplication::keyboardModifiers() & (Qt::ControlModifier | Qt::ShiftModifier))) activateIndex(ix);
+    connect(v, &QAbstractItemView::clicked, this, [this, toggleInTree](const QModelIndex &ix) {
+        if (Settings::get().singleClick && !(QApplication::keyboardModifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) && !toggleInTree(ix))
+            activateIndex(ix);
     });
 }
 

@@ -121,7 +121,6 @@ QAbstractItemView::item:hover { background: %HOVERA%; }
 QAbstractItemView::item:selected { background: %SELA%; color: %FG%; }
 QAbstractItemView::item:selected:!active { background: %SELI%; }
 QHeaderView::section { background: %BG%; color: %DIM%; border: none; border-bottom: 1px solid %MUTED%; padding: 4px 6px; }
-QTreeView::branch { background: transparent; }
 QTabBar { font-family: "%UIFONT%"; }
 QTabBar::tab { background: transparent; color: %DIM%; padding: 6px 14px; border-bottom: 2px solid transparent; }
 QTabBar::tab:selected { color: %FG%; border-bottom: 2px solid %ACC%; }
