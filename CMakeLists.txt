@@ -39,13 +39,17 @@ add_executable(luna
   src/properties.h src/properties.cpp
   src/settingsdialog.h src/settingsdialog.cpp
   src/smoothscroll.h src/smoothscroll.cpp
+  src/preview.h src/preview.cpp
   src/mainwindow.h src/mainwindow.cpp
   data/luna.qrc
 )
 target_link_libraries(luna PRIVATE Qt6::Widgets Qt6::Svg PkgConfig::MEDIA)
 
 # Docked terminal (F4): optional, only with libvterm (Arch: libvterm).
-pkg_check_modules(VTERM IMPORTED_TARGET vterm)
+option(LUNA_WITH_TERMINAL "Docked terminal (needs libvterm)" ON)
+if(LUNA_WITH_TERMINAL)
+  pkg_check_modules(VTERM IMPORTED_TARGET vterm)
+endif()
 if(VTERM_FOUND)
   target_sources(luna PRIVATE src/terminal.h src/terminal.cpp)
   target_compile_definitions(luna PRIVATE LUNA_TERMINAL)

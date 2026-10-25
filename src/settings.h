@@ -70,6 +70,7 @@ public:
     // Terminal
     QString terminal = "xdg-terminal-exec";
     int terminalHeight = 200;      // px, the docked terminal (F4)
+    bool terminalClickInserts = true;   // a click on a file types its name in the docked terminal
     // Sesión
     QStringList sessionTabs;
     bool startSplit = false;

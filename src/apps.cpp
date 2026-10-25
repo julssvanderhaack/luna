@@ -204,7 +204,29 @@ void Apps::setDefault(const QString &mime, const QString &appId)
     readMimeApps();
 }
 
-bool Apps::launch(const QString &appId, const QStringList &paths)
+// Hyprland places the window itself: hl.exec_cmd(cmd, rules) on the Lua
+// config (0.56+, Omarchy's), where hyprctl dispatch takes Lua, or
+// "[workspace N silent] cmd" on the classic one.
+static void launchOnWorkspace(const QString &bin, const QStringList &args, int workspace)
+{
+    QStringList words{bin};
+    for (const QString &a : args) {
+        QString q = a;
+        q.replace('\'', R"('\'')");
+        words << '\'' + q + '\'';
+    }
+    const QString cmd = words.join(' ');
+    QString lua = cmd;
+    lua.replace('\\', R"(\\)").replace('"', R"(\")").replace('\n', R"(\n)");
+    QProcess p;
+    const QString ws = QString::number(workspace);   // arg(a, b) at once: a file named "%2" stays intact
+    p.start("hyprctl", {"dispatch", QString(R"(hl.dsp.exec_cmd("%1", { workspace = "%2 silent" }))").arg(lua, ws)});
+    p.waitForFinished(2000);
+    if (p.readAllStandardOutput().trimmed() == "ok") return;
+    QProcess::execute("hyprctl", {"dispatch", "exec", QString("[workspace %1 silent] %2").arg(ws, cmd)});
+}
+
+bool Apps::launch(const QString &appId, const QStringList &paths, int workspace)
 {
     const AppInfo *a = byId(appId);
     if (!a) return false;
@@ -215,6 +237,7 @@ bool Apps::launch(const QString &appId, const QStringList &paths)
         QStringList args;
         if (bin == "uwsm-app") args << "--";
         args << appId << files;
+        if (workspace > 0) return launchOnWorkspace(bin, args, workspace);
         QProcess::startDetached(bin, args, QDir::homePath());
     };
     if (single && paths.size() > 1) {
@@ -225,7 +248,7 @@ bool Apps::launch(const QString &appId, const QStringList &paths)
     return true;
 }
 
-QStringList Apps::openDefault(const QStringList &paths)
+QStringList Apps::openDefault(const QStringList &paths, int workspace)
 {
     QMimeDatabase db;
     QHash<QString, QStringList> groups;
@@ -236,7 +259,7 @@ QStringList Apps::openDefault(const QStringList &paths)
         if (id.isEmpty()) none << p;
         else groups[id] << p;
     }
-    for (auto it = groups.begin(); it != groups.end(); ++it) launch(it.key(), it.value());
+    for (auto it = groups.begin(); it != groups.end(); ++it) launch(it.key(), it.value(), workspace);
     return none;
 }
 

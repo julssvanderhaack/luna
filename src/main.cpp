@@ -15,6 +15,9 @@
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QDateTime>
+#include <QFile>
+#include <QFileSystemWatcher>
 #include <QPalette>
 #include <QPixmapCache>
 #include <QPainter>
@@ -86,6 +89,38 @@ int main(int argc, char **argv)
 
     app.setStyle(new LunaStyle(QStyleFactory::create("Fusion")));
     th.applyToApp();
+
+    // Follow Omarchy's theme live. omarchy-theme-set replaces current/theme
+    // and then rewrites current/theme.name; inotify tells us, nothing polls.
+    const QString themeState = QDir::homePath() + "/.local/state/omarchy/current";
+    auto *themeWatch = new QFileSystemWatcher(&app);
+    auto watchTheme = [themeWatch, themeState] {
+        for (const QString &p : {themeState, themeState + "/theme.name"})
+            if (QFileInfo::exists(p) && !themeWatch->files().contains(p) && !themeWatch->directories().contains(p)) themeWatch->addPath(p);
+    };
+    watchTheme();
+    auto *themeSettle = new QTimer(&app);   // the theme is copied file by file: wait for the dust
+    themeSettle->setSingleShot(true);
+    themeSettle->setInterval(600);
+    QObject::connect(themeWatch, &QFileSystemWatcher::directoryChanged, themeSettle, qOverload<>(&QTimer::start));
+    QObject::connect(themeWatch, &QFileSystemWatcher::fileChanged, themeSettle, qOverload<>(&QTimer::start));
+    // The same folder changes when Omarchy rotates the wallpaper: reload only
+    // for a different theme (name or colours), not for a new background.
+    auto themeStamp = [themeState] {
+        QFile name(themeState + "/theme.name");
+        const QByteArray n = name.open(QIODevice::ReadOnly) ? name.readAll() : QByteArray();
+        return n + QByteArray::number(QFileInfo(themeState + "/theme/colors.toml").lastModified().toMSecsSinceEpoch());
+    };
+    QObject::connect(themeSettle, &QTimer::timeout, &app, [watchTheme, themeStamp, last = themeStamp()]() mutable {
+        watchTheme();   // theme.name may have been replaced
+        const QByteArray now = themeStamp();
+        if (now == last) return;
+        last = now;
+        Theme::get().load();
+        Theme::get().applyToApp();
+        Icons::get().reload();
+        emit Settings::get().updated();   // every window repaints (MainWindow::applySettings)
+    });
 
     QStringList paths, remotes;
     for (int i = 1; i < argc; ++i) {

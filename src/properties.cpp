@@ -10,6 +10,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDateTime>
+#include <QSet>
 #include <QHash>
 #include <QDesktopServices>
 #include <QDir>
@@ -230,6 +231,22 @@ Sections exifSections(const QString &path)
 }
 
 } // namespace
+
+QList<QPair<QString, QString>> mediaSummary(const QString &path)
+{
+    static const QStringList keep = {QString::fromUtf8("Título"), "Artista", QString::fromUtf8("Álbum"), QString::fromUtf8("Duración"),
+                                     QString::fromUtf8("Resolución"), QString::fromUtf8("Códec"), "Fotogramas por segundo", "Canales",
+                                     "Frecuencia de muestreo", "Tasa de bits"};
+    QList<QPair<QString, QString>> out;
+    QSet<QString> seen;
+    for (const auto &section : mediaSections(path))
+        for (const auto &kv : section.second)
+            if (keep.contains(kv.first) && !seen.contains(kv.first)) {   // first stream wins (video before audio)
+                seen.insert(kv.first);
+                out << kv;
+            }
+    return out;
+}
 
 PropertiesDialog::PropertiesDialog(const QStringList &paths, QWidget *parent) : QDialog(parent), m_paths(paths)
 {

@@ -4,12 +4,15 @@
 #include "fsmodel.h"
 #include "icons.h"
 #include "places.h"
+#include "preview.h"
 #include "theme.h"
 #include "undo.h"
 #include <utility>
 #include <QApplication>
 #include <QClipboard>
 #include <QColumnView>
+#include <QDateTime>
+#include <QLocale>
 #include <QDir>
 #include <QFileInfo>
 #include <QHBoxLayout>
@@ -24,6 +27,9 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QListView>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMimeDatabase>
@@ -407,6 +413,7 @@ void Pane::setupView(QAbstractItemView *v)
         return true;
     };
     connect(v, &QAbstractItemView::doubleClicked, this, [this, toggleInTree](const QModelIndex &ix) {
+        if (m_clickTimer) m_clickTimer->stop();   // it was a double click: no fileClicked
         // QTreeView emits doubleClicked and then activated for the same click
         if (!Settings::get().singleClick && toggleInTree(ix)) m_skipActivate = true;
     });
@@ -415,8 +422,21 @@ void Pane::setupView(QAbstractItemView *v)
         if (!Settings::get().singleClick) activateIndex(ix);
     });
     connect(v, &QAbstractItemView::clicked, this, [this, toggleInTree](const QModelIndex &ix) {
-        if (Settings::get().singleClick && !(QApplication::keyboardModifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) && !toggleInTree(ix))
-            activateIndex(ix);
+        const bool plain = !(QApplication::keyboardModifiers() & (Qt::ControlModifier | Qt::ShiftModifier));
+        if (Settings::get().singleClick) {
+            if (plain && !toggleInTree(ix)) activateIndex(ix);
+            return;
+        }
+        if (!plain || isVirtual()) return;
+        // A plain click, reported once it is clear it was not the first half
+        // of a double click (which opens the file).
+        if (!m_clickTimer) {
+            m_clickTimer = new QTimer(this);
+            m_clickTimer->setSingleShot(true);
+            connect(m_clickTimer, &QTimer::timeout, this, [this] { emit fileClicked(m_clickPath); });
+        }
+        m_clickPath = ix.data(FsModel::PathRole).toString();
+        m_clickTimer->start(QApplication::doubleClickInterval());
     });
 }
 
@@ -475,6 +495,7 @@ void Pane::setActive(bool a)
 void Pane::applySettings()
 {
     const Settings &s = Settings::get();
+    updateTitle();   // its path is drawn in the theme's dim colour
     // Re-sorting a big folder is the expensive part: only when it matters
     // (zooming, for instance, also lands here).
     const QList<int> sortKey = {s.sortColumn, s.sortDescending, s.foldersFirst, s.showHidden};
@@ -768,6 +789,40 @@ void Pane::openWithDialog()
     Apps::get().launch(d.chosen(), paths);
 }
 
+// The other Omarchy workspaces, read from hyprctl when the submenu opens; the
+// file opens there with its default app while you stay where you are.
+QMenu *Pane::workspaceMenu(const QStringList &paths, QWidget *parent)
+{
+    auto *m = new QMenu(QString::fromUtf8("Abrir en el escritorio"), parent);
+    m->setIcon(Icons::get().ui("split"));
+    connect(m, &QMenu::aboutToShow, m, [m, paths] {
+        m->clear();
+        auto json = [](const QString &what) {
+            QProcess p;
+            p.start("hyprctl", {"-j", what});
+            p.waitForFinished(1000);
+            return QJsonDocument::fromJson(p.readAllStandardOutput());
+        };
+        const int active = json("activeworkspace").object().value("id").toInt();
+        QMap<int, int> windows;   // id → windows, sorted
+        for (const QJsonValue &v : json("workspaces").array())
+            if (const int id = v.toObject().value("id").toInt(); id > 0) windows[id] = v.toObject().value("windows").toInt();
+        auto add = [m, paths](int id, const QString &label) {
+            m->addAction(label, m, [paths, id] { Apps::get().openDefault(paths, id); });
+        };
+        for (auto it = windows.cbegin(); it != windows.cend(); ++it) {
+            if (it.key() == active) continue;
+            const int n = it.value();
+            add(it.key(), QString::fromUtf8("Escritorio %1  ·  %2").arg(it.key()).arg(n == 1 ? QString::fromUtf8("1 ventana") : QString::fromUtf8("%1 ventanas").arg(n)));
+        }
+        int next = 1;
+        while (windows.contains(next) || next == active) ++next;
+        if (!m->isEmpty()) m->addSeparator();
+        add(next, QString::fromUtf8("Escritorio nuevo (%1)").arg(next));
+    });
+    return m;
+}
+
 QMenu *Pane::openWithMenu(const QStringList &paths, QWidget *parent)
 {
     auto *m = new QMenu(QString::fromUtf8("Abrir con"), parent);
@@ -1049,6 +1104,32 @@ void Pane::invertSelection()
     m_selection->select(all, QItemSelectionModel::Toggle | QItemSelectionModel::Rows);
 }
 
+void Pane::showPreview()
+{
+    QAbstractItemView *v = view();
+    QModelIndex cur = v->currentIndex();
+    if (!cur.isValid() || !m_selection->isSelected(cur)) {
+        const QModelIndexList sel = selectedItems();
+        if (sel.isEmpty()) return;
+        cur = sel.first();
+    }
+    const QString path = cur.sibling(cur.row(), 0).data(FsModel::PathRole).toString();
+    if (path.isEmpty() || Preview::isOpen()) return;
+    // ←/→ in the preview walk the view: the selection follows, like Nautilus
+    auto step = [this, v](int delta) -> QString {
+        const QModelIndex at = v->currentIndex().sibling(v->currentIndex().row(), 0);
+        QModelIndex next;
+        if (auto *t = qobject_cast<QTreeView *>(v)) next = delta > 0 ? t->indexBelow(at) : t->indexAbove(at);
+        else next = at.sibling(at.row() + delta, 0);
+        if (!next.isValid()) return {};
+        m_selection->setCurrentIndex(next, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+        v->scrollTo(next);
+        return next.data(FsModel::PathRole).toString();
+    };
+    auto *p = new Preview(path, step, window());
+    p->show();
+}
+
 void Pane::openTerminal()
 {
     QString dir = m_path;
@@ -1193,6 +1274,16 @@ void Pane::updateStatus()
         if (sel.size() == 1 && one) s = QString::fromUtf8("«%1» seleccionado").arg(one->name);
         else s = QString::fromUtf8("%1 de %2 seleccionados").arg(sel.size()).arg(total);
         if (bytes > 0) s += " (" + FsModel::formatSize(bytes) + ")";
+        if (sel.size() == 1 && one && one->mtime > 0) {
+            // Always with the time, unlike the Modified column ("4 sept")
+            const QDateTime dt = QDateTime::fromSecsSinceEpoch(one->mtime);
+            const qint64 days = dt.date().daysTo(QDate::currentDate());
+            static const QLocale es(QLocale::Spanish, QLocale::Spain);
+            const QString when = days == 0 ? QString::fromUtf8("hoy, ") + dt.toString("HH:mm")
+                                 : days == 1 ? QString::fromUtf8("ayer, ") + dt.toString("HH:mm")
+                                             : es.toString(dt, "d MMM yyyy, HH:mm");
+            s += QString::fromUtf8("  ·  modificado ") + when;
+        }
     }
     if (m_freeBytes >= 0) s += QString::fromUtf8("  ·  %1 libres").arg(FsModel::formatSize(m_freeBytes));
     emit status(s);
@@ -1227,6 +1318,7 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
     QMenu m(this);
     Icons &ic = Icons::get();
     QStringList sel = selectedPaths();
+    static const bool hyprland = qEnvironmentVariableIsSet("HYPRLAND_INSTANCE_SIGNATURE");
     if (onItem && !sel.isEmpty()) {
         bool allDirs = true, anyDir = false, archive = false;
         QMimeDatabase db;
@@ -1249,6 +1341,7 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             m.addAction(ic.ui("open"), "Abrir", this, [this] { openSelection(); });
             m.addAction(ic.ui("newtab"), QString::fromUtf8("Abrir en pestaña nueva"), this, [this] { openSelection(true); });
             if (sel.size() == 1) m.addAction(ic.ui("split"), "Abrir en el otro panel", this, [this, sel] { emit openInOtherPane(sel[0]); });
+            if (hyprland) m.addMenu(workspaceMenu(sel, &m));
             m.addAction(ic.ui("terminal"), "Abrir terminal aquí", this, &Pane::openTerminal);
         } else if (!anyDir) {
             const QString mime = db.mimeTypeForFile(sel[0]).name();
@@ -1256,6 +1349,7 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             m.addAction(def ? Icons::get().app(def->icon) : ic.ui("open"), def ? QString::fromUtf8("Abrir con %1").arg(def->name) : "Abrir", this,
                         [this, sel] { openFiles(sel); });
             m.addMenu(openWithMenu(sel, &m));
+            if (hyprland) m.addMenu(workspaceMenu(sel, &m));
         }
         m.addSeparator();
         m.addAction(ic.ui("cut"), "Cortar", QKeySequence::Cut, this, &Pane::cutSelection);
@@ -1445,6 +1539,10 @@ bool Pane::eventFilter(QObject *o, QEvent *e)
         if (vp) break;
         auto *k = static_cast<QKeyEvent *>(e);
         const auto mods = k->modifiers() & ~Qt::KeypadModifier;
+        if (k->key() == Qt::Key_Space && mods == Qt::NoModifier && !k->isAutoRepeat()) {
+            showPreview();
+            return true;
+        }
         if ((k->key() == Qt::Key_Return || k->key() == Qt::Key_Enter) && !(mods & Qt::AltModifier)) {
             if (mods & Qt::ControlModifier) openSelection(true);
             else openSelection();

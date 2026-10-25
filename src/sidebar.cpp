@@ -96,7 +96,7 @@ Sidebar::Sidebar(QWidget *parent) : QTreeWidget(parent)
     setMinimumWidth(170);
     setFrameShape(QFrame::NoFrame);
     setFocusPolicy(Qt::NoFocus);
-    setStyleSheet(QString("QTreeWidget { background: %1; }").arg(Theme::get().bgDark.name()));
+    // background: set in reload(), which also runs when the Omarchy theme changes
     connect(this, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem *it, int) {
         const QString path = it->data(0, PathRole).toString();
         const QString dev = it->data(0, DeviceRole).toString();
@@ -200,6 +200,7 @@ void Sidebar::applySizes()
 void Sidebar::reload()
 {
     const Settings &s = Settings::get();
+    if (const QString css = QString("QTreeWidget { background: %1; }").arg(Theme::get().bgDark.name()); css != styleSheet()) setStyleSheet(css);
     clear();
     ++m_gen;
     m_places = m_bookmarks = m_devices = nullptr;

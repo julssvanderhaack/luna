@@ -23,9 +23,11 @@ public:
     QList<const AppInfo *> all() const;
     QString defaultFor(const QString &mime) const;
     void setDefault(const QString &mime, const QString &appId);
-    bool launch(const QString &appId, const QStringList &paths);
+    // workspace > 0: the window opens on that Hyprland workspace, without
+    // leaving the current one.
+    bool launch(const QString &appId, const QStringList &paths, int workspace = 0);
     // Opens each file with its default app; returns files that have none.
-    QStringList openDefault(const QStringList &paths);
+    QStringList openDefault(const QStringList &paths, int workspace = 0);
     void runTerminal(const QString &dir);
 
 private:

@@ -31,12 +31,15 @@ public:
         m_px.insert(key, px);
         return px;
     }
+    void clear() { m_px.clear(); }
 
 private:
     QHash<quint64, QPixmap> m_px;
 };
 
-// Paints one Nerd Font glyph, crisp at any size.
+// Paints one Nerd Font glyph, crisp at any size. Without a colour it takes
+// the theme's text colour when painted, so buttons and menus built once
+// still follow a new Omarchy theme.
 class GlyphEngine : public QIconEngine {
 public:
     GlyphEngine(QString text, QColor color) : m_text(std::move(text)), m_color(std::move(color)) {}
@@ -47,7 +50,7 @@ public:
         p->save();
         p->setRenderHint(QPainter::TextAntialiasing);
         p->setFont(f);
-        QColor c = m_color;
+        QColor c = m_color.isValid() ? m_color : Theme::get().fg;
         if (mode == QIcon::Disabled) c.setAlpha(110);
         p->setPen(c);
         p->drawText(r, Qt::AlignCenter, m_text);
@@ -55,6 +58,7 @@ public:
     }
     QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override
     {
+        followTheme();
         return m_cache.get(size, 1.0, mode, [&] {
             QPixmap px(size);
             px.fill(Qt::transparent);
@@ -65,6 +69,7 @@ public:
     }
     QPixmap scaledPixmap(const QSize &size, QIcon::Mode mode, QIcon::State state, qreal scale) override
     {
+        followTheme();
         return m_cache.get(size, scale, mode, [&] {
             QPixmap px(size * scale);
             px.setDevicePixelRatio(scale);
@@ -77,8 +82,15 @@ public:
     QIconEngine *clone() const override { return new GlyphEngine(m_text, m_color); }
 
 private:
+    void followTheme()
+    {
+        if (m_color.isValid() || m_gen == Theme::get().generation) return;
+        m_gen = Theme::get().generation;
+        m_cache.clear();   // painted with the previous theme's colour
+    }
     QString m_text;
     QColor m_color;
+    int m_gen = -1;
     PixmapCache m_cache;
 };
 
@@ -336,7 +348,7 @@ QIcon Icons::ui(const QString &name)
         {"trash", 0xF1F8}, {"info", 0xF05A}, {"open", 0xF07C}, {"lock", 0xF023}, {"star", 0xF005},
         {"restore", 0xF0E2}, {"network", 0xF0E8}, {"crumbs", 0xF0C1}, {"chevron", 0xF078}, {"hidden", 0xF070}, {"zoomin", 0xF00E}, {"zoomout", 0xF010}, {"cancel", 0xF05E},
     };
-    QIcon icon = glyph(g.value(name, 0xF128), Theme::get().fg);
+    QIcon icon = glyph(g.value(name, 0xF128), QColor());   // follows the theme when painted
     m_cache.insert(key, icon);
     return icon;
 }

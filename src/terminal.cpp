@@ -4,7 +4,9 @@
 #include <QClipboard>
 #include <QDir>
 #include <QKeyEvent>
+#include <QMimeData>
 #include <QPainter>
+#include <QRegularExpression>
 #include <QSocketNotifier>
 #include <QTimer>
 #include <algorithm>
@@ -63,6 +65,7 @@ Terminal::Terminal(const QString &dir, QWidget *parent) : QWidget(parent), m_dir
     setFocusPolicy(Qt::StrongFocus);
     setCursor(Qt::IBeamCursor);
     setMinimumHeight(3 * 16);
+    setAcceptDrops(true);
 
     QFont f(Theme::get().mono);
     f.setStyleHint(QFont::Monospace);
@@ -164,6 +167,45 @@ void Terminal::setDirectory(const QString &dir)
     // out of the history (HISTCONTROL=ignorespace/ignoreboth).
     const QByteArray cmd = "\x15 cd -- '" + quoted.toUtf8() + "'\r";
     writePty(cmd.constData(), size_t(cmd.size()));
+}
+
+QString Terminal::shellQuote(const QString &s)
+{
+    static const QRegularExpression plain("^[A-Za-z0-9_./+,:=@%-]+$");
+    if (plain.match(s).hasMatch()) return s;
+    QString q = s;
+    q.replace('\'', "'\\''");
+    return '\'' + q + '\'';
+}
+
+void Terminal::insertText(const QString &text, bool onlyAtPrompt)
+{
+    if (m_fd < 0 || text.isEmpty()) return;
+    if (onlyAtPrompt && tcgetpgrp(m_fd) != m_pid) return;
+    scrollTo(0);
+    // Typed like keys (readline would paint a paste red); a name with a
+    // newline goes as a bracketed paste so it can never run on its own.
+    const bool control = std::any_of(text.cbegin(), text.cend(), [](QChar c) { return c.unicode() < 0x20; });
+    if (control) vterm_keyboard_start_paste(m_vt);
+    for (char32_t c : text.toUcs4()) vterm_keyboard_unichar(m_vt, c, VTERM_MOD_NONE);
+    if (control) vterm_keyboard_end_paste(m_vt);
+}
+
+void Terminal::dragEnterEvent(QDragEnterEvent *e)
+{
+    if (e->mimeData()->hasUrls() || e->mimeData()->hasText()) e->acceptProposedAction();
+}
+
+// Dropped files are typed as full, quoted paths, like other terminals do.
+void Terminal::dropEvent(QDropEvent *e)
+{
+    QStringList parts;
+    for (const QUrl &u : e->mimeData()->urls()) parts << shellQuote(u.isLocalFile() ? u.toLocalFile() : u.toString());
+    if (parts.isEmpty()) parts << e->mimeData()->text();
+    insertText(parts.join(' ') + ' ', false);
+    e->setDropAction(Qt::CopyAction);   // never let the view treat it as a move
+    e->accept();
+    setFocus();
 }
 
 // ---- pty

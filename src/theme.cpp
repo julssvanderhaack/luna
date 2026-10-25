@@ -35,6 +35,7 @@ static QHash<QString, QString> readColors()
 
 void Theme::load()
 {
+    ++generation;
     auto c = readColors();
     auto col = [&](const char *k, const QString &fallback) {
         QColor q(c.value(k, fallback));

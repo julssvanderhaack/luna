@@ -75,6 +75,7 @@ private:
     QSplitter *m_center = nullptr;   // the pages above, the terminal below
     class Terminal *m_term = nullptr;   // created the first time it is shown
     QToolButton *m_termBtn = nullptr;
+    int m_themeGen = -1;   // Theme::generation this window was last painted with
     QToolButton *m_back = nullptr, *m_forward = nullptr, *m_up = nullptr, *m_split = nullptr, *m_sideBtn = nullptr, *m_viewBtn = nullptr,
                 *m_search = nullptr, *m_menuBtn = nullptr;
     QList<QFrame *> m_groups;        // header button groups, see rebuildHeader()

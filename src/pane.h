@@ -61,6 +61,7 @@ public:
     bool filterVisible() const;
     void refresh();
     void openTerminal();
+    void showPreview();   // Space: quick look at the current item
     void setSplitMode(bool split);
     void showFolderMenu(const QPoint &globalPos);
     void setOtherPane(Pane *other) { m_other = other; }
@@ -79,6 +80,7 @@ signals:
     void bookmarkRequested(const QString &path);
     void propertiesRequested(const QStringList &paths);
     void historyChanged();
+    void fileClicked(const QString &path);   // plain single click (not a double click)
 
 protected:
     bool eventFilter(QObject *o, QEvent *e) override;
@@ -92,6 +94,7 @@ private:
     void openFiles(const QStringList &paths);
     void contextMenu(const QPoint &globalPos, bool onItem);
     QMenu *openWithMenu(const QStringList &paths, QWidget *parent);
+    QMenu *workspaceMenu(const QStringList &paths, QWidget *parent);   // "Abrir en el escritorio" (Hyprland)
     QMenu *transferMenu(bool move, QWidget *parent);
     void handleDrop(const QList<QUrl> &urls, const QString &dest);
     void updateStatus();
@@ -123,6 +126,8 @@ private:
     QStringList m_pendingSelect;
     bool m_pendingEdit = false;
     bool m_skipActivate = false;   // tree: the double click already toggled the folder
+    class QTimer *m_clickTimer = nullptr;
+    QString m_clickPath;
     qint64 m_freeBytes = -1;
     QList<int> m_sortKey;   // sort/filter settings last applied to the proxy
     QPointer<Pane> m_other;

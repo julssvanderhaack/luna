@@ -19,7 +19,12 @@ public:
     // Follows the active folder: "cd" into it, but only while the shell is
     // waiting at its prompt (never typed into a running program).
     void setDirectory(const QString &dir);
+    QString directory() const { return m_dir; }
     void applyTheme();
+    // Types text at the prompt. With onlyAtPrompt it does nothing while a
+    // program runs (clicks in the file view must not type into vim).
+    void insertText(const QString &text, bool onlyAtPrompt);
+    static QString shellQuote(const QString &s);   // 'quoted' only when needed
 
 signals:
     void finished();   // the shell exited
@@ -35,6 +40,8 @@ protected:
     void mouseReleaseEvent(QMouseEvent *e) override;
     void focusInEvent(QFocusEvent *e) override;
     void focusOutEvent(QFocusEvent *e) override;
+    void dragEnterEvent(QDragEnterEvent *e) override;
+    void dropEvent(QDropEvent *e) override;
     bool focusNextPrevChild(bool) override { return false; }   // Tab goes to the shell
 
 private:

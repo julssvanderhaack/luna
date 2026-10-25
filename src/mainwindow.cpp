@@ -102,6 +102,7 @@ void TabPage::setSplit(bool on)
 // --------------------------------------------------------------- MainWindow
 MainWindow::MainWindow(const QStringList &paths)
 {
+    m_themeGen = Theme::get().generation;   // the theme it starts with needs no refresh
     setWindowIcon(QIcon::fromTheme("luna", QIcon(":/luna.svg")));
     resize(1100, 700);
     auto *central = new QWidget;
@@ -249,12 +250,14 @@ MainWindow::MainWindow(const QStringList &paths)
     m_center = new QSplitter(Qt::Vertical);
     m_center->setChildrenCollapsible(false);
     m_center->addWidget(m_pages);
+#ifdef LUNA_TERMINAL
     connect(m_center, &QSplitter::splitterMoved, this, [this] {
         if (m_term && m_term->isVisible()) {
             Settings::get().terminalHeight = m_term->height();
             Settings::get().changed();
         }
     });
+#endif
     m_main->addWidget(m_center);
     m_main->addWidget(m_sidebar);
     v->addWidget(m_main, 1);
@@ -419,6 +422,16 @@ void MainWindow::wirePane(Pane *p)
     connect(p, &Pane::historyChanged, this, [this, p] {
         if (pane() == p) syncHeader();
     });
+#ifdef LUNA_TERMINAL
+    // With the terminal open, clicking a file types its name at the prompt
+    // (just the name where the shell already is, else the whole path).
+    connect(p, &Pane::fileClicked, this, [this](const QString &path) {
+        if (!m_term || !m_term->isVisible() || !Settings::get().terminalClickInserts || path.isEmpty()) return;
+        const QFileInfo fi(path);
+        const QString word = fi.absolutePath() == m_term->directory() ? fi.fileName() : path;
+        m_term->insertText(Terminal::shellQuote(word) + ' ', true);
+    });
+#endif
     connect(p, &Pane::status, this, [this, p](const QString &t) {
         if (pane() == p) m_status->setText(t);
     });
@@ -673,10 +686,17 @@ void MainWindow::applySettings()
     }
     const bool iconsChanged = lastStyle != s.iconStyle || lastTheme != s.iconTheme || accentChanged;
     if (iconsChanged) Icons::get().reload();
+    // A new Omarchy theme (main.cpp watches it) already reloaded colours and
+    // icons for the whole app; each window still repaints its own parts.
+    const bool themeChanged = m_themeGen != Theme::get().generation;
+    m_themeGen = Theme::get().generation;
     for (Pane *p : findChildren<Pane *>()) {
         p->applySettings();
-        if (iconsChanged || (lastCounts >= 0 && lastCounts != int(s.showItemCounts))) p->refresh();
+        if (iconsChanged || themeChanged || (lastCounts >= 0 && lastCounts != int(s.showItemCounts))) p->refresh();
     }
+#ifdef LUNA_TERMINAL
+    if (m_term && themeChanged) m_term->applyTheme();
+#endif
     lastStyle = s.iconStyle;
     lastTheme = s.iconTheme;
     lastCounts = s.showItemCounts;
@@ -684,7 +704,7 @@ void MainWindow::applySettings()
     // something it shows changed.
     static QList<int> lastSidebar;
     const QList<int> sidebar = {s.showPlaces, s.showBookmarks, s.showDevices};
-    if (iconsChanged || sidebar != lastSidebar) m_sidebar->reload();
+    if (iconsChanged || themeChanged || sidebar != lastSidebar) m_sidebar->reload();
     lastSidebar = sidebar;
     m_sidebar->applySizes();
     layoutSidebar();
@@ -814,7 +834,9 @@ void MainWindow::addShortcuts()
         QStringList s = pane()->selectedPaths();
         (new PropertiesDialog(s.isEmpty() ? QStringList{pane()->path()} : s, this))->show();
     });
+#ifdef LUNA_TERMINAL
     sc(QKeySequence("F4"), [this] { showTerminal(!(m_term && m_term->isVisible())); });
+#endif
     sc(QKeySequence("Shift+F4"), [this] { pane()->openTerminal(); });
     sc(QKeySequence("F3"), [this] {
         page()->setSplit(!page()->isSplit());

@@ -2,6 +2,7 @@
 #include "settings.h"
 #include <QAbstractItemView>
 #include <QApplication>
+#include <QMouseEvent>
 #include <QScrollBar>
 #include <QVariantAnimation>
 #include <QWheelEvent>
@@ -22,6 +23,36 @@ QVariantAnimation *animationFor(QScrollBar *bar)
     QObject::connect(a, &QVariantAnimation::valueChanged, bar, [bar](const QVariant &v) { bar->setValue(qRound(v.toDouble())); });
     return a;
 }
+}
+
+// Two fingers sideways on a file view go back/forward, like a browser:
+// revealing what is "to the left" (positive x) is back. Fires once per
+// gesture, when the swipe is clearly horizontal; views that do scroll
+// sideways (compact view, a wide table) keep scrolling instead. It sends the
+// mouse's Back/Forward button to the view, which Pane already handles.
+bool SmoothScroll::swipe(QWidget *viewport, QAbstractScrollArea *area, QWheelEvent *we, bool scrollsSideways)
+{
+    constexpr double kTrigger = 100;   // px of finger travel
+    const qint64 now = we->timestamp();
+    if (we->phase() == Qt::ScrollBegin || now - m_swipeLast > 300) {   // a new gesture
+        m_swipeX = m_swipeY = 0;
+        m_swipeDone = false;
+    }
+    m_swipeLast = now;
+    if (we->phase() == Qt::ScrollEnd || we->phase() == Qt::ScrollMomentum) return m_swipeDone;
+    m_swipeX += we->pixelDelta().x();
+    m_swipeY += we->pixelDelta().y();
+    if (m_swipeDone) return true;   // the rest of a gesture that already navigated
+    if (scrollsSideways || std::abs(m_swipeX) < kTrigger || std::abs(m_swipeX) < 2 * std::abs(m_swipeY)) return false;
+    bool inPane = false;
+    for (QObject *p = area; p && !inPane; p = p->parent()) inPane = p->inherits("Pane");
+    if (!inPane || !qobject_cast<QAbstractItemView *>(area)) return false;
+    m_swipeDone = true;
+    const Qt::MouseButton b = m_swipeX > 0 ? Qt::BackButton : Qt::ForwardButton;
+    const QPointF pos = we->position();
+    QMouseEvent press(QEvent::MouseButtonPress, pos, we->globalPosition(), b, b, Qt::NoModifier);
+    QApplication::sendEvent(viewport, &press);
+    return true;
 }
 
 bool SmoothScroll::eventFilter(QObject *o, QEvent *e)
@@ -55,6 +86,7 @@ bool SmoothScroll::eventFilter(QObject *o, QEvent *e)
     if (d.y() && scrollable(area->verticalScrollBar())) bar = area->verticalScrollBar(), delta = d.y();
     else if (d.y() && scrollable(area->horizontalScrollBar())) bar = area->horizontalScrollBar(), delta = d.y();   // compact view wraps sideways
     else if (d.x() && scrollable(area->horizontalScrollBar())) bar = area->horizontalScrollBar(), delta = d.x();
+    if (touch && swipe(w, area, we, bar && bar == area->horizontalScrollBar() && d.x())) return true;
     if (!bar) return touch;   // nothing to scroll: don't let Qt bubble pixels up either
     const Settings &st = Settings::get();
 

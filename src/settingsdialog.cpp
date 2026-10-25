@@ -375,7 +375,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
         Settings::get().changed();
     });
     f->addRow("Orden:", term);
-    f->addRow("", note(QString::fromUtf8("Se ejecuta en la carpeta actual (F4). Por defecto xdg-terminal-exec, la terminal de Omarchy.")));
+    f->addRow("", note(QString::fromUtf8("Terminal aparte, en la carpeta actual (Mayús+F4). Por defecto xdg-terminal-exec, la terminal de Omarchy.")));
+    f->addRow("", check(QString::fromUtf8("Con el terminal integrado abierto (F4), un clic en un archivo escribe su nombre"), s.terminalClickInserts));
+    f->addRow("", note(QString::fromUtf8("Solo mientras el terminal espera órdenes. Arrastrar archivos al terminal escribe sus rutas completas.")));
 
     m_nav->setCurrentRow(0);
 }

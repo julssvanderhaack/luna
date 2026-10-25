@@ -31,6 +31,14 @@ escritorio. Lleva el nombre de Luna, una gata siamesa, que es también su icono.
 - **Archivos:** abrir con (respeta `mimeapps.list`), mover a / copiar a, copiar y
   mover con progreso y gestión de conflictos, papelera estándar, renombrar en lote,
   comprimir y extraer, enlaces, deshacer y rehacer.
+- **Vista previa** con la barra espaciadora: fotos, páginas de PDF, texto, un
+  fotograma o la carátula de vídeos y canciones con sus datos; ← / → recorren la
+  carpeta.
+- **Terminal integrado** abajo (F4) que sigue la carpeta; un clic en un archivo
+  escribe su nombre y arrastrar archivos escribe sus rutas.
+- **Omarchy:** sigue el tema en vivo, abre archivos en otro escritorio (clic
+  derecho → *Abrir en el escritorio*) y navega atrás/adelante deslizando dos
+  dedos en horizontal, como el navegador.
 - **Propiedades:** permisos (casillas, octal, bits especiales, recursivo) y
   metadatos de audio y vídeo (libmediainfo) y de fotos, con EXIF y GPS (exiv2).
 - **Conectar a un servidor:** SFTP/SSH, FTP, FTPS, SMB y NFS a través de GVFS.
@@ -51,7 +59,7 @@ compiló (**Qt 6.12**, exiv2 0.28, poppler 26): en la práctica, Omarchy o cualq
 distribución basada en Arch al día.
 
 ```sh
-sudo pacman -S --needed qt6-base qt6-svg libmediainfo exiv2 poppler-qt6
+sudo pacman -S --needed qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libvterm
 # opcionales: miniaturas de vídeo, servidores remotos y comprimir/extraer
 sudo pacman -S --needed ffmpegthumbnailer gvfs gvfs-smb libarchive 7zip
 unzip luna-1.1.0-linux-x86_64.zip
@@ -76,7 +84,7 @@ Necesitas un compilador con C++17, CMake ≥ 3.20, Qt 6 (Widgets, Svg),
 libmediainfo, exiv2 y poppler-qt6.
 
 ```sh
-# Arch: sudo pacman -S --needed base-devel cmake qt6-base qt6-svg libmediainfo exiv2 poppler-qt6
+# Arch: sudo pacman -S --needed base-devel cmake qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libvterm   # libvterm: terminal integrado (opcional)
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j"$(nproc)"
 cmake --install build --prefix ~/.local
@@ -104,7 +112,9 @@ Por defecto se optimiza para el procesador de la máquina que compila
 | Ctrl + Z / Ctrl + Mayús + Z | Deshacer / rehacer |
 | Ctrl + Mayús + N | Nueva carpeta |
 | Alt + Intro | Propiedades |
-| F4 | Terminal aquí |
+| Espacio | Vista previa (← / → anterior y siguiente, Intro abrir) |
+| F4 / Mayús + F4 | Terminal integrado / terminal aparte |
+| Dos dedos a los lados | Atrás / adelante |
 | Ctrl + D | Añadir a marcadores |
 | Ctrl + , | Ajustes |
 

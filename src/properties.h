@@ -2,7 +2,12 @@
 // (libmediainfo + exiv2) and the default application for the file type.
 #pragma once
 #include <QDialog>
+#include <QPair>
 #include <QStringList>
+
+// A few lines of audio/video facts (duration, resolution, artist…) for the
+// quick preview. Slow-ish (libmediainfo reads the file): call it off the GUI thread.
+QList<QPair<QString, QString>> mediaSummary(const QString &path);
 
 class QCheckBox;
 class QComboBox;
