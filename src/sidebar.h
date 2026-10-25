@@ -31,8 +31,10 @@ private:
     QList<Bookmark> readBookmarks() const;
     void writeBookmarks(const QList<Bookmark> &b) const;
     void loadDevices();
+    void fillDiscovered();   // SFTP servers on the network (the phone), above "Conectar…"
     QTreeWidgetItem *section(const QString &title);
     QTreeWidgetItem *m_places = nullptr, *m_bookmarks = nullptr, *m_devices = nullptr, *m_network = nullptr;
     QString m_current;
+    QList<QTreeWidgetItem *> m_found;
     quint64 m_gen = 0;   // bumps on reload, so late lsblk results are dropped
 };

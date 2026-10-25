@@ -1,4 +1,5 @@
 #include "sidebar.h"
+#include "discovery.h"
 #include "fileops.h"
 #include "icons.h"
 #include "remote.h"
@@ -85,6 +86,7 @@ QString Sidebar::bookmarksFile() { return QDir::homePath() + "/.config/gtk-3.0/b
 
 Sidebar::Sidebar(QWidget *parent) : QTreeWidget(parent)
 {
+    connect(&Discovery::get(), &Discovery::changed, this, &Sidebar::fillDiscovered);
     setHeaderHidden(true);
     setRootIsDecorated(false);
     setIndentation(0);
@@ -202,6 +204,7 @@ void Sidebar::reload()
     const Settings &s = Settings::get();
     if (const QString css = QString("QTreeWidget { background: %1; }").arg(Theme::get().bgDark.name()); css != styleSheet()) setStyleSheet(css);
     clear();
+    m_found.clear();   // deleted by clear()
     ++m_gen;
     m_places = m_bookmarks = m_devices = nullptr;
     auto item = [&](QTreeWidgetItem *parent, const QString &name, const QString &path, const QIcon &icon, int kind) {
@@ -262,8 +265,31 @@ void Sidebar::reload()
     }
     auto *conn = item(m_network, QString::fromUtf8("Conectar a un servidor…"), QString(), Icons::get().sidebar("add"), Place);
     conn->setData(0, UriRole, QString("connect:"));
+    fillDiscovered();
     expandAll();
     setCurrentPath(m_current);
+}
+
+void Sidebar::fillDiscovered()
+{
+    if (!m_network) return;
+    qDeleteAll(m_found);
+    m_found.clear();
+    QStringList mounted;   // already in "Red" as a mount: not twice
+    for (const Remote::Mount &mt : Remote::get().mounts()) mounted << mt.uri;
+    int at = m_network->childCount() - 1;   // "Conectar a un servidor…" stays last
+    for (const Discovery::Service &s : Discovery::get().services()) {
+        const QString uri = s.uri();
+        if (std::any_of(mounted.cbegin(), mounted.cend(), [&](const QString &m) { return m.contains(s.address); })) continue;
+        auto *it = new QTreeWidgetItem({s.name});
+        it->setIcon(0, Icons::get().sidebar(s.luna ? "phone" : "network"));
+        it->setData(0, KindRole, Place);
+        it->setData(0, UriRole, uri);
+        it->setToolTip(0, s.luna ? QString::fromUtf8("Luna Android en %1 (SFTP)").arg(uri) : uri);
+        it->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        m_network->insertChild(at++, it);
+        m_found << it;
+    }
 }
 
 void Sidebar::loadDevices()

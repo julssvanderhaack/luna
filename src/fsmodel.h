@@ -17,6 +17,9 @@
 #include <optional>
 #include <vector>
 
+// Lower-case and without accents, so "musica" matches "Música".
+QString foldName(const QString &s);
+
 struct FileEntry {
     QString name;
     qint64 size = 0;        // bytes; for folders the number of items (-1 unknown)
@@ -44,7 +47,8 @@ public:
     QString error() const { return m_error; }
 
     // Recursive name search below the root; results stream in.
-    void startSearch(const QString &pattern);
+    // contents: files whose text holds the pattern (ripgrep), not names
+    void startSearch(const QString &pattern, bool contents = false);
     void stopSearch();
     bool searching() const { return m_searchMode; }
     // A flat list of arbitrary paths (Recientes, Destacados) under a
@@ -124,7 +128,7 @@ private:
     void onDirChanged(const QString &path);
     void thumbReady(const QString &path);
     void insertFlat(std::vector<std::pair<QString, FileEntry>> &items);
-    static void searchWorker(QPointer<FsModel> self, std::shared_ptr<std::atomic<bool>> cancel, QByteArray root, QString pattern,
+    static void searchWorker(QPointer<FsModel> self, std::shared_ptr<std::atomic<bool>> cancel, QByteArray root, QString pattern, bool contents,
                              quint64 gen, bool hidden);
 
     std::unique_ptr<Node> m_root;
@@ -149,6 +153,14 @@ class SortProxy : public QSortFilterProxyModel {
 public:
     explicit SortProxy(QObject *parent = nullptr);
     void setQuickFilter(const QString &f);
+    // 0 = any. date: 1 today, 2 last 7 days, 3 last 30 days, 4 this year;
+    // size (files only): 1 < 1 MB, 2 > 1 MB, 3 > 100 MB, 4 > 1 GB
+    void setLimits(int date, int size);
+    bool hasLimits() const { return m_date || m_size; }
+    // git state of the listed folder's items, by name: 'n' new, 'm' modified,
+    // 'c' conflict. Their names are painted in green, yellow or red.
+    void setGitMarks(const QHash<QString, char> &marks);
+    QVariant data(const QModelIndex &index, int role) const override;
     QString quickFilter() const { return m_filter; }
     void reapply();
 
@@ -158,4 +170,6 @@ protected:
 
 private:
     QString m_filter;
+    int m_date = 0, m_size = 0;
+    QHash<QString, char> m_git;
 };

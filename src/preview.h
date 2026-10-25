@@ -39,5 +39,6 @@ private:
     QImage m_image;
     QLabel *m_title, *m_sub, *m_picture, *m_facts, *m_hint;
     QPlainTextEdit *m_text;
+    class QTextBrowser *m_rich;
     QStackedWidget *m_stack;
 };

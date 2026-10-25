@@ -31,9 +31,16 @@ escritorio. Lleva el nombre de Luna, una gata siamesa, que es también su icono.
 - **Archivos:** abrir con (respeta `mimeapps.list`), mover a / copiar a, copiar y
   mover con progreso y gestión de conflictos, papelera estándar, renombrar en lote,
   comprimir y extraer, enlaces, deshacer y rehacer.
-- **Vista previa** con la barra espaciadora: fotos, páginas de PDF, texto, un
-  fotograma o la carátula de vídeos y canciones con sus datos; ← / → recorren la
-  carpeta.
+- **Vista previa** con la barra espaciadora: fotos, páginas de PDF, texto,
+  Markdown con formato, lo que hay dentro de zip/tar/7z/rar, un fotograma o la
+  carátula de vídeos y canciones con sus datos; ← / → recorren la carpeta.
+- **Ir a una carpeta** (Ctrl + P) escribiendo trozos de su ruta, con las carpetas
+  frecuentes de zoxide y tus marcadores; Luna le cuenta a zoxide dónde vas.
+- **Buscar** por nombre o dentro de los archivos (ripgrep, a prioridad mínima),
+  y filtrar por fecha de modificación y tamaño.
+- **git:** en un repositorio, los nombres se colorean (modificado, nuevo,
+  conflicto) y la barra de abajo muestra la rama y los cambios.
+- **Imágenes:** girar, reducir tamaño y convertir a JPG/PNG/WebP (ImageMagick).
 - **Terminal integrado** abajo (F4) que sigue la carpeta; un clic en un archivo
   escribe su nombre y arrastrar archivos escribe sus rutas.
 - **Omarchy:** sigue el tema en vivo, abre archivos en otro escritorio (clic
@@ -41,7 +48,11 @@ escritorio. Lleva el nombre de Luna, una gata siamesa, que es también su icono.
   dedos en horizontal, como el navegador.
 - **Propiedades:** permisos (casillas, octal, bits especiales, recursivo) y
   metadatos de audio y vídeo (libmediainfo) y de fotos, con EXIF y GPS (exiv2).
-- **Conectar a un servidor:** SFTP/SSH, FTP, FTPS, SMB y NFS a través de GVFS.
+- **Conectar a un servidor:** SFTP/SSH, FTP, FTPS, SMB y NFS a través de GVFS. Los
+  servidores SFTP de la red aparecen solos en *Red*, también el móvil con
+  [Luna Android](https://github.com/julssvanderhaack/luna-android) (avahi).
+- **Tus apps:** reproducir carpetas en Sonata y ver qué ocupa espacio con
+  julss.disk, cuando están instalados.
 - **Rápido y ligero:** listado en hilos aparte, búsqueda recursiva a prioridad
   mínima con `getdents64`, miniaturas en la caché compartida de freedesktop (las
   mismas que usa Nautilus) con vista previa EXIF al instante. No consume CPU en
@@ -60,8 +71,9 @@ distribución basada en Arch al día.
 
 ```sh
 sudo pacman -S --needed qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libvterm
-# opcionales: miniaturas de vídeo, servidores remotos y comprimir/extraer
-sudo pacman -S --needed ffmpegthumbnailer gvfs gvfs-smb libarchive 7zip
+# opcionales: miniaturas de vídeo, servidores remotos y comprimir/extraer,
+# buscar dentro de archivos, imágenes, servidores de la red y Ctrl + P
+sudo pacman -S --needed ffmpegthumbnailer gvfs gvfs-smb libarchive 7zip ripgrep imagemagick avahi zoxide
 unzip luna-1.1.0-linux-x86_64.zip
 cd luna-1.1.0-linux-x86_64
 ./install.sh            # en ~/.local (sin sudo)
@@ -99,6 +111,7 @@ Por defecto se optimiza para el procesador de la máquina que compila
 |---|---|
 | Alt + ← / → / ↑, Retroceso | Atrás / adelante / carpeta superior |
 | Ctrl + L | Escribir una ruta |
+| Ctrl + P | Ir a una carpeta (zoxide y marcadores) |
 | Ctrl + F o empezar a escribir | Filtrar (Intro busca en subcarpetas) |
 | Ctrl + T / Ctrl + W, Ctrl + Tab | Pestañas |
 | F3 / F6 | Vista dividida / cambiar de panel |

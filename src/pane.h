@@ -62,6 +62,9 @@ public:
     void refresh();
     void openTerminal();
     void showPreview();   // Space: quick look at the current item
+    void applyLimits();   // date/size filters from the filter bar
+    void refreshGit();    // repository state of this folder (names coloured, branch in the status bar)
+    void runGit();
     void setSplitMode(bool split);
     void showFolderMenu(const QPoint &globalPos);
     void setOtherPane(Pane *other) { m_other = other; }
@@ -95,6 +98,7 @@ private:
     void contextMenu(const QPoint &globalPos, bool onItem);
     QMenu *openWithMenu(const QStringList &paths, QWidget *parent);
     QMenu *workspaceMenu(const QStringList &paths, QWidget *parent);   // "Abrir en el escritorio" (Hyprland)
+    QMenu *imageMenu(const QStringList &paths, QWidget *parent);       // rotate/resize/convert (ImageMagick); null if not all images
     QMenu *transferMenu(bool move, QWidget *parent);
     void handleDrop(const QList<QUrl> &urls, const QString &dest);
     void updateStatus();
@@ -122,6 +126,13 @@ private:
     QWidget *m_filterBar = nullptr;
     QLineEdit *m_filter = nullptr;
     QToolButton *m_recursive = nullptr;
+    QToolButton *m_contents = nullptr;    // search inside files (ripgrep)
+    QToolButton *m_limitsBtn = nullptr;   // date/size filters menu
+    int m_dateLimit = 0, m_sizeLimit = 0;
+    QString m_gitRoot, m_gitSummary;      // repository holding this folder; "main ↑1  ·  3 cambios"
+    class QFileSystemWatcher *m_gitWatch = nullptr;
+    QTimer *m_gitTimer = nullptr;
+    bool m_gitRunning = false, m_gitAgain = false;
     QLabel *m_overlay = nullptr;
     QStringList m_pendingSelect;
     bool m_pendingEdit = false;

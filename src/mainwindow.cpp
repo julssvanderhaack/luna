@@ -41,6 +41,7 @@
 #include "terminal.h"
 #endif
 #include "fsmodel.h"
+#include "jump.h"
 #include "places.h"
 #include "undo.h"
 
@@ -212,6 +213,7 @@ MainWindow::MainWindow(const QStringList &paths)
     menu->addAction(Icons::get().ui("trash"), "Ir a la papelera", this, [this] { pane()->setPath(FileOps::trashFiles()); });
     menu->addAction(Icons::get().ui("refresh"), "Recientes", this, [this] { pane()->setPath(Places::recent); });
     menu->addAction(Icons::get().ui("star"), "Destacados", this, [this] { pane()->setPath(Places::starred); });
+    menu->addAction(Icons::get().ui("search"), QString::fromUtf8("Ir a una carpeta…"), QKeySequence("Ctrl+P"), this, &MainWindow::jump);
     menu->addAction(Icons::get().ui("network"), QString::fromUtf8("Conectar a un servidor…"), this, [this] { connectServer({}); });
     menu->addSeparator();
     menu->addAction(Icons::get().ui("icons"), "Barra superior…", this, [this] { headerMenu(QCursor::pos()); });
@@ -412,6 +414,7 @@ void MainWindow::wirePane(Pane *p)
         if (tp && tp->active() != x) tp->setActive(x);
     });
     connect(p, &Pane::pathChanged, this, [this, p, tp](const QString &path) {
+        JumpDialog::recordVisit(path);
         for (int i = 0; i < m_tabBar->count(); ++i)
             if (m_tabBar->tabData(i).value<QWidget *>() == tp && tp->active() == p) {
                 m_tabBar->setTabText(i, Places::displayName(path));
@@ -446,6 +449,15 @@ void MainWindow::wirePane(Pane *p)
         m_status->setText(QString::fromUtf8("Añadido a marcadores: %1").arg(QFileInfo(path).fileName()));
     });
     connect(p, &Pane::propertiesRequested, this, [this](const QStringList &paths) { (new PropertiesDialog(paths, this))->show(); });
+}
+
+void MainWindow::jump()
+{
+    JumpDialog d(this);
+    if (d.exec() == QDialog::Accepted && !d.chosen().isEmpty()) {
+        pane()->setPath(d.chosen());
+        pane()->focusView();
+    }
 }
 
 void MainWindow::showTerminal(bool show)
@@ -802,6 +814,7 @@ void MainWindow::addShortcuts()
     sc(QKeySequence("F5"), [this] { pane()->refresh(); });
     sc(QKeySequence("Ctrl+R"), [this] { pane()->refresh(); });
     sc(QKeySequence("Ctrl+L"), [this] { m_pathbar->editPath(); });
+    sc(QKeySequence("Ctrl+P"), [this] { jump(); });
     sc(QKeySequence("Ctrl+F"), [this] { pane()->showFilter(); });
     sc(QKeySequence("Ctrl+H"), [] {
         Settings::get().showHidden = !Settings::get().showHidden;
@@ -900,7 +913,7 @@ void MainWindow::showShortcuts()
 {
     const char *rows[][2] = {
         {"Alt+← / Alt+→ / Alt+↑", "Atrás / adelante / carpeta superior"}, {"Retroceso", "Carpeta superior"},
-        {"Ctrl+L", "Escribir una ruta"}, {"Ctrl+F o escribir", "Filtrar; Intro busca en subcarpetas"},
+        {"Ctrl+L", "Escribir una ruta"}, {"Ctrl+P", "Ir a una carpeta (zoxide y marcadores)"}, {"Ctrl+F o escribir", "Filtrar; Intro busca en subcarpetas"},
         {"Ctrl+T / Ctrl+W", "Abrir / cerrar pestaña"}, {"Ctrl+Tab", "Siguiente pestaña"},
         {"F3 / F6", "Vista dividida / cambiar de panel"}, {"F9", "Barra lateral"},
         {"Ctrl+1 … Ctrl+6", "Iconos, compacta, lista, detallada, árbol, columnas"}, {"Ctrl + rueda, Ctrl+/−", "Tamaño de los iconos"},

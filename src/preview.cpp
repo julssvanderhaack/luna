@@ -18,6 +18,7 @@
 #include <QProcess>
 #include <QScrollBar>
 #include <QStackedWidget>
+#include <QTextBrowser>
 #include <QTemporaryFile>
 #include <QThreadPool>
 #include <QVBoxLayout>
@@ -35,6 +36,41 @@ bool isText(const QMimeType &t)
     for (const QString &m : more)
         if (t.inherits(m)) return true;
     return false;
+}
+
+bool isArchive(const QMimeType &t)
+{
+    static const QStringList kinds = {"application/zip", "application/x-tar", "application/x-compressed-tar", "application/x-xz-compressed-tar",
+                                      "application/x-zstd-compressed-tar", "application/x-bzip2-compressed-tar", "application/x-bzip-compressed-tar",
+                                      "application/x-7z-compressed", "application/vnd.rar", "application/x-rar", "application/x-cd-image",
+                                      "application/java-archive", "application/vnd.debian.binary-package", "application/x-rpm"};
+    for (const QString &k : kinds)
+        if (t.inherits(k)) return true;
+    return false;
+}
+
+// What an archive holds, one path per line (bsdtar reads zip, tar, 7z, rar,
+// iso…; 7z is the fallback). Capped so a huge archive stays quick.
+QString archiveListing(const QString &path)
+{
+    constexpr int kMax = 5000;
+    QStringList names;
+    QProcess p;
+    p.start("bsdtar", {"-tf", path});
+    p.waitForFinished(20000);
+    if (p.exitCode() == 0) {
+        names = QString::fromUtf8(p.readAllStandardOutput()).split('\n', Qt::SkipEmptyParts);
+    } else {
+        p.start("7z", {"l", "-ba", "-slt", path});
+        p.waitForFinished(20000);
+        for (const QString &l : QString::fromUtf8(p.readAllStandardOutput()).split('\n'))
+            if (l.startsWith("Path = ")) names << l.mid(7);
+    }
+    if (names.isEmpty()) return QString::fromUtf8("No se puede leer el contenido.");
+    const int total = int(names.size());
+    QString head = total == 1 ? QString::fromUtf8("1 elemento\n\n") : QString::fromUtf8("%1 elementos\n\n").arg(total);
+    if (total > kMax) names = names.mid(0, kMax) << QString::fromUtf8("… y %1 más").arg(total - kMax);
+    return head + names.join('\n');
 }
 
 // Runs fn on a pool thread and hands its result to done() on the GUI thread,
@@ -92,8 +128,12 @@ Preview::Preview(const QString &path, std::function<QString(int)> step, QWidget 
     m_text->setFocusPolicy(Qt::NoFocus);   // the keys walk the folder, the wheel scrolls
     m_text->setLineWrapMode(QPlainTextEdit::NoWrap);
     m_text->setFont(QFont(Theme::get().mono));
+    m_rich = new QTextBrowser;   // Markdown, formatted
+    m_rich->setFocusPolicy(Qt::NoFocus);
+    m_rich->setOpenExternalLinks(true);
     m_stack->addWidget(picPage);
     m_stack->addWidget(m_text);
+    m_stack->addWidget(m_rich);
     v->addWidget(m_stack, 1);
 
     m_hint = new QLabel(QString::fromUtf8("←/→ anterior y siguiente  ·  Intro abrir  ·  Espacio o Esc cerrar"));
@@ -186,6 +226,22 @@ void Preview::load(const QString &path)
         offThread<QList<QPair<QString, QString>>>(this, &m_request, [path] { return mediaSummary(path); },
                                                    [this](const QList<QPair<QString, QString>> &f) { showFacts(f); });
         return;
+    }
+    if (fi.isFile() && isArchive(type)) {
+        // the list of what is inside, without extracting anything
+        bigIcon(Icons::get().forMime(m_mime));
+        m_text->setPlainText(QString::fromUtf8("Leyendo el contenido…"));
+        m_stack->setCurrentIndex(1);
+        offThread<QString>(this, &m_request, [path] { return archiveListing(path); }, [this](const QString &t) { m_text->setPlainText(t); });
+        return;
+    }
+    if (fi.isFile() && type.inherits("text/markdown") && fi.size() <= kTextBytes) {
+        QFile f(path);
+        if (f.open(QIODevice::ReadOnly)) {
+            m_rich->setMarkdown(QString::fromUtf8(f.readAll()));
+            m_stack->setCurrentIndex(2);
+            return;
+        }
     }
     if (fi.isFile() && isText(type)) {
         QFile f(path);

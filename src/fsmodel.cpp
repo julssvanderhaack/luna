@@ -11,6 +11,7 @@
 #include <QIcon>
 #include <QPointer>
 #include <QDateTime>
+#include <QProcess>
 #include <QDir>
 #include <QDirIterator>
 #include <QElapsedTimer>
@@ -719,16 +720,6 @@ void FsModel::thumbReady(const QString &path)
 }
 
 // ------------------------------------------------------------------ search
-namespace {
-
-struct LinuxDirent64 {
-    ino64_t d_ino;
-    off64_t d_off;
-    unsigned short d_reclen;
-    unsigned char d_type;
-    char d_name[];
-};
-
 QString foldName(const QString &s)
 {
     // lower-case and without accents, so "musica" finds "Música"
@@ -739,6 +730,17 @@ QString foldName(const QString &s)
         if (c.category() != QChar::Mark_NonSpacing) out += c.toLower();
     return out;
 }
+
+namespace {
+
+struct LinuxDirent64 {
+    ino64_t d_ino;
+    off64_t d_off;
+    unsigned short d_reclen;
+    unsigned char d_type;
+    char d_name[];
+};
+
 
 // Case-insensitive ASCII substring test on raw bytes (needle already lower-case).
 bool asciiContains(const char *hay, size_t hl, const char *needle, size_t nl)
@@ -773,7 +775,7 @@ bool skipDir(const QByteArray &path)
 
 } // namespace
 
-void FsModel::searchWorker(QPointer<FsModel> self, std::shared_ptr<std::atomic<bool>> cancel, QByteArray root, QString pattern,
+void FsModel::searchWorker(QPointer<FsModel> self, std::shared_ptr<std::atomic<bool>> cancel, QByteArray root, QString pattern, bool contents,
                            quint64 gen, bool hidden)
 {
     // Be nice: lowest CPU priority and idle I/O class for this thread only.
@@ -810,6 +812,44 @@ void FsModel::searchWorker(QPointer<FsModel> self, std::shared_ptr<std::atomic<b
         if (ascii && asciiPattern) return asciiContains(name, len, foldedUtf8.constData(), size_t(foldedUtf8.size()));
         return foldName(QString::fromUtf8(name, qsizetype(len))).contains(folded);
     };
+
+    if (contents) {
+        // ripgrep lists the files whose text holds the pattern; it inherits
+        // this thread's lowest CPU and idle I/O priority. It skips binaries
+        // and what .gitignore hides (node_modules…).
+        QStringList args{"--files-with-matches", "--null", "--ignore-case", "--fixed-strings", "--no-messages", "--max-filesize", "50M"};
+        if (hidden) args << "--hidden";
+        args << "--" << pattern << QFile::decodeName(root);
+        QProcess rg;
+        rg.start("rg", args);
+        QByteArray pending;
+        auto take = [&] {
+            pending += rg.readAllStandardOutput();
+            for (qsizetype nul; total < 20000 && (nul = pending.indexOf('\0')) >= 0;) {
+                const QByteArray full = pending.left(nul);
+                pending.remove(0, nul + 1);
+                const qsizetype slash = full.lastIndexOf('/');
+                const QString dirQ = QFile::decodeName(full.left(slash)), nameQ = QFile::decodeName(full.mid(slash + 1));
+                batch.push_back({QFile::decodeName(full), fromStat(dirQ, nameQ, AT_FDCWD, full.constData())});
+                ++total;
+                if (batch.size() >= 300 || t.elapsed() > 150) {
+                    flush(false);
+                    t.restart();
+                }
+            }
+        };
+        while (!*cancel && total < 20000 && rg.state() != QProcess::NotRunning) {
+            rg.waitForReadyRead(200);
+            take();
+        }
+        if (rg.state() != QProcess::NotRunning) {   // cancelled or too many
+            rg.kill();
+            rg.waitForFinished(1000);
+        }
+        take();
+        if (!*cancel) flush(true);
+        return;
+    }
 
     std::vector<char> buf(64 * 1024);
     std::deque<QByteArray> queue{root};   // breadth-first: nearby results first
@@ -918,7 +958,7 @@ void FsModel::setPaths(const QString &root, const QStringList &paths)
     });
 }
 
-void FsModel::startSearch(const QString &pattern)
+void FsModel::startSearch(const QString &pattern, bool contents)
 {
     stopSearch();
     beginResetModel();
@@ -940,8 +980,8 @@ void FsModel::startSearch(const QString &pattern)
     QPointer<FsModel> self(this);
     // A dedicated low-priority thread: raising nice is one-way for normal
     // users, so it must not be a pool thread that gets reused.
-    std::thread([self, cancel, root, pattern, gen, hidden] {
-        searchWorker(self, cancel, root, pattern, gen, hidden);
+    std::thread([self, cancel, root, pattern, contents, gen, hidden] {
+        searchWorker(self, cancel, root, pattern, contents, gen, hidden);
     }).detach();
 }
 
@@ -1187,7 +1227,54 @@ bool SortProxy::filterAcceptsRow(int row, const QModelIndex &parent) const
     if (!e) return false;
     if (!Settings::get().showHidden && e->hidden) return false;
     if (!m_filter.isEmpty() && !parent.isValid() && !e->name.contains(m_filter, Qt::CaseInsensitive)) return false;
+    if (parent.isValid()) return true;   // the limits are for the listed folder, not inside expanded ones
+    if (m_date) {
+        const QDateTime now = QDateTime::currentDateTime();
+        const qint64 from = m_date == 1 ? now.date().startOfDay().toSecsSinceEpoch()
+                            : m_date == 2 ? now.addDays(-7).toSecsSinceEpoch()
+                            : m_date == 3 ? now.addDays(-30).toSecsSinceEpoch()
+                                          : QDate(now.date().year(), 1, 1).startOfDay().toSecsSinceEpoch();
+        if (e->mtime < from) return false;
+    }
+    if (m_size) {
+        if (e->isDir) return false;
+        constexpr qint64 MB = 1024 * 1024;
+        const qint64 s = e->size;
+        if ((m_size == 1 && s >= MB) || (m_size == 2 && s <= MB) || (m_size == 3 && s <= 100 * MB) || (m_size == 4 && s <= 1024 * MB)) return false;
+    }
     return true;
+}
+
+void SortProxy::setGitMarks(const QHash<QString, char> &marks)
+{
+    if (marks == m_git) return;
+    m_git = marks;
+    if (rowCount() > 0) emit dataChanged(index(0, 0), index(rowCount() - 1, 0), {Qt::ForegroundRole});
+}
+
+QVariant SortProxy::data(const QModelIndex &ix, int role) const
+{
+    if (role == Qt::ForegroundRole && ix.column() == 0 && !m_git.isEmpty() && !ix.parent().isValid()) {
+        const auto *m = static_cast<const FsModel *>(sourceModel());
+        if (const FileEntry *e = m->entry(mapToSource(ix))) {
+            switch (m_git.value(e->name)) {
+            case 'n': return Theme::get().green;
+            case 'm': return Theme::get().yellow;
+            case 'c': return Theme::get().red;
+            default: break;
+            }
+        }
+    }
+    return QSortFilterProxyModel::data(ix, role);
+}
+
+void SortProxy::setLimits(int date, int size)
+{
+    if (date == m_date && size == m_size) return;
+    beginFilterChange();
+    m_date = date;
+    m_size = size;
+    endFilterChange(QSortFilterProxyModel::Direction::Rows);
 }
 
 namespace {

@@ -40,6 +40,8 @@ add_executable(luna
   src/settingsdialog.h src/settingsdialog.cpp
   src/smoothscroll.h src/smoothscroll.cpp
   src/preview.h src/preview.cpp
+  src/jump.h src/jump.cpp
+  src/discovery.h src/discovery.cpp
   src/mainwindow.h src/mainwindow.cpp
   data/luna.qrc
 )

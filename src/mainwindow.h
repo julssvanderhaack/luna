@@ -55,6 +55,7 @@ private:
     void closeTab(int index);
     void syncHeader();
     void showTerminal(bool show);
+    void jump();   // Ctrl+P
     void layoutSidebar();
     void applySettings();
     void trackJob(Job *job);

@@ -8,6 +8,7 @@
 #include "theme.h"
 #include "undo.h"
 #include <utility>
+#include <QActionGroup>
 #include <QApplication>
 #include <QClipboard>
 #include <QColumnView>
@@ -15,6 +16,7 @@
 #include <QLocale>
 #include <QDir>
 #include <QFileInfo>
+#include <QFileSystemWatcher>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QInputDialog>
@@ -34,7 +36,10 @@
 #include <QMessageBox>
 #include <QMimeDatabase>
 #include <QPointer>
+#include <functional>
+#include <memory>
 #include <QProcess>
+#include <QRegularExpression>
 #include <QPushButton>
 #include <QPainter>
 #include <QSet>
@@ -302,6 +307,34 @@ Pane::Pane(QWidget *parent) : QFrame(parent)
     m_recursive->setChecked(Settings::get().searchRecursiveDefault);
     m_recursive->setToolTip(QString::fromUtf8("Buscar también dentro de las subcarpetas"));
     fb->addWidget(m_recursive);
+    m_contents = new QToolButton;
+    m_contents->setText(QString::fromUtf8("Contenido"));
+    m_contents->setCheckable(true);
+    m_contents->setToolTip(QString::fromUtf8("Buscar el texto dentro de los archivos (incluye subcarpetas)"));
+    fb->addWidget(m_contents);
+    // Date and size limits, on top of the name filter or search
+    m_limitsBtn = new QToolButton;
+    m_limitsBtn->setText("Filtros");
+    m_limitsBtn->setPopupMode(QToolButton::InstantPopup);
+    m_limitsBtn->setToolTip(QString::fromUtf8("Filtrar por fecha de modificación y tamaño"));
+    auto *limits = new QMenu(m_limitsBtn);
+    auto addGroup = [this, limits](const QString &title, const QStringList &labels, int *field) {
+        limits->addSection(title);
+        auto *group = new QActionGroup(limits);
+        for (int i = 0; i < labels.size(); ++i) {
+            QAction *a = limits->addAction(labels[i], this, [this, field, i] {
+                *field = i;
+                applyLimits();
+            });
+            a->setCheckable(true);
+            a->setChecked(i == 0);
+            group->addAction(a);
+        }
+    };
+    addGroup("Modificado", {QString::fromUtf8("En cualquier fecha"), "Hoy", QString::fromUtf8("Últimos 7 días"), QString::fromUtf8("Últimos 30 días"), QString::fromUtf8("Este año")}, &m_dateLimit);
+    addGroup(QString::fromUtf8("Tamaño"), {QString::fromUtf8("Cualquier tamaño"), "Menos de 1 MB", QString::fromUtf8("Más de 1 MB"), QString::fromUtf8("Más de 100 MB"), QString::fromUtf8("Más de 1 GB")}, &m_sizeLimit);
+    m_limitsBtn->setMenu(limits);
+    fb->addWidget(m_limitsBtn);
     auto *fc = new QToolButton;
     fc->setIcon(Icons::get().ui("close"));
     connect(fc, &QToolButton::clicked, this, &Pane::closeFilter);
@@ -313,7 +346,7 @@ Pane::Pane(QWidget *parent) : QFrame(parent)
     searchTimer->setInterval(350);
     connect(searchTimer, &QTimer::timeout, this, [this] {
         const QString t = m_filter->text().trimmed();
-        if (recursiveSearch() && t.size() >= 2) m_model->startSearch(t);
+        if (recursiveSearch() && t.size() >= (m_contents->isChecked() ? 3 : 2)) m_model->startSearch(t, m_contents->isChecked());
     });
     connect(m_filter, &QLineEdit::textChanged, this, [this, searchTimer](const QString &t) {
         if (recursiveSearch()) {
@@ -328,14 +361,22 @@ Pane::Pane(QWidget *parent) : QFrame(parent)
         if (isVirtual()) return;   // a list of files, not a folder tree
         if (!m_recursive->isChecked()) m_recursive->setChecked(true);
         searchTimer->stop();
-        if (!m_filter->text().trimmed().isEmpty()) m_model->startSearch(m_filter->text().trimmed());
+        if (!m_filter->text().trimmed().isEmpty()) m_model->startSearch(m_filter->text().trimmed(), m_contents->isChecked());
         m_proxy->setQuickFilter({});
+    });
+    connect(m_contents, &QToolButton::toggled, this, [this](bool on) {
+        m_filter->setPlaceholderText(on ? QString::fromUtf8("Texto que contienen los archivos (aquí y en subcarpetas)")
+                                        : QString::fromUtf8("Filtrar por nombre (Intro busca en subcarpetas)"));
+        if (isVirtual()) return;
+        if (on && !m_recursive->isChecked()) m_recursive->setChecked(true);   // that starts the search
+        else if (m_recursive->isChecked() && !m_filter->text().trimmed().isEmpty()) m_model->startSearch(m_filter->text().trimmed(), on);
     });
     connect(m_recursive, &QToolButton::toggled, this, [this](bool on) {
         if (isVirtual()) return;
+        if (!on) m_contents->setChecked(false);   // contents always search the subfolders
         if (on && !m_filter->text().trimmed().isEmpty()) {
             m_proxy->setQuickFilter({});
-            m_model->startSearch(m_filter->text().trimmed());
+            m_model->startSearch(m_filter->text().trimmed(), m_contents->isChecked());
         } else if (!on && m_model->searching()) {
             setPath(m_path, false);
             m_proxy->setQuickFilter(m_filter->text());
@@ -626,9 +667,114 @@ void Pane::setPath(const QString &path0, bool record, const QStringList &select)
                 self->updateStatus();
             }, Qt::QueuedConnection);
         });
+    refreshGit();
     emit pathChanged(path);
     emit historyChanged();
     updateStatus();
+}
+
+// Inside a git repository: colour the names by their state and show the
+// branch in the status bar. git runs in the background, at low priority,
+// again a moment after the folder or the repository's index changes.
+void Pane::refreshGit()
+{
+    static const bool haveGit = !QStandardPaths::findExecutable("git").isEmpty();
+    QString root;
+    if (haveGit && !isVirtual() && m_path.startsWith('/') && !m_path.startsWith("/run/user/"))
+        for (QDir d(m_path);;) {
+            if (QFileInfo::exists(d.filePath(".git"))) {
+                root = d.absolutePath();
+                break;
+            }
+            if (!d.cdUp()) break;
+        }
+    if (root != m_gitRoot) {
+        m_gitRoot = root;
+        if (m_gitWatch) {
+            delete m_gitWatch;
+            m_gitWatch = nullptr;
+        }
+        if (!root.isEmpty() && QFileInfo(root + "/.git").isDir()) {   // add, commit, checkout touch these
+            m_gitWatch = new QFileSystemWatcher({root + "/.git/index", root + "/.git/HEAD"}, this);
+            connect(m_gitWatch, &QFileSystemWatcher::fileChanged, this, [this] { m_gitTimer->start(); });
+        }
+    }
+    m_gitSummary.clear();
+    m_proxy->setGitMarks({});
+    if (root.isEmpty()) return;
+    if (!m_gitTimer) {
+        m_gitTimer = new QTimer(this);
+        m_gitTimer->setSingleShot(true);
+        m_gitTimer->setInterval(700);
+        connect(m_gitTimer, &QTimer::timeout, this, &Pane::runGit);
+        for (auto sig : {&QAbstractItemModel::rowsInserted, &QAbstractItemModel::rowsRemoved})
+            connect(m_model, sig, this, [this] {
+                if (!m_gitRoot.isEmpty() && !m_model->searching()) m_gitTimer->start();
+            });
+    }
+    runGit();
+}
+
+void Pane::runGit()
+{
+    if (m_gitRoot.isEmpty()) return;
+    if (m_gitRunning) {   // one at a time; a change during it asks for one more
+        m_gitAgain = true;
+        return;
+    }
+    m_gitRunning = true;
+    auto *p = new QProcess(this);
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("LC_ALL", "C");   // the branch line is parsed
+    env.insert("GIT_OPTIONAL_LOCKS", "0");   // never compete with a git command the user runs
+    p->setProcessEnvironment(env);
+    const QString dir = m_path, root = m_gitRoot;
+    connect(p, &QProcess::finished, this, [this, p, dir, root](int code) {
+        p->deleteLater();
+        m_gitRunning = false;
+        if (std::exchange(m_gitAgain, false) || dir != m_path) {
+            QTimer::singleShot(0, this, &Pane::runGit);
+            if (dir != m_path) return;
+        }
+        if (code != 0) return;
+        // Paths are relative to the repository; each one marks the item of
+        // this folder it lives in (a folder shows its contents' state).
+        const QString rel = QDir(root).relativeFilePath(dir);
+        const QString prefix = rel == "." ? QString() : rel + '/';
+        QHash<QString, char> marks;
+        int changes = 0;
+        QString branch;
+        const QList<QByteArray> parts = p->readAllStandardOutput().split('\0');
+        for (int i = 0; i < parts.size(); ++i) {
+            const QString e = QString::fromUtf8(parts[i]);
+            if (e.startsWith("## ")) {
+                branch = e.mid(3);
+                continue;
+            }
+            if (e.size() < 4) continue;
+            const QString xy = e.left(2), path = e.mid(3);
+            if (xy[0] == 'R' || xy[0] == 'C') ++i;   // -z puts the old name of a rename next
+            ++changes;
+            if (!path.startsWith(prefix)) continue;
+            const QString item = path.mid(prefix.size()).section('/', 0, 0);
+            const char state = xy.contains('U') || xy == "AA" || xy == "DD" ? 'c' : xy == "??" || xy[0] == 'A' ? 'n' : 'm';
+            const char old = marks.value(item, 0);
+            if (state == 'c' || (state == 'm' && old != 'c') || !old) marks[item] = state;
+        }
+        // "main...origin/main [ahead 1, behind 2]" → "main ↑1 ↓2"
+        QString name = branch.section("...", 0, 0).section(' ', 0, 0);
+        if (branch.startsWith("No commits yet on ")) name = branch.mid(18);
+        if (branch.startsWith("HEAD (no branch)")) name = QString::fromUtf8("sin rama");
+        static const QRegularExpression ahead("ahead (\\d+)"), behind("behind (\\d+)");
+        if (auto m = ahead.match(branch); m.hasMatch()) name += QString::fromUtf8(" ↑") + m.captured(1);
+        if (auto m = behind.match(branch); m.hasMatch()) name += QString::fromUtf8(" ↓") + m.captured(1);
+        m_gitSummary = QString::fromUtf8("%1  ·  %2").arg(name, changes == 0 ? QString::fromUtf8("sin cambios")
+                                                         : changes == 1 ? QString::fromUtf8("1 cambio")
+                                                                        : QString::fromUtf8("%1 cambios").arg(changes));
+        m_proxy->setGitMarks(marks);
+        updateStatus();
+    });
+    p->start("nice", {"-n", "10", "git", "-C", dir, "status", "--porcelain=v1", "-z", "-b", "--untracked-files=normal", "--", "."});
 }
 
 void Pane::back()
@@ -787,6 +933,120 @@ void Pane::openWithDialog()
     if (d.makeDefault()) Apps::get().setDefault(QMimeDatabase().mimeTypeForFile(paths[0]).name(), d.chosen());
     Recent::add(paths);
     Apps::get().launch(d.chosen(), paths);
+}
+
+// The user's own apps, when installed: Sonata plays folders (single instance,
+// so a running Sonata just gets them), julss.disk shows what fills one.
+static bool haveSonata() { return !QStandardPaths::findExecutable("sonata").isEmpty(); }
+
+static bool haveDiskPanel()
+{
+    static const bool yes = QFileInfo::exists(QDir::homePath() + "/.config/omarchy/plugins/julss.disk") &&
+                            !QStandardPaths::findExecutable("omarchy-shell").isEmpty();
+    return yes;
+}
+
+static void playInSonata(const QStringList &paths)
+{
+    QStringList args{"--play"};
+    args += paths;
+    if (!QStandardPaths::findExecutable("uwsm-app").isEmpty()) QProcess::startDetached("uwsm-app", QStringList{"--", "sonata"} + args);
+    else QProcess::startDetached("sonata", args);
+}
+
+static void showDiskUsage(const QString &path)
+{
+    const QByteArray json = QJsonDocument(QJsonObject{{"view", "treemap"}, {"path", path}}).toJson(QJsonDocument::Compact);
+    QProcess::startDetached("omarchy-shell", {"shell", "summon", "julss.disk", QString::fromUtf8(json)});
+}
+
+// "name (1920 px).jpg", "name (2).png"…: never overwrite anything.
+static QString freeName(const QString &dir, const QString &base, const QString &suffix, const QString &ext)
+{
+    QString name = base + suffix + '.' + ext;
+    for (int n = 2; QFileInfo::exists(dir + '/' + name); ++n) name = base + suffix + QString(" (%1)").arg(n) + '.' + ext;
+    return dir + '/' + name;
+}
+
+// Quick picture edits with ImageMagick. Rotating changes the photo (after
+// applying its EXIF orientation); resizing and converting write new files
+// next to it. One magick at a time, at low priority.
+QMenu *Pane::imageMenu(const QStringList &paths, QWidget *parent)
+{
+    static const bool magick = !QStandardPaths::findExecutable("magick").isEmpty();
+    if (!magick || paths.isEmpty() || isVirtual()) return nullptr;
+    QMimeDatabase db;
+    for (const QString &p : paths) {
+        const QString mime = db.mimeTypeForFile(p).name();
+        if (!mime.startsWith("image/") || mime == "image/svg+xml") return nullptr;
+    }
+    auto *m = new QMenu("Imagen", parent);
+    m->setIcon(Icons::get().ui("image"));
+    const int n = int(paths.size());
+    const QString many = n == 1 ? QString() : QString::fromUtf8(" (%1)").arg(n);
+
+    // runs the commands one after the other, then reports in the status bar
+    auto run = [this](QList<QStringList> jobs, const QString &done) {
+        auto queue = std::make_shared<QList<QStringList>>(std::move(jobs));
+        auto failed = std::make_shared<int>(0);
+        auto step = std::make_shared<std::function<void()>>();
+        std::weak_ptr<std::function<void()>> weak = step;   // only the running process keeps it alive
+        QPointer<Pane> self(this);
+        *step = [queue, failed, weak, self, done] {
+            if (queue->isEmpty()) {
+                if (self) emit self->status(*failed ? QString::fromUtf8("%1 (%2 con errores)").arg(done).arg(*failed) : done);
+                return;
+            }
+            auto *p = new QProcess;
+            QObject::connect(p, &QProcess::finished, p, [p, failed, keep = weak.lock()](int code, QProcess::ExitStatus st) {
+                if (code != 0 || st != QProcess::NormalExit) ++*failed;
+                p->deleteLater();
+                (*keep)();
+            });
+            p->start("nice", QStringList{"-n", "10", "magick"} + queue->takeFirst());
+        };
+        (*step)();
+    };
+
+    auto rotate = [paths, run, n](int degrees) {
+        QList<QStringList> jobs;
+        for (const QString &p : paths) jobs << QStringList{"mogrify", "-auto-orient", "-rotate", QString::number(degrees), p};
+        run(jobs, n == 1 ? QString::fromUtf8("Imagen girada") : QString::fromUtf8("%1 imágenes giradas").arg(n));
+    };
+    m->addAction(QString::fromUtf8("Girar a la derecha") + many, this, [rotate] { rotate(90); });
+    m->addAction(QString::fromUtf8("Girar a la izquierda") + many, this, [rotate] { rotate(-90); });
+    m->addSeparator();
+
+    auto *sizes = m->addMenu(QString::fromUtf8("Reducir tamaño (copia)"));
+    struct Size { const char *label, *geometry, *suffix; };
+    for (const Size &s : {Size{"Máximo 3840 px (4K)", "3840x3840>", " (3840 px)"}, Size{"Máximo 1920 px", "1920x1920>", " (1920 px)"},
+                          Size{"Máximo 1280 px", "1280x1280>", " (1280 px)"}, Size{"La mitad (50 %)", "50%", " (50 %)"}}) {
+        sizes->addAction(QString::fromUtf8(s.label), this, [paths, run, s, n] {
+            QList<QStringList> jobs;
+            for (const QString &p : paths) {
+                const QFileInfo fi(p);
+                jobs << QStringList{p, "-auto-orient", "-resize", QString::fromUtf8(s.geometry),
+                                    freeName(fi.absolutePath(), fi.completeBaseName(), QString::fromUtf8(s.suffix), fi.suffix())};
+            }
+            run(jobs, n == 1 ? QString::fromUtf8("Copia reducida creada") : QString::fromUtf8("%1 copias reducidas creadas").arg(n));
+        });
+    }
+    auto *formats = m->addMenu(QString::fromUtf8("Convertir a (copia)"));
+    for (const char *ext : {"jpg", "png", "webp"}) {
+        formats->addAction(QString(ext).toUpper(), this, [paths, run, ext, n] {
+            QList<QStringList> jobs;
+            for (const QString &p : paths) {
+                const QFileInfo fi(p);
+                if (fi.suffix().compare(ext, Qt::CaseInsensitive) == 0) continue;   // already that format
+                QStringList args{p, "-auto-orient"};
+                if (QString(ext) == "jpg") args << "-quality" << "92";
+                jobs << (args << freeName(fi.absolutePath(), fi.completeBaseName(), QString(), ext));
+            }
+            run(jobs, n == 1 ? QString::fromUtf8("Imagen convertida a %1").arg(QString(ext).toUpper())
+                             : QString::fromUtf8("%1 imágenes convertidas a %2").arg(n).arg(QString(ext).toUpper()));
+        });
+    }
+    return m;
 }
 
 // The other Omarchy workspaces, read from hyprctl when the submenu opens; the
@@ -1235,6 +1495,31 @@ void Pane::showFilter(const QString &initial)
     if (!initial.isEmpty()) m_filter->setText(m_filter->text() + initial);
 }
 
+void Pane::applyLimits()
+{
+    m_proxy->setLimits(m_dateLimit, m_sizeLimit);
+    static const char *dates[] = {"", "hoy", "7 días", "30 días", "este año"};
+    static const char *sizes[] = {"", "< 1 MB", "> 1 MB", "> 100 MB", "> 1 GB"};
+    QStringList on;
+    if (m_dateLimit) on << QString::fromUtf8(dates[m_dateLimit]);
+    if (m_sizeLimit) on << QString::fromUtf8(sizes[m_sizeLimit]);
+    m_limitsBtn->setText(on.isEmpty() ? QString::fromUtf8("Filtros") : QString::fromUtf8("Filtros: ") + on.join(QString::fromUtf8(" · ")));
+    m_limitsBtn->setMinimumWidth(m_limitsBtn->fontMetrics().horizontalAdvance(m_limitsBtn->text()) + 24);   // never elided
+    // keep the menu's ticks in step (closing the bar resets them)
+    const QList<QAction *> acts = m_limitsBtn->menu()->actions();
+    int group = -1, idx = 0;
+    for (QAction *a : acts) {
+        if (a->isSeparator()) {
+            ++group;
+            idx = 0;
+            continue;
+        }
+        a->setChecked(idx++ == (group == 0 ? m_dateLimit : m_sizeLimit));
+    }
+    updateStatus();
+    updateOverlay();
+}
+
 bool Pane::filterVisible() const { return m_filterBar && m_filterBar->isVisible(); }
 
 void Pane::closeFilter()
@@ -1246,6 +1531,9 @@ void Pane::closeFilter()
     m_filter->clear();
     m_filter->blockSignals(false);
     m_proxy->setQuickFilter({});
+    m_contents->setChecked(false);
+    m_dateLimit = m_sizeLimit = 0;
+    applyLimits();
     m_recursive->setChecked(Settings::get().searchRecursiveDefault);
     if (isVirtual()) m_proxy->setQuickFilter({});
     else if (wasSearch) m_model->setRoot(m_path);
@@ -1285,6 +1573,7 @@ void Pane::updateStatus()
             s += QString::fromUtf8("  ·  modificado ") + when;
         }
     }
+    if (!m_gitSummary.isEmpty()) s += QString::fromUtf8("  ·  ") + m_gitSummary;
     if (m_freeBytes >= 0) s += QString::fromUtf8("  ·  %1 libres").arg(FsModel::formatSize(m_freeBytes));
     emit status(s);
 }
@@ -1296,6 +1585,7 @@ void Pane::updateOverlay()
     else if (!m_model->isLoading() && m_proxy->rowCount() == 0)
         text = m_model->searching() && !isVirtual() ? QString::fromUtf8("Sin resultados")
                : !m_proxy->quickFilter().isEmpty() ? QString::fromUtf8("Nada coincide con «%1»").arg(m_proxy->quickFilter())
+               : m_proxy->hasLimits() ? QString::fromUtf8("Nada coincide con los filtros")
                : m_path == Places::recent  ? QString::fromUtf8("No has abierto archivos últimamente")
                : m_path == Places::starred ? QString::fromUtf8("Nada destacado todavía: clic derecho → Destacar")
                : isTrash() ? QString::fromUtf8("La papelera está vacía")
@@ -1343,6 +1633,9 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             if (sel.size() == 1) m.addAction(ic.ui("split"), "Abrir en el otro panel", this, [this, sel] { emit openInOtherPane(sel[0]); });
             if (hyprland) m.addMenu(workspaceMenu(sel, &m));
             m.addAction(ic.ui("terminal"), "Abrir terminal aquí", this, &Pane::openTerminal);
+            if (haveSonata()) m.addAction(ic.ui("play"), "Reproducir en Sonata", this, [sel] { playInSonata(sel); });
+            if (haveDiskPanel() && sel.size() == 1 && !isVirtual())
+                m.addAction(ic.ui("disk"), QString::fromUtf8("Ver qué ocupa espacio"), this, [sel] { showDiskUsage(sel[0]); });
         } else if (!anyDir) {
             const QString mime = db.mimeTypeForFile(sel[0]).name();
             const AppInfo *def = Apps::get().byId(Apps::get().defaultFor(mime));
@@ -1350,6 +1643,7 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
                         [this, sel] { openFiles(sel); });
             m.addMenu(openWithMenu(sel, &m));
             if (hyprland) m.addMenu(workspaceMenu(sel, &m));
+            if (QMenu *img = imageMenu(sel, &m)) m.addMenu(img);
         }
         m.addSeparator();
         m.addAction(ic.ui("cut"), "Cortar", QKeySequence::Cut, this, &Pane::cutSelection);
@@ -1406,6 +1700,8 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             m.addSeparator();
             m.addAction(ic.ui("terminal"), "Abrir terminal aquí", QKeySequence("Shift+F4"), this, &Pane::openTerminal);
             m.addAction(ic.ui("copy"), "Copiar ruta de la carpeta", this, &Pane::copyPath);
+            if (haveSonata()) m.addAction(ic.ui("play"), "Reproducir la carpeta en Sonata", this, [this] { playInSonata({m_path}); });
+            if (haveDiskPanel()) m.addAction(ic.ui("disk"), QString::fromUtf8("Ver qué ocupa espacio"), this, [this] { showDiskUsage(m_path); });
         }
         m.addAction(QString::fromUtf8("Seleccionar todo"), QKeySequence::SelectAll, this, &Pane::selectAll);
         m.addSeparator();

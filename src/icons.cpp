@@ -347,6 +347,7 @@ QIcon Icons::ui(const QString &name)
         {"settings", 0xF013}, {"edit", 0xF040}, {"copy", 0xF0C5}, {"cut", 0xF0C4}, {"paste", 0xF0EA},
         {"trash", 0xF1F8}, {"info", 0xF05A}, {"open", 0xF07C}, {"lock", 0xF023}, {"star", 0xF005},
         {"restore", 0xF0E2}, {"network", 0xF0E8}, {"crumbs", 0xF0C1}, {"chevron", 0xF078}, {"hidden", 0xF070}, {"zoomin", 0xF00E}, {"zoomout", 0xF010}, {"cancel", 0xF05E},
+        {"play", 0xF04B}, {"disk", 0xF0A0}, {"image", 0xF03E}, {"phone", 0xF10B}, {"git", 0xF1D3}, {"archive", 0xF187},
     };
     QIcon icon = glyph(g.value(name, 0xF128), QColor());   // follows the theme when painted
     m_cache.insert(key, icon);
@@ -406,6 +407,7 @@ QIcon Icons::sidebar(const QString &kind)
         {"trash-full", {{"user-trash-full-symbolic", "user-trash-symbolic"}, 0xF0A7A}},
         {"drive", {{"drive-harddisk-symbolic"}, 0xF02CA}},
         {"usb", {{"drive-removable-media-symbolic", "media-removable-symbolic"}, 0xF0553}},
+        {"phone", {{"phone-symbolic", "phone-apple-iphone-symbolic"}, 0xF011C}},   // a phone found on the network (Luna Android)
         {"network", {{"network-server-symbolic", "folder-remote-symbolic"}, 0xF048D}},
         {"add", {{"list-add-symbolic"}, 0xF0415}},
         {"recent", {{"document-open-recent-symbolic", "history-symbolic"}, 0xF02DA}},
