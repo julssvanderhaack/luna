@@ -59,7 +59,8 @@ escritorio. Lleva el nombre de Luna, una gata siamesa, que es también su icono.
   reposo.
 - **Muy configurable:** barra superior (solo iconos, iconos y texto, o agrupados),
   tamaños, columnas, comportamiento al abrir… en *Ajustes*.
-- Interfaz en español.
+- **Idiomas:** español e inglés (EE. UU.). Sigue el idioma del sistema y se puede
+  cambiar en *Ajustes → Apariencia → Idioma*. Ver [Traducir Luna](#traducir-luna).
 
 ## Instalar desde el zip
 
@@ -104,6 +105,23 @@ cmake --install build --prefix ~/.local
 
 Por defecto se optimiza para el procesador de la máquina que compila
 (`-march=native`); `-DLUNA_NATIVE=OFF` genera un ejecutable para cualquier x86-64.
+
+## Traducir Luna
+
+Los textos se escriben en español en el código, marcados con `i18n("…")` (o
+`I18N_NOOP("…")` en listas de `const char *`). Cada idioma es un fichero de
+Qt Linguist en `i18n/luna_<código>.ts` que va dentro del ejecutable; no hace
+falta `qt6-tools` para compilar.
+
+```sh
+i18n/update.py        # recoge los textos nuevos en todos los .ts
+i18n/update.py fr     # empieza i18n/luna_fr.ts
+```
+
+Traduce el `.ts` (con Qt Linguist o un editor de texto), añádelo a
+`data/luna.qrc` y recompila. Con el idioma del sistema en uno que Luna no tiene,
+se usa el inglés. Los diálogos propios de Qt (botones estándar, menú de los
+campos de texto) salen de `qt6-translations`.
 
 ## Atajos de teclado
 

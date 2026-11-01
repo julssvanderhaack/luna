@@ -98,6 +98,7 @@ void Settings::load()
     wheelSpeed = std::clamp(q.value("behavior/wheelSpeed", wheelSpeed).toInt(), 25, 500);
     touchSpeed = std::clamp(q.value("behavior/touchSpeed", touchSpeed).toInt(), 25, 500);
     restoreSession = q.value("behavior/restoreSession", restoreSession).toBool();
+    language = q.value("look/language", language).toString();
     typeToSearch = q.value("behavior/typeToSearch", typeToSearch).toBool();
     searchRecursiveDefault = q.value("behavior/searchRecursive", searchRecursiveDefault).toBool();
     executableText = q.value("behavior/executableText", executableText).toInt();
@@ -160,6 +161,7 @@ void Settings::save() const
     q.setValue("behavior/touchSpeed", touchSpeed);
     q.remove("behavior/scrollSpeed");   // short-lived 3-step setting
     q.setValue("behavior/restoreSession", restoreSession);
+    q.setValue("look/language", language);
     q.setValue("behavior/typeToSearch", typeToSearch);
     q.setValue("behavior/searchRecursive", searchRecursiveDefault);
     q.setValue("behavior/executableText", executableText);

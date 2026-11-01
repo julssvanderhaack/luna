@@ -14,6 +14,7 @@ public:
 
 private:
     QFormLayout *page(const QString &title, const QString &glyph);
+    void restartLuna();
     QListWidget *m_nav;
     QStackedWidget *m_pages;
 };

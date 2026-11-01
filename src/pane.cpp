@@ -1,4 +1,5 @@
 #include "pane.h"
+#include "i18n.h"
 #include "apps.h"
 #include "fileops.h"
 #include "fsmodel.h"
@@ -197,12 +198,12 @@ Pane::Pane(QWidget *parent) : QFrame(parent)
     m_trashBar = new QWidget;
     auto *tb = new QHBoxLayout(m_trashBar);
     tb->setContentsMargins(8, 2, 4, 2);
-    auto *tl = new QLabel(QString::fromUtf8("Papelera: los elementos se pueden restaurar a su ubicación original."));
+    auto *tl = new QLabel(i18n("Papelera: los elementos se pueden restaurar a su ubicación original."));
     tl->setProperty("role", "dim");
     tb->addWidget(tl, 1);
-    auto *empty = new QPushButton(Icons::get().ui("trash"), "Vaciar papelera");
+    auto *empty = new QPushButton(Icons::get().ui("trash"), i18n("Vaciar papelera"));
     connect(empty, &QPushButton::clicked, this, [this] {
-        if (QMessageBox::question(this, "Vaciar papelera", QString::fromUtf8("¿Eliminar definitivamente todo lo que hay en la papelera?"),
+        if (QMessageBox::question(this, i18n("Vaciar papelera"), i18n("¿Eliminar definitivamente todo lo que hay en la papelera?"),
                                   QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
             FileOps::get().emptyTrash();
     });
@@ -298,25 +299,25 @@ Pane::Pane(QWidget *parent) : QFrame(parent)
     fi->setPixmap(Icons::get().ui("search").pixmap(16, 16));
     fb->addWidget(fi);
     m_filter = new QLineEdit;
-    m_filter->setPlaceholderText(QString::fromUtf8("Filtrar por nombre (Intro busca en subcarpetas)"));
+    m_filter->setPlaceholderText(i18n("Filtrar por nombre (Intro busca en subcarpetas)"));
     m_filter->installEventFilter(this);
     fb->addWidget(m_filter, 1);
     m_recursive = new QToolButton;
-    m_recursive->setText(QString::fromUtf8("Subcarpetas"));
+    m_recursive->setText(i18n("Subcarpetas"));
     m_recursive->setCheckable(true);
     m_recursive->setChecked(Settings::get().searchRecursiveDefault);
-    m_recursive->setToolTip(QString::fromUtf8("Buscar también dentro de las subcarpetas"));
+    m_recursive->setToolTip(i18n("Buscar también dentro de las subcarpetas"));
     fb->addWidget(m_recursive);
     m_contents = new QToolButton;
-    m_contents->setText(QString::fromUtf8("Contenido"));
+    m_contents->setText(i18n("Contenido"));
     m_contents->setCheckable(true);
-    m_contents->setToolTip(QString::fromUtf8("Buscar el texto dentro de los archivos (incluye subcarpetas)"));
+    m_contents->setToolTip(i18n("Buscar el texto dentro de los archivos (incluye subcarpetas)"));
     fb->addWidget(m_contents);
     // Date and size limits, on top of the name filter or search
     m_limitsBtn = new QToolButton;
-    m_limitsBtn->setText("Filtros");
+    m_limitsBtn->setText(i18n("Filtros"));
     m_limitsBtn->setPopupMode(QToolButton::InstantPopup);
-    m_limitsBtn->setToolTip(QString::fromUtf8("Filtrar por fecha de modificación y tamaño"));
+    m_limitsBtn->setToolTip(i18n("Filtrar por fecha de modificación y tamaño"));
     auto *limits = new QMenu(m_limitsBtn);
     auto addGroup = [this, limits](const QString &title, const QStringList &labels, int *field) {
         limits->addSection(title);
@@ -331,8 +332,8 @@ Pane::Pane(QWidget *parent) : QFrame(parent)
             group->addAction(a);
         }
     };
-    addGroup("Modificado", {QString::fromUtf8("En cualquier fecha"), "Hoy", QString::fromUtf8("Últimos 7 días"), QString::fromUtf8("Últimos 30 días"), QString::fromUtf8("Este año")}, &m_dateLimit);
-    addGroup(QString::fromUtf8("Tamaño"), {QString::fromUtf8("Cualquier tamaño"), "Menos de 1 MB", QString::fromUtf8("Más de 1 MB"), QString::fromUtf8("Más de 100 MB"), QString::fromUtf8("Más de 1 GB")}, &m_sizeLimit);
+    addGroup(i18n("Modificado"), {i18n("En cualquier fecha"), i18n("Hoy"), i18n("Últimos 7 días"), i18n("Últimos 30 días"), i18n("Este año")}, &m_dateLimit);
+    addGroup(i18n("Tamaño"), {i18n("Cualquier tamaño"), i18n("Menos de 1 MB"), i18n("Más de 1 MB"), i18n("Más de 100 MB"), i18n("Más de 1 GB")}, &m_sizeLimit);
     m_limitsBtn->setMenu(limits);
     fb->addWidget(m_limitsBtn);
     auto *fc = new QToolButton;
@@ -365,8 +366,8 @@ Pane::Pane(QWidget *parent) : QFrame(parent)
         m_proxy->setQuickFilter({});
     });
     connect(m_contents, &QToolButton::toggled, this, [this](bool on) {
-        m_filter->setPlaceholderText(on ? QString::fromUtf8("Texto que contienen los archivos (aquí y en subcarpetas)")
-                                        : QString::fromUtf8("Filtrar por nombre (Intro busca en subcarpetas)"));
+        m_filter->setPlaceholderText(on ? i18n("Texto que contienen los archivos (aquí y en subcarpetas)")
+                                        : i18n("Filtrar por nombre (Intro busca en subcarpetas)"));
         if (isVirtual()) return;
         if (on && !m_recursive->isChecked()) m_recursive->setChecked(true);   // that starts the search
         else if (m_recursive->isChecked() && !m_filter->text().trimmed().isEmpty()) m_model->startSearch(m_filter->text().trimmed(), on);
@@ -392,7 +393,7 @@ Pane::Pane(QWidget *parent) : QFrame(parent)
         updateOverlay();
     });
     connect(m_model, &FsModel::searchProgress, this, [this](int n, bool done) {
-        emit status(done ? QString::fromUtf8("%1 resultados").arg(n) : QString::fromUtf8("Buscando… %1 resultados").arg(n));
+        emit status(done ? i18n("%1 resultados").arg(n) : i18n("Buscando… %1 resultados").arg(n));
         updateOverlay();
     });
     connect(m_model, &FsModel::dropRequested, this, [this](const QList<QUrl> &urls, const QString &dest, Qt::DropAction) { handleDrop(urls, dest); });
@@ -768,13 +769,13 @@ void Pane::runGit()
         // "main...origin/main [ahead 1, behind 2]" → "main ↑1 ↓2"
         QString name = branch.section("...", 0, 0).section(' ', 0, 0);
         if (branch.startsWith("No commits yet on ")) name = branch.mid(18);
-        if (branch.startsWith("HEAD (no branch)")) name = QString::fromUtf8("sin rama");
+        if (branch.startsWith("HEAD (no branch)")) name = i18n("sin rama");
         static const QRegularExpression ahead("ahead (\\d+)"), behind("behind (\\d+)");
         if (auto m = ahead.match(branch); m.hasMatch()) name += QString::fromUtf8(" ↑") + m.captured(1);
         if (auto m = behind.match(branch); m.hasMatch()) name += QString::fromUtf8(" ↓") + m.captured(1);
-        m_gitSummary = QString::fromUtf8("%1  ·  %2").arg(name, changes == 0 ? QString::fromUtf8("sin cambios")
-                                                         : changes == 1 ? QString::fromUtf8("1 cambio")
-                                                                        : QString::fromUtf8("%1 cambios").arg(changes));
+        m_gitSummary = QString::fromUtf8("%1  ·  %2").arg(name, changes == 0 ? i18n("sin cambios")
+                                                         : changes == 1 ? i18n("1 cambio")
+                                                                        : i18n("%1 cambios").arg(changes));
         m_proxy->setGitMarks(marks);
         updateStatus();
     });
@@ -828,7 +829,7 @@ void Pane::updateTitle()
     const QFontMetrics fb(bold), fm(m_titleLabel->font());
     const QString shownName = fb.elidedText(name, Qt::ElideRight, std::max(avail, 0));
     const int rest = avail - fb.horizontalAdvance(shownName) - 2 * fm.horizontalAdvance(' ');
-    const QString shownPath = rest > fm.horizontalAdvance(QString::fromUtf8("/…/")) ? fm.elidedText(path, Qt::ElideMiddle, rest) : QString();
+    const QString shownPath = rest > fm.horizontalAdvance(i18n("/…/")) ? fm.elidedText(path, Qt::ElideMiddle, rest) : QString();
     m_titleLabel->setText(QString("<b>%1</b>&nbsp;&nbsp;<span style=\"color:%2\">%3</span>")
                               .arg(shownName.toHtmlEscaped(), Theme::get().fgDim.name(), shownPath.toHtmlEscaped()));
 }
@@ -877,12 +878,12 @@ void Pane::openFiles(const QStringList &paths)
         int choice = Settings::get().executableText;   // 0 ask, 1 open, 2 run
         if (choice == 0) {
             QMessageBox box(this);
-            box.setWindowTitle(QString::fromUtf8("Archivo ejecutable"));
-            box.setText(QString::fromUtf8("«%1» es un programa. ¿Qué quieres hacer?").arg(fi.fileName()));
-            auto *run = box.addButton("Ejecutar", QMessageBox::AcceptRole);
-            auto *term = box.addButton("Ejecutar en terminal", QMessageBox::AcceptRole);
-            auto *open = box.addButton("Abrir", QMessageBox::AcceptRole);
-            box.addButton("Cancelar", QMessageBox::RejectRole);
+            box.setWindowTitle(i18n("Archivo ejecutable"));
+            box.setText(i18n("«%1» es un programa. ¿Qué quieres hacer?").arg(fi.fileName()));
+            auto *run = box.addButton(i18n("Ejecutar"), QMessageBox::AcceptRole);
+            auto *term = box.addButton(i18n("Ejecutar en terminal"), QMessageBox::AcceptRole);
+            auto *open = box.addButton(i18n("Abrir"), QMessageBox::AcceptRole);
+            box.addButton(i18n("Cancelar"), QMessageBox::RejectRole);
             box.exec();
             if (box.clickedButton() == run) choice = 2;
             else if (box.clickedButton() == open) choice = 1;
@@ -984,7 +985,7 @@ QMenu *Pane::imageMenu(const QStringList &paths, QWidget *parent)
         const QString mime = db.mimeTypeForFile(p).name();
         if (!mime.startsWith("image/") || mime == "image/svg+xml") return nullptr;
     }
-    auto *m = new QMenu("Imagen", parent);
+    auto *m = new QMenu(i18n("Imagen"), parent);
     m->setIcon(Icons::get().ui("image"));
     const int n = int(paths.size());
     const QString many = n == 1 ? QString() : QString::fromUtf8(" (%1)").arg(n);
@@ -998,7 +999,7 @@ QMenu *Pane::imageMenu(const QStringList &paths, QWidget *parent)
         QPointer<Pane> self(this);
         *step = [queue, failed, weak, self, done] {
             if (queue->isEmpty()) {
-                if (self) emit self->status(*failed ? QString::fromUtf8("%1 (%2 con errores)").arg(done).arg(*failed) : done);
+                if (self) emit self->status(*failed ? i18n("%1 (%2 con errores)").arg(done).arg(*failed) : done);
                 return;
             }
             auto *p = new QProcess;
@@ -1015,27 +1016,27 @@ QMenu *Pane::imageMenu(const QStringList &paths, QWidget *parent)
     auto rotate = [paths, run, n](int degrees) {
         QList<QStringList> jobs;
         for (const QString &p : paths) jobs << QStringList{"mogrify", "-auto-orient", "-rotate", QString::number(degrees), p};
-        run(jobs, n == 1 ? QString::fromUtf8("Imagen girada") : QString::fromUtf8("%1 imágenes giradas").arg(n));
+        run(jobs, n == 1 ? i18n("Imagen girada") : i18n("%1 imágenes giradas").arg(n));
     };
-    m->addAction(QString::fromUtf8("Girar a la derecha") + many, this, [rotate] { rotate(90); });
-    m->addAction(QString::fromUtf8("Girar a la izquierda") + many, this, [rotate] { rotate(-90); });
+    m->addAction(i18n("Girar a la derecha") + many, this, [rotate] { rotate(90); });
+    m->addAction(i18n("Girar a la izquierda") + many, this, [rotate] { rotate(-90); });
     m->addSeparator();
 
-    auto *sizes = m->addMenu(QString::fromUtf8("Reducir tamaño (copia)"));
+    auto *sizes = m->addMenu(i18n("Reducir tamaño (copia)"));
     struct Size { const char *label, *geometry, *suffix; };
-    for (const Size &s : {Size{"Máximo 3840 px (4K)", "3840x3840>", " (3840 px)"}, Size{"Máximo 1920 px", "1920x1920>", " (1920 px)"},
-                          Size{"Máximo 1280 px", "1280x1280>", " (1280 px)"}, Size{"La mitad (50 %)", "50%", " (50 %)"}}) {
-        sizes->addAction(QString::fromUtf8(s.label), this, [paths, run, s, n] {
+    for (const Size &s : {Size{I18N_NOOP("Máximo 3840 px (4K)"), "3840x3840>", " (3840 px)"}, Size{I18N_NOOP("Máximo 1920 px"), "1920x1920>", " (1920 px)"},
+                          Size{I18N_NOOP("Máximo 1280 px"), "1280x1280>", " (1280 px)"}, Size{I18N_NOOP("La mitad (50 %)"), "50%", " (50 %)"}}) {
+        sizes->addAction(i18n(s.label), this, [paths, run, s, n] {
             QList<QStringList> jobs;
             for (const QString &p : paths) {
                 const QFileInfo fi(p);
                 jobs << QStringList{p, "-auto-orient", "-resize", QString::fromUtf8(s.geometry),
                                     freeName(fi.absolutePath(), fi.completeBaseName(), QString::fromUtf8(s.suffix), fi.suffix())};
             }
-            run(jobs, n == 1 ? QString::fromUtf8("Copia reducida creada") : QString::fromUtf8("%1 copias reducidas creadas").arg(n));
+            run(jobs, n == 1 ? i18n("Copia reducida creada") : i18n("%1 copias reducidas creadas").arg(n));
         });
     }
-    auto *formats = m->addMenu(QString::fromUtf8("Convertir a (copia)"));
+    auto *formats = m->addMenu(i18n("Convertir a (copia)"));
     for (const char *ext : {"jpg", "png", "webp"}) {
         formats->addAction(QString(ext).toUpper(), this, [paths, run, ext, n] {
             QList<QStringList> jobs;
@@ -1046,8 +1047,8 @@ QMenu *Pane::imageMenu(const QStringList &paths, QWidget *parent)
                 if (QString(ext) == "jpg") args << "-quality" << "92";
                 jobs << (args << freeName(fi.absolutePath(), fi.completeBaseName(), QString(), ext));
             }
-            run(jobs, n == 1 ? QString::fromUtf8("Imagen convertida a %1").arg(QString(ext).toUpper())
-                             : QString::fromUtf8("%1 imágenes convertidas a %2").arg(n).arg(QString(ext).toUpper()));
+            run(jobs, n == 1 ? i18n("Imagen convertida a %1").arg(QString(ext).toUpper())
+                             : i18n("%1 imágenes convertidas a %2").arg(n).arg(QString(ext).toUpper()));
         });
     }
     return m;
@@ -1057,7 +1058,7 @@ QMenu *Pane::imageMenu(const QStringList &paths, QWidget *parent)
 // file opens there with its default app while you stay where you are.
 QMenu *Pane::workspaceMenu(const QStringList &paths, QWidget *parent)
 {
-    auto *m = new QMenu(QString::fromUtf8("Abrir en el escritorio"), parent);
+    auto *m = new QMenu(i18n("Abrir en el escritorio"), parent);
     m->setIcon(Icons::get().ui("split"));
     connect(m, &QMenu::aboutToShow, m, [m, paths] {
         m->clear();
@@ -1077,24 +1078,24 @@ QMenu *Pane::workspaceMenu(const QStringList &paths, QWidget *parent)
         for (auto it = windows.cbegin(); it != windows.cend(); ++it) {
             if (it.key() == active) continue;
             const int n = it.value();
-            add(it.key(), QString::fromUtf8("Escritorio %1  ·  %2").arg(it.key()).arg(n == 1 ? QString::fromUtf8("1 ventana") : QString::fromUtf8("%1 ventanas").arg(n)));
+            add(it.key(), i18n("Escritorio %1  ·  %2").arg(it.key()).arg(n == 1 ? i18n("1 ventana") : i18n("%1 ventanas").arg(n)));
         }
         int next = 1;
         while (windows.contains(next) || next == active) ++next;
         if (!m->isEmpty()) m->addSeparator();
-        add(next, QString::fromUtf8("Escritorio nuevo (%1)").arg(next));
+        add(next, i18n("Escritorio nuevo (%1)").arg(next));
     });
     return m;
 }
 
 QMenu *Pane::openWithMenu(const QStringList &paths, QWidget *parent)
 {
-    auto *m = new QMenu(QString::fromUtf8("Abrir con"), parent);
+    auto *m = new QMenu(i18n("Abrir con"), parent);
     m->setIcon(Icons::get().ui("open"));
     const QString mime = QMimeDatabase().mimeTypeForFile(paths.value(0)).name();
     const QString def = Apps::get().defaultFor(mime);
     for (const AppInfo *a : Apps::get().forMime(mime)) {
-        QString label = a->name + (a->id == def ? QString::fromUtf8("  (predeterminada)") : QString());
+        QString label = a->name + (a->id == def ? i18n("  (predeterminada)") : QString());
         const QString id = a->id;
         m->addAction(Icons::get().app(a->icon), label, this, [paths, id] {
             Recent::add(paths);
@@ -1102,14 +1103,14 @@ QMenu *Pane::openWithMenu(const QStringList &paths, QWidget *parent)
         });
     }
     if (!m->isEmpty()) m->addSeparator();
-    m->addAction(QString::fromUtf8("Otra aplicación…"), this, &Pane::openWithDialog);
+    m->addAction(i18n("Otra aplicación…"), this, &Pane::openWithDialog);
     return m;
 }
 
 // ------------------------------------------------- "Mover a" / "Copiar a"
 QMenu *Pane::transferMenu(bool move, QWidget *parent)
 {
-    auto *m = new QMenu(move ? QString::fromUtf8("Mover a") : QString::fromUtf8("Copiar a"), parent);
+    auto *m = new QMenu(move ? i18n("Mover a") : i18n("Copiar a"), parent);
     m->setIcon(Icons::get().ui(move ? "cut" : "copy"));
     const QStringList sel = selectedPaths();
     QSet<QString> used;
@@ -1121,7 +1122,7 @@ QMenu *Pane::transferMenu(bool move, QWidget *parent)
         m->addAction(icon, label, this, [this, move, dest] { transferSelection(move, dest); })->setToolTip(dest);
     };
     if (m_other && m_other->path() != m_path) {
-        add(Icons::get().ui("split"), QString::fromUtf8("Otro panel: %1").arg(QFileInfo(m_other->path()).fileName()), m_other->path());
+        add(Icons::get().ui("split"), i18n("Otro panel: %1").arg(QFileInfo(m_other->path()).fileName()), m_other->path());
         m->addSeparator();
     }
     // Recent destinations
@@ -1131,13 +1132,13 @@ QMenu *Pane::transferMenu(bool move, QWidget *parent)
     if (m->actions().size() > before) m->addSeparator();
     // Places
     const QString home = QDir::homePath();
-    add(Icons::get().place("home"), QString::fromUtf8("Carpeta personal"), home);
+    add(Icons::get().place("home"), i18n("Carpeta personal"), home);
     struct P { QStandardPaths::StandardLocation l; const char *name; };
-    for (P p : {P{QStandardPaths::DocumentsLocation, "Documentos"}, P{QStandardPaths::DownloadLocation, "Descargas"},
-                P{QStandardPaths::MusicLocation, "Música"}, P{QStandardPaths::PicturesLocation, "Imágenes"},
-                P{QStandardPaths::MoviesLocation, "Vídeos"}, P{QStandardPaths::DesktopLocation, "Escritorio"}}) {
+    for (P p : {P{QStandardPaths::DocumentsLocation, I18N_NOOP("Documentos")}, P{QStandardPaths::DownloadLocation, I18N_NOOP("Descargas")},
+                P{QStandardPaths::MusicLocation, I18N_NOOP("Música")}, P{QStandardPaths::PicturesLocation, I18N_NOOP("Imágenes")},
+                P{QStandardPaths::MoviesLocation, I18N_NOOP("Vídeos")}, P{QStandardPaths::DesktopLocation, I18N_NOOP("Escritorio")}}) {
         const QString d = QStandardPaths::writableLocation(p.l);
-        if (d != home) add(Icons::get().forFolder(d), QString::fromUtf8(p.name), d);
+        if (d != home) add(Icons::get().forFolder(d), i18n(p.name), d);
     }
     // GTK bookmarks (local ones)
     QFile f(QDir::homePath() + "/.config/gtk-3.0/bookmarks");
@@ -1154,7 +1155,7 @@ QMenu *Pane::transferMenu(bool move, QWidget *parent)
         }
     }
     m->addSeparator();
-    m->addAction(Icons::get().ui("open"), QString::fromUtf8("Elegir carpeta…"), this, [this, move] { transferSelection(move); });
+    m->addAction(Icons::get().ui("open"), i18n("Elegir carpeta…"), this, [this, move] { transferSelection(move); });
     return m;
 }
 
@@ -1164,14 +1165,14 @@ void Pane::transferSelection(bool move, const QString &dest0)
     if (sel.isEmpty()) return;
     QString dest = dest0;
     if (dest.isEmpty()) {
-        QFileDialog dlg(this, move ? QString::fromUtf8("Mover %1 elemento(s) a…").arg(sel.size()) : QString::fromUtf8("Copiar %1 elemento(s) a…").arg(sel.size()),
+        QFileDialog dlg(this, move ? i18n("Mover %1 elemento(s) a…").arg(sel.size()) : i18n("Copiar %1 elemento(s) a…").arg(sel.size()),
                         m_path);
         dlg.setFileMode(QFileDialog::Directory);
         dlg.setOptions(QFileDialog::ShowDirsOnly | QFileDialog::DontUseNativeDialog);
-        dlg.setLabelText(QFileDialog::Accept, move ? QString::fromUtf8("Mover aquí") : QString::fromUtf8("Copiar aquí"));
-        dlg.setLabelText(QFileDialog::Reject, "Cancelar");
-        dlg.setLabelText(QFileDialog::LookIn, QString::fromUtf8("Buscar en:"));
-        dlg.setLabelText(QFileDialog::FileName, "Carpeta:");
+        dlg.setLabelText(QFileDialog::Accept, move ? i18n("Mover aquí") : i18n("Copiar aquí"));
+        dlg.setLabelText(QFileDialog::Reject, i18n("Cancelar"));
+        dlg.setLabelText(QFileDialog::LookIn, i18n("Buscar en:"));
+        dlg.setLabelText(QFileDialog::FileName, i18n("Carpeta:"));
         dlg.setSidebarUrls({QUrl::fromLocalFile(QDir::homePath()), QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)),
                             QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)),
                             QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation))});
@@ -1180,7 +1181,7 @@ void Pane::transferSelection(bool move, const QString &dest0)
     }
     for (const QString &s : sel)
         if (dest == s || dest.startsWith(s + '/')) {
-            QMessageBox::warning(this, move ? "Mover" : "Copiar", QString::fromUtf8("No se puede meter «%1» dentro de sí misma.").arg(QFileInfo(s).fileName()));
+            QMessageBox::warning(this, move ? i18n("Mover") : i18n("Copiar"), i18n("No se puede meter «%1» dentro de sí misma.").arg(QFileInfo(s).fileName()));
             return;
         }
     QSettings q("luna", "luna");
@@ -1190,7 +1191,7 @@ void Pane::transferSelection(bool move, const QString &dest0)
     q.setValue("transfer/recent", recent.mid(0, 8));
     if (move) FileOps::get().move(sel, dest);
     else FileOps::get().copy(sel, dest);
-    emit status(QString::fromUtf8("%1 %2 elemento(s) a %3").arg(move ? "Moviendo" : "Copiando").arg(sel.size()).arg(QFileInfo(dest).fileName()));
+    emit status(i18n("%1 %2 elemento(s) a %3").arg(move ? i18n("Moviendo") : i18n("Copiando")).arg(sel.size()).arg(QFileInfo(dest).fileName()));
 }
 
 // ------------------------------------------------------------------ actions
@@ -1234,8 +1235,8 @@ void Pane::renameSelected()
     // Batch rename: a pattern with # for the counter
     bool ok;
     QString pattern = QInputDialog::getText(this, QString::fromUtf8("Renombrar %1 elementos").arg(rows.size()),
-                                            QString::fromUtf8("Nuevo nombre (# = número, se conserva la extensión):"), QLineEdit::Normal,
-                                            QString::fromUtf8("Archivo #"), &ok);
+                                            i18n("Nuevo nombre (# = número, se conserva la extensión):"), QLineEdit::Normal,
+                                            i18n("Archivo #"), &ok);
     if (!ok || pattern.trimmed().isEmpty()) return;
     QStringList paths = selectedPaths();
     std::sort(paths.begin(), paths.end(), [](const QString &a, const QString &b) { return QString::localeAwareCompare(a, b) < 0; });
@@ -1253,16 +1254,16 @@ void Pane::renameSelected()
         else renamed.append({p, to});
     }
     Undo::get().record(Undo::Rename, renamed);
-    if (!errors.isEmpty()) QMessageBox::warning(this, "Renombrar", QString::fromUtf8("No se pudieron renombrar:\n") + errors.join('\n'));
+    if (!errors.isEmpty()) QMessageBox::warning(this, i18n("Renombrar"), i18n("No se pudieron renombrar:\n") + errors.join('\n'));
     m_model->refresh();
 }
 
 void Pane::newFolder()
 {
     if (isTrash() || m_model->searching()) return;
-    const QString name = FileOps::uniqueName(m_path, QString::fromUtf8("Nueva carpeta"));
+    const QString name = FileOps::uniqueName(m_path, i18n("Nueva carpeta"));
     if (!QDir(m_path).mkdir(name)) {
-        emit status(QString::fromUtf8("No se pudo crear la carpeta (¿sin permisos?)."));
+        emit status(i18n("No se pudo crear la carpeta (¿sin permisos?)."));
         return;
     }
     m_pendingSelect = {m_path + '/' + name};
@@ -1274,10 +1275,10 @@ void Pane::newFolder()
 void Pane::newFile()
 {
     if (isTrash() || m_model->searching()) return;
-    const QString name = FileOps::uniqueName(m_path, QString::fromUtf8("Archivo nuevo.txt"));
+    const QString name = FileOps::uniqueName(m_path, i18n("Archivo nuevo.txt"));
     QFile f(m_path + '/' + name);
     if (!f.open(QIODevice::WriteOnly)) {
-        emit status(QString::fromUtf8("No se pudo crear el archivo (¿sin permisos?)."));
+        emit status(i18n("No se pudo crear el archivo (¿sin permisos?)."));
         return;
     }
     f.close();
@@ -1292,7 +1293,7 @@ void Pane::copySelection()
     QStringList p = selectedPaths();
     if (p.isEmpty()) return;
     FileOps::toClipboard(p, false);
-    emit status(QString::fromUtf8("%1 elemento(s) copiados al portapapeles").arg(p.size()));
+    emit status(i18n("%1 elemento(s) copiados al portapapeles").arg(p.size()));
 }
 
 void Pane::cutSelection()
@@ -1300,7 +1301,7 @@ void Pane::cutSelection()
     QStringList p = selectedPaths();
     if (p.isEmpty() || isTrash()) return;
     FileOps::toClipboard(p, true);
-    emit status(QString::fromUtf8("%1 elemento(s) cortados").arg(p.size()));
+    emit status(i18n("%1 elemento(s) cortados").arg(p.size()));
 }
 
 void Pane::paste()
@@ -1327,14 +1328,14 @@ void Pane::trashSelection()
         return;
     }
     if (Settings::get().confirmTrash &&
-        QMessageBox::question(this, "Papelera", QString::fromUtf8("¿Mover %1 elemento(s) a la papelera?").arg(p.size())) != QMessageBox::Yes)
+        QMessageBox::question(this, i18n("Papelera"), i18n("¿Mover %1 elemento(s) a la papelera?").arg(p.size())) != QMessageBox::Yes)
         return;
     QStringList errors = FileOps::get().trash(p);
     if (!errors.isEmpty()) {
-        if (QMessageBox::question(this, "Papelera", errors.join('\n') + QString::fromUtf8("\n\n¿Eliminarlos definitivamente?")) == QMessageBox::Yes)
+        if (QMessageBox::question(this, i18n("Papelera"), errors.join('\n') + i18n("\n\n¿Eliminarlos definitivamente?")) == QMessageBox::Yes)
             deleteSelection();
     } else {
-        emit status(QString::fromUtf8("%1 elemento(s) movidos a la papelera").arg(p.size()));
+        emit status(i18n("%1 elemento(s) movidos a la papelera").arg(p.size()));
     }
     m_model->refresh();
 }
@@ -1344,9 +1345,9 @@ void Pane::deleteSelection()
     QStringList p = selectedPaths();
     if (p.isEmpty()) return;
     if (Settings::get().confirmDelete &&
-        QMessageBox::warning(this, "Eliminar definitivamente",
-                             p.size() == 1 ? QString::fromUtf8("¿Eliminar definitivamente «%1»? No se puede deshacer.").arg(QFileInfo(p[0]).fileName())
-                                           : QString::fromUtf8("¿Eliminar definitivamente %1 elementos? No se puede deshacer.").arg(p.size()),
+        QMessageBox::warning(this, i18n("Eliminar definitivamente"),
+                             p.size() == 1 ? i18n("¿Eliminar definitivamente «%1»? No se puede deshacer.").arg(QFileInfo(p[0]).fileName())
+                                           : i18n("¿Eliminar definitivamente %1 elementos? No se puede deshacer.").arg(p.size()),
                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
         return;
     FileOps::get().deleteForever(p);
@@ -1408,7 +1409,7 @@ void Pane::copyPath()
     QStringList p = selectedPaths();
     if (p.isEmpty()) p = {m_path};
     QApplication::clipboard()->setText(p.join('\n'));
-    emit status(QString::fromUtf8("Ruta copiada"));
+    emit status(i18n("Ruta copiada"));
 }
 
 void Pane::createLink()
@@ -1422,10 +1423,10 @@ void Pane::compressSelection()
     QStringList p = selectedPaths();
     if (p.isEmpty() || isVirtual()) return;
     QString base = p.size() == 1 ? QFileInfo(p[0]).completeBaseName() : QFileInfo(m_path).fileName();
-    if (base.isEmpty()) base = "archivo";
+    if (base.isEmpty()) base = i18n("archivo");
     QStringList formats = {".zip", ".tar.gz", ".tar.xz", ".tar.zst", ".7z"};
     bool ok;
-    QString fmt = QInputDialog::getItem(this, "Comprimir", QString::fromUtf8("Formato de «%1»:").arg(base), formats, 0, false, &ok);
+    QString fmt = QInputDialog::getItem(this, i18n("Comprimir"), i18n("Formato de «%1»:").arg(base), formats, 0, false, &ok);
     if (!ok) return;
     const QString out = m_path + '/' + FileOps::uniqueName(m_path, base + fmt);
     QStringList rel;
@@ -1434,13 +1435,13 @@ void Pane::compressSelection()
     proc->setWorkingDirectory(m_path);
     connect(proc, &QProcess::finished, this, [this, proc, out](int code) {
         proc->deleteLater();
-        emit status(code == 0 ? QString::fromUtf8("Creado «%1»").arg(QFileInfo(out).fileName()) : QString::fromUtf8("Error al comprimir"));
+        emit status(code == 0 ? i18n("Creado «%1»").arg(QFileInfo(out).fileName()) : i18n("Error al comprimir"));
         if (code == 0) {
             m_pendingSelect = {out};
             m_model->refresh();
         }
     });
-    emit status(QString::fromUtf8("Comprimiendo…"));
+    emit status(i18n("Comprimiendo…"));
     if (fmt == ".7z") proc->start("7z", QStringList{"a", out, "--"} + rel);
     else proc->start("bsdtar", QStringList{"-a", "-cf", out, "--"} + rel);
 }
@@ -1461,11 +1462,11 @@ void Pane::extractSelection()
         auto *proc = new QProcess(this);
         connect(proc, &QProcess::finished, this, [this, proc, dir](int code) {
             proc->deleteLater();
-            emit status(code == 0 ? QString::fromUtf8("Extraído en «%1»").arg(QFileInfo(dir).fileName()) : QString::fromUtf8("Error al extraer"));
+            emit status(code == 0 ? i18n("Extraído en «%1»").arg(QFileInfo(dir).fileName()) : i18n("Error al extraer"));
             m_pendingSelect = {dir};
             m_model->refresh();
         });
-        emit status(QString::fromUtf8("Extrayendo…"));
+        emit status(i18n("Extrayendo…"));
         if (p.endsWith(".7z", Qt::CaseInsensitive) || p.endsWith(".rar", Qt::CaseInsensitive)) proc->start("7z", {"x", "-o" + dir, p});
         else proc->start("bsdtar", {"-xf", p, "-C", dir});
     }
@@ -1502,12 +1503,12 @@ void Pane::showFilter(const QString &initial)
 void Pane::applyLimits()
 {
     m_proxy->setLimits(m_dateLimit, m_sizeLimit);
-    static const char *dates[] = {"", "hoy", "7 días", "30 días", "este año"};
+    static const char *dates[] = {"", I18N_NOOP("hoy"), I18N_NOOP("7 días"), I18N_NOOP("30 días"), I18N_NOOP("este año")};
     static const char *sizes[] = {"", "< 1 MB", "> 1 MB", "> 100 MB", "> 1 GB"};
     QStringList on;
-    if (m_dateLimit) on << QString::fromUtf8(dates[m_dateLimit]);
-    if (m_sizeLimit) on << QString::fromUtf8(sizes[m_sizeLimit]);
-    m_limitsBtn->setText(on.isEmpty() ? QString::fromUtf8("Filtros") : QString::fromUtf8("Filtros: ") + on.join(QString::fromUtf8(" · ")));
+    if (m_dateLimit) on << i18n(dates[m_dateLimit]);
+    if (m_sizeLimit) on << i18n(sizes[m_sizeLimit]);
+    m_limitsBtn->setText(on.isEmpty() ? i18n("Filtros") : i18n("Filtros: ") + on.join(QString::fromUtf8(" · ")));
     m_limitsBtn->setMinimumWidth(m_limitsBtn->fontMetrics().horizontalAdvance(m_limitsBtn->text()) + 24);   // never elided
     // keep the menu's ticks in step (closing the bar resets them)
     const QList<QAction *> acts = m_limitsBtn->menu()->actions();
@@ -1551,9 +1552,9 @@ void Pane::updateStatus()
     const QModelIndexList sel = m_model->isLoading() ? QModelIndexList() : selectedItems();
     QString s;
     if (m_model->isLoading()) {
-        s = QString::fromUtf8("Cargando…");
+        s = i18n("Cargando…");
     } else if (sel.isEmpty()) {
-        s = total == 1 ? QString::fromUtf8("1 elemento") : QString::fromUtf8("%1 elementos").arg(total);
+        s = total == 1 ? i18n("1 elemento") : i18n("%1 elementos").arg(total);
     } else {
         qint64 bytes = 0;
         const FileEntry *one = nullptr;
@@ -1563,22 +1564,22 @@ void Pane::updateStatus()
             one = e;
             if (!e->isDir) bytes += e->size;
         }
-        if (sel.size() == 1 && one) s = QString::fromUtf8("«%1» seleccionado").arg(one->name);
-        else s = QString::fromUtf8("%1 de %2 seleccionados").arg(sel.size()).arg(total);
+        if (sel.size() == 1 && one) s = i18n("«%1» seleccionado").arg(one->name);
+        else s = i18n("%1 de %2 seleccionados").arg(sel.size()).arg(total);
         if (bytes > 0) s += " (" + FsModel::formatSize(bytes) + ")";
         if (sel.size() == 1 && one && one->mtime > 0) {
             // Always with the time, unlike the Modified column ("4 sept")
             const QDateTime dt = QDateTime::fromSecsSinceEpoch(one->mtime);
             const qint64 days = dt.date().daysTo(QDate::currentDate());
-            static const QLocale es(QLocale::Spanish, QLocale::Spain);
-            const QString when = days == 0 ? QString::fromUtf8("hoy, ") + dt.toString("HH:mm")
-                                 : days == 1 ? QString::fromUtf8("ayer, ") + dt.toString("HH:mm")
-                                             : es.toString(dt, "d MMM yyyy, HH:mm");
-            s += QString::fromUtf8("  ·  modificado ") + when;
+            static const QLocale es = I18n::locale();
+            const QString when = days == 0 ? i18n("hoy, ") + dt.toString(i18n("HH:mm"))
+                                 : days == 1 ? i18n("ayer, ") + dt.toString(i18n("HH:mm"))
+                                             : es.toString(dt, i18n("d MMM yyyy, HH:mm"));
+            s += i18n("  ·  modificado ") + when;
         }
     }
     if (!m_gitSummary.isEmpty()) s += QString::fromUtf8("  ·  ") + m_gitSummary;
-    if (m_freeBytes >= 0) s += QString::fromUtf8("  ·  %1 libres").arg(FsModel::formatSize(m_freeBytes));
+    if (m_freeBytes >= 0) s += i18n("  ·  %1 libres").arg(FsModel::formatSize(m_freeBytes));
     emit status(s);
 }
 
@@ -1587,13 +1588,13 @@ void Pane::updateOverlay()
     QString text;
     if (!m_model->error().isEmpty()) text = m_model->error();
     else if (!m_model->isLoading() && m_proxy->rowCount() == 0)
-        text = m_model->searching() && !isVirtual() ? QString::fromUtf8("Sin resultados")
-               : !m_proxy->quickFilter().isEmpty() ? QString::fromUtf8("Nada coincide con «%1»").arg(m_proxy->quickFilter())
-               : m_proxy->hasLimits() ? QString::fromUtf8("Nada coincide con los filtros")
-               : m_path == Places::recent  ? QString::fromUtf8("No has abierto archivos últimamente")
-               : m_path == Places::starred ? QString::fromUtf8("Nada destacado todavía: clic derecho → Destacar")
-               : isTrash() ? QString::fromUtf8("La papelera está vacía")
-                           : QString::fromUtf8("Carpeta vacía");
+        text = m_model->searching() && !isVirtual() ? i18n("Sin resultados")
+               : !m_proxy->quickFilter().isEmpty() ? i18n("Nada coincide con «%1»").arg(m_proxy->quickFilter())
+               : m_proxy->hasLimits() ? i18n("Nada coincide con los filtros")
+               : m_path == Places::recent  ? i18n("No has abierto archivos últimamente")
+               : m_path == Places::starred ? i18n("Nada destacado todavía: clic derecho → Destacar")
+               : isTrash() ? i18n("La papelera está vacía")
+                           : i18n("Carpeta vacía");
     m_overlay->setText(text);
     m_overlay->setVisible(!text.isEmpty());
     m_overlay->setGeometry(m_overlay->parentWidget()->rect());
@@ -1624,72 +1625,72 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             archive |= mt.contains("zip") || mt.contains("tar") || mt.contains("compressed") || mt.contains("7z") || mt.contains("rar");
         }
         if (isTrash()) {
-            m.addAction(ic.ui("restore"), "Restaurar", this, &Pane::restoreSelection);
-            m.addAction(ic.ui("trash"), "Eliminar definitivamente", this, &Pane::deleteSelection);
+            m.addAction(ic.ui("restore"), i18n("Restaurar"), this, &Pane::restoreSelection);
+            m.addAction(ic.ui("trash"), i18n("Eliminar definitivamente"), this, &Pane::deleteSelection);
             m.addSeparator();
-            m.addAction(ic.ui("info"), "Propiedades", QKeySequence("Alt+Return"), this, [this, sel] { emit propertiesRequested(sel); });
+            m.addAction(ic.ui("info"), i18n("Propiedades"), QKeySequence("Alt+Return"), this, [this, sel] { emit propertiesRequested(sel); });
             m.exec(pos);
             return;
         }
         if (allDirs) {
-            m.addAction(ic.ui("open"), "Abrir", this, [this] { openSelection(); });
-            m.addAction(ic.ui("newtab"), QString::fromUtf8("Abrir en pestaña nueva"), this, [this] { openSelection(true); });
-            if (sel.size() == 1) m.addAction(ic.ui("split"), "Abrir en el otro panel", this, [this, sel] { emit openInOtherPane(sel[0]); });
+            m.addAction(ic.ui("open"), i18n("Abrir"), this, [this] { openSelection(); });
+            m.addAction(ic.ui("newtab"), i18n("Abrir en pestaña nueva"), this, [this] { openSelection(true); });
+            if (sel.size() == 1) m.addAction(ic.ui("split"), i18n("Abrir en el otro panel"), this, [this, sel] { emit openInOtherPane(sel[0]); });
             if (hyprland) m.addMenu(workspaceMenu(sel, &m));
-            m.addAction(ic.ui("terminal"), "Abrir terminal aquí", this, &Pane::openTerminal);
-            if (haveSonata()) m.addAction(ic.ui("play"), "Reproducir en Sonata", this, [sel] { playInSonata(sel); });
+            m.addAction(ic.ui("terminal"), i18n("Abrir terminal aquí"), this, &Pane::openTerminal);
+            if (haveSonata()) m.addAction(ic.ui("play"), i18n("Reproducir en Sonata"), this, [sel] { playInSonata(sel); });
             if (haveDiskPanel() && sel.size() == 1 && !isVirtual())
-                m.addAction(ic.ui("disk"), QString::fromUtf8("Ver qué ocupa espacio"), this, [sel] { showDiskUsage(sel[0]); });
+                m.addAction(ic.ui("disk"), i18n("Ver qué ocupa espacio"), this, [sel] { showDiskUsage(sel[0]); });
         } else if (!anyDir) {
             const QString mime = db.mimeTypeForFile(sel[0]).name();
             const AppInfo *def = Apps::get().byId(Apps::get().defaultFor(mime));
-            m.addAction(def ? Icons::get().app(def->icon) : ic.ui("open"), def ? QString::fromUtf8("Abrir con %1").arg(def->name) : "Abrir", this,
+            m.addAction(def ? Icons::get().app(def->icon) : ic.ui("open"), def ? i18n("Abrir con %1").arg(def->name) : i18n("Abrir"), this,
                         [this, sel] { openFiles(sel); });
             m.addMenu(openWithMenu(sel, &m));
             if (hyprland) m.addMenu(workspaceMenu(sel, &m));
             if (QMenu *img = imageMenu(sel, &m)) m.addMenu(img);
         }
         m.addSeparator();
-        m.addAction(ic.ui("cut"), "Cortar", QKeySequence::Cut, this, &Pane::cutSelection);
-        m.addAction(ic.ui("copy"), "Copiar", QKeySequence::Copy, this, &Pane::copySelection);
+        m.addAction(ic.ui("cut"), i18n("Cortar"), QKeySequence::Cut, this, &Pane::cutSelection);
+        m.addAction(ic.ui("copy"), i18n("Copiar"), QKeySequence::Copy, this, &Pane::copySelection);
         if (sel.size() == 1 && allDirs)
-            m.addAction(ic.ui("paste"), "Pegar dentro", this, [sel] {
+            m.addAction(ic.ui("paste"), i18n("Pegar dentro"), this, [sel] {
                 bool cut;
                 QStringList s = FileOps::fromClipboard(&cut);
                 if (s.isEmpty()) return;
                 if (cut) FileOps::get().move(s, sel[0]);
                 else FileOps::get().copy(s, sel[0]);
             })->setEnabled(!FileOps::fromClipboard(nullptr).isEmpty());
-        m.addAction(ic.ui("copy"), "Copiar ruta", this, &Pane::copyPath);
+        m.addAction(ic.ui("copy"), i18n("Copiar ruta"), this, &Pane::copyPath);
         if (isVirtual() && sel.size() == 1) {
             const QString item = sel[0];
-            m.addAction(ic.ui("open"), QString::fromUtf8("Abrir la carpeta que lo contiene"), this,
+            m.addAction(ic.ui("open"), i18n("Abrir la carpeta que lo contiene"), this,
                         [this, item] { setPath(QFileInfo(item).absolutePath(), true, {item}); });
         }
         bool allStarred = true;
         for (const QString &x : sel) allStarred &= Starred::get().contains(x);
-        if (allStarred) m.addAction(ic.ui("star"), "Quitar de destacados", this, [sel] { Starred::get().remove(sel); });
-        else m.addAction(ic.ui("star"), "Destacar", this, [sel] { Starred::get().add(sel); });
+        if (allStarred) m.addAction(ic.ui("star"), i18n("Quitar de destacados"), this, [sel] { Starred::get().remove(sel); });
+        else m.addAction(ic.ui("star"), i18n("Destacar"), this, [sel] { Starred::get().add(sel); });
         m.addSeparator();
         m.addMenu(transferMenu(true, &m));
         m.addMenu(transferMenu(false, &m));
         m.addSeparator();
-        m.addAction(ic.ui("edit"), sel.size() == 1 ? QString::fromUtf8("Renombrar…") : QString::fromUtf8("Renombrar en lote…"), QKeySequence("F2"), this,
+        m.addAction(ic.ui("edit"), sel.size() == 1 ? i18n("Renombrar…") : i18n("Renombrar en lote…"), QKeySequence("F2"), this,
                     &Pane::renameSelected);
-        m.addAction(ic.ui("trash"), "Mover a la papelera", QKeySequence::Delete, this, &Pane::trashSelection);
-        m.addAction(ic.ui("cancel"), "Eliminar definitivamente", QKeySequence("Shift+Del"), this, &Pane::deleteSelection);
+        m.addAction(ic.ui("trash"), i18n("Mover a la papelera"), QKeySequence::Delete, this, &Pane::trashSelection);
+        m.addAction(ic.ui("cancel"), i18n("Eliminar definitivamente"), QKeySequence("Shift+Del"), this, &Pane::deleteSelection);
         m.addSeparator();
         if (!isVirtual()) {   // these create things in the current folder
-            if (archive) m.addAction(ic.ui("open"), QString::fromUtf8("Extraer aquí"), this, &Pane::extractSelection);
-            m.addAction(ic.ui("copy"), QString::fromUtf8("Comprimir…"), this, &Pane::compressSelection);
-            m.addAction(ic.ui("star"), "Crear enlace", this, &Pane::createLink);
+            if (archive) m.addAction(ic.ui("open"), i18n("Extraer aquí"), this, &Pane::extractSelection);
+            m.addAction(ic.ui("copy"), i18n("Comprimir…"), this, &Pane::compressSelection);
+            m.addAction(ic.ui("star"), i18n("Crear enlace"), this, &Pane::createLink);
         }
-        if (sel.size() == 1 && allDirs) m.addAction(ic.ui("star"), QString::fromUtf8("Añadir a marcadores"), this, [this, sel] { emit bookmarkRequested(sel[0]); });
+        if (sel.size() == 1 && allDirs) m.addAction(ic.ui("star"), i18n("Añadir a marcadores"), this, [this, sel] { emit bookmarkRequested(sel[0]); });
         m.addSeparator();
-        m.addAction(ic.ui("info"), "Propiedades", QKeySequence("Alt+Return"), this, [this, sel] { emit propertiesRequested(sel); });
+        m.addAction(ic.ui("info"), i18n("Propiedades"), QKeySequence("Alt+Return"), this, [this, sel] { emit propertiesRequested(sel); });
     } else {
         if (isTrash()) {
-            m.addAction(ic.ui("trash"), "Vaciar papelera", this, [] { FileOps::get().emptyTrash(); });
+            m.addAction(ic.ui("trash"), i18n("Vaciar papelera"), this, [] { FileOps::get().emptyTrash(); });
             m.exec(pos);
             return;
         }
@@ -1698,22 +1699,22 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
         m.addAction(ic.ui("restore"), u.redoText(), QKeySequence("Ctrl+Shift+Z"), &u, &Undo::redo)->setEnabled(u.canRedo());
         m.addSeparator();
         if (!isVirtual()) {
-            m.addAction(ic.ui("newfolder"), "Nueva carpeta", QKeySequence("Ctrl+Shift+N"), this, &Pane::newFolder);
-            m.addAction(ic.ui("edit"), QString::fromUtf8("Nuevo archivo vacío"), this, &Pane::newFile);
-            m.addAction(ic.ui("paste"), "Pegar", QKeySequence::Paste, this, &Pane::paste)->setEnabled(!FileOps::fromClipboard(nullptr).isEmpty());
+            m.addAction(ic.ui("newfolder"), i18n("Nueva carpeta"), QKeySequence("Ctrl+Shift+N"), this, &Pane::newFolder);
+            m.addAction(ic.ui("edit"), i18n("Nuevo archivo vacío"), this, &Pane::newFile);
+            m.addAction(ic.ui("paste"), i18n("Pegar"), QKeySequence::Paste, this, &Pane::paste)->setEnabled(!FileOps::fromClipboard(nullptr).isEmpty());
             m.addSeparator();
-            m.addAction(ic.ui("terminal"), "Abrir terminal aquí", QKeySequence("Shift+F4"), this, &Pane::openTerminal);
-            m.addAction(ic.ui("copy"), "Copiar ruta de la carpeta", this, &Pane::copyPath);
-            if (haveSonata()) m.addAction(ic.ui("play"), "Reproducir la carpeta en Sonata", this, [this] { playInSonata({m_path}); });
-            if (haveDiskPanel()) m.addAction(ic.ui("disk"), QString::fromUtf8("Ver qué ocupa espacio"), this, [this] { showDiskUsage(m_path); });
+            m.addAction(ic.ui("terminal"), i18n("Abrir terminal aquí"), QKeySequence("Shift+F4"), this, &Pane::openTerminal);
+            m.addAction(ic.ui("copy"), i18n("Copiar ruta de la carpeta"), this, &Pane::copyPath);
+            if (haveSonata()) m.addAction(ic.ui("play"), i18n("Reproducir la carpeta en Sonata"), this, [this] { playInSonata({m_path}); });
+            if (haveDiskPanel()) m.addAction(ic.ui("disk"), i18n("Ver qué ocupa espacio"), this, [this] { showDiskUsage(m_path); });
         }
-        m.addAction(QString::fromUtf8("Seleccionar todo"), QKeySequence::SelectAll, this, &Pane::selectAll);
+        m.addAction(i18n("Seleccionar todo"), QKeySequence::SelectAll, this, &Pane::selectAll);
         m.addSeparator();
-        auto *viewMenu = m.addMenu(ic.ui("icons"), "Vista");
-        const char *names[] = {"Iconos", "Compacta", "Lista", "Lista detallada", "Árbol", "Columnas"};
+        auto *viewMenu = m.addMenu(ic.ui("icons"), i18n("Vista"));
+        const char *names[] = {I18N_NOOP("Iconos"), I18N_NOOP("Compacta"), I18N_NOOP("Lista"), I18N_NOOP("Lista detallada"), I18N_NOOP("Árbol"), I18N_NOOP("Columnas")};
         const char *glyphs[] = {"icons", "compact", "list", "details", "tree", "columns"};
         for (int i = 0; i < 6; ++i) {
-            QAction *a = viewMenu->addAction(ic.ui(glyphs[i]), QString::fromUtf8(names[i]), this, [this, i] {
+            QAction *a = viewMenu->addAction(ic.ui(glyphs[i]), i18n(names[i]), this, [this, i] {
                 setViewMode(ViewMode(i));
                 Settings::get().viewMode = ViewMode(i);
                 Settings::get().changed();
@@ -1721,10 +1722,10 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             a->setCheckable(true);
             a->setChecked(int(m_mode) == i);
         }
-        auto *sortMenu = m.addMenu(ic.ui("sort"), "Ordenar por");
-        const char *cols[] = {"Nombre", "Tamaño", "Tipo", "Fecha de modificación", "Permisos", "Propietario"};
+        auto *sortMenu = m.addMenu(ic.ui("sort"), i18n("Ordenar por"));
+        const char *cols[] = {I18N_NOOP("Nombre"), I18N_NOOP("Tamaño"), I18N_NOOP("Tipo"), I18N_NOOP("Fecha de modificación"), I18N_NOOP("Permisos"), I18N_NOOP("Propietario")};
         for (int i = 0; i < 6; ++i) {
-            QAction *a = sortMenu->addAction(QString::fromUtf8(cols[i]), this, [i] {
+            QAction *a = sortMenu->addAction(i18n(cols[i]), this, [i] {
                 Settings::get().sortColumn = i;
                 Settings::get().changed();
             });
@@ -1732,19 +1733,19 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             a->setChecked(Settings::get().sortColumn == i);
         }
         sortMenu->addSeparator();
-        QAction *desc = sortMenu->addAction("Descendente", this, [] {
+        QAction *desc = sortMenu->addAction(i18n("Descendente"), this, [] {
             Settings::get().sortDescending = !Settings::get().sortDescending;
             Settings::get().changed();
         });
         desc->setCheckable(true);
         desc->setChecked(Settings::get().sortDescending);
-        QAction *ff = sortMenu->addAction("Carpetas primero", this, [] {
+        QAction *ff = sortMenu->addAction(i18n("Carpetas primero"), this, [] {
             Settings::get().foldersFirst = !Settings::get().foldersFirst;
             Settings::get().changed();
         });
         ff->setCheckable(true);
         ff->setChecked(Settings::get().foldersFirst);
-        QAction *hid = m.addAction(ic.ui("hidden"), "Mostrar archivos ocultos", QKeySequence("Ctrl+H"), this, [] {
+        QAction *hid = m.addAction(ic.ui("hidden"), i18n("Mostrar archivos ocultos"), QKeySequence("Ctrl+H"), this, [] {
             Settings::get().showHidden = !Settings::get().showHidden;
             Settings::get().changed();
         });
@@ -1752,9 +1753,9 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
         hid->setChecked(Settings::get().showHidden);
         if (!isVirtual()) {
             m.addSeparator();
-            m.addAction(ic.ui("star"), QString::fromUtf8("Añadir carpeta a marcadores"), QKeySequence("Ctrl+D"), this,
+            m.addAction(ic.ui("star"), i18n("Añadir carpeta a marcadores"), QKeySequence("Ctrl+D"), this,
                         [this] { emit bookmarkRequested(m_path); });
-            m.addAction(ic.ui("info"), "Propiedades de la carpeta", this, [this] { emit propertiesRequested({m_path}); });
+            m.addAction(ic.ui("info"), i18n("Propiedades de la carpeta"), this, [this] { emit propertiesRequested({m_path}); });
         }
     }
     m.exec(pos);

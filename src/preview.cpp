@@ -1,4 +1,5 @@
 #include "preview.h"
+#include "i18n.h"
 #include "apps.h"
 #include "fsmodel.h"
 #include "icons.h"
@@ -66,10 +67,10 @@ QString archiveListing(const QString &path)
         for (const QString &l : QString::fromUtf8(p.readAllStandardOutput()).split('\n'))
             if (l.startsWith("Path = ")) names << l.mid(7);
     }
-    if (names.isEmpty()) return QString::fromUtf8("No se puede leer el contenido.");
+    if (names.isEmpty()) return i18n("No se puede leer el contenido.");
     const int total = int(names.size());
-    QString head = total == 1 ? QString::fromUtf8("1 elemento\n\n") : QString::fromUtf8("%1 elementos\n\n").arg(total);
-    if (total > kMax) names = names.mid(0, kMax) << QString::fromUtf8("… y %1 más").arg(total - kMax);
+    QString head = total == 1 ? i18n("1 elemento\n\n") : i18n("%1 elementos\n\n").arg(total);
+    if (total > kMax) names = names.mid(0, kMax) << i18n("… y %1 más").arg(total - kMax);
     return head + names.join('\n');
 }
 
@@ -95,7 +96,7 @@ Preview::Preview(const QString &path, std::function<QString(int)> step, QWidget 
 {
     g_open = this;
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowTitle("Vista previa");
+    setWindowTitle(i18n("Vista previa"));
     auto *v = new QVBoxLayout(this);
     v->setContentsMargins(14, 12, 14, 10);
     v->setSpacing(4);
@@ -136,7 +137,7 @@ Preview::Preview(const QString &path, std::function<QString(int)> step, QWidget 
     m_stack->addWidget(m_rich);
     v->addWidget(m_stack, 1);
 
-    m_hint = new QLabel(QString::fromUtf8("←/→ anterior y siguiente  ·  Intro abrir  ·  Espacio o Esc cerrar"));
+    m_hint = new QLabel(i18n("←/→ anterior y siguiente  ·  Intro abrir  ·  Espacio o Esc cerrar"));
     m_hint->setProperty("role", "dim");
     m_hint->setAlignment(Qt::AlignCenter);
     m_hint->setStyleSheet("font-size: 11px;");
@@ -174,7 +175,7 @@ void Preview::load(const QString &path)
     m_title->setToolTip(path);
     QStringList sub{type.comment()};
     if (fi.isFile()) sub << FsModel::formatSize(fi.size());
-    if (fi.lastModified().isValid()) sub << QString::fromUtf8("modificado ") + FsModel::formatDate(fi.lastModified().toSecsSinceEpoch());
+    if (fi.lastModified().isValid()) sub << i18n("modificado ") + FsModel::formatDate(fi.lastModified().toSecsSinceEpoch());
     m_sub->setText(sub.join(QString::fromUtf8("  ·  ")));
     m_stack->setCurrentIndex(0);
     auto bigIcon = [this](const QIcon &icon) { m_picture->setPixmap(icon.pixmap(QSize(160, 160), devicePixelRatioF())); };
@@ -182,7 +183,7 @@ void Preview::load(const QString &path)
     if (fi.isDir()) {
         bigIcon(Icons::get().forFolder(path));
         offThread<int>(this, &m_request, [path] { return int(QDir(path).entryList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden).size()); },
-                       [this](const int &n) { m_facts->setText(n == 1 ? QString::fromUtf8("1 elemento") : QString::fromUtf8("%1 elementos").arg(n)); });
+                       [this](const int &n) { m_facts->setText(n == 1 ? i18n("1 elemento") : i18n("%1 elementos").arg(n)); });
         return;
     }
     if (m_mime.startsWith("image/") && QImageReader(path).canRead()) {
@@ -230,7 +231,7 @@ void Preview::load(const QString &path)
     if (fi.isFile() && isArchive(type)) {
         // the list of what is inside, without extracting anything
         bigIcon(Icons::get().forMime(m_mime));
-        m_text->setPlainText(QString::fromUtf8("Leyendo el contenido…"));
+        m_text->setPlainText(i18n("Leyendo el contenido…"));
         m_stack->setCurrentIndex(1);
         offThread<QString>(this, &m_request, [path] { return archiveListing(path); }, [this](const QString &t) { m_text->setPlainText(t); });
         return;
@@ -249,7 +250,7 @@ void Preview::load(const QString &path)
             const QByteArray data = f.read(kTextBytes);
             if (!data.contains('\0')) {
                 QString text = QString::fromUtf8(data);
-                if (fi.size() > kTextBytes) text += QString::fromUtf8("\n\n… (solo los primeros 512 KB)");
+                if (fi.size() > kTextBytes) text += i18n("\n\n… (solo los primeros 512 KB)");
                 m_text->setPlainText(text);
                 m_stack->setCurrentIndex(1);
                 return;
@@ -297,11 +298,11 @@ void Preview::renderPdfPage()
         m_pages = r.pages;
         if (r.img.isNull()) {
             m_picture->setPixmap(Icons::get().forMime(m_mime).pixmap(QSize(160, 160), devicePixelRatioF()));
-            m_facts->setText(QString::fromUtf8("No se puede mostrar (¿protegido?)"));
+            m_facts->setText(i18n("No se puede mostrar (¿protegido?)"));
             return;
         }
         showImage(r.img);
-        m_facts->setText(m_pages > 1 ? QString::fromUtf8("Página %1 de %2  ·  RePág/AvPág para pasar").arg(m_page + 1).arg(m_pages) : QString());
+        m_facts->setText(m_pages > 1 ? i18n("Página %1 de %2  ·  RePág/AvPág para pasar").arg(m_page + 1).arg(m_pages) : QString());
     });
 }
 

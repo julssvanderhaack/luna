@@ -44,6 +44,7 @@ public:
     int newTab(const QString &path, bool activate = true);
     // Mounts a sftp:// smb:// … address (asks for it when empty) and opens it
     void connectServer(const QString &uri);
+    QStringList tabPaths() const;   // first pane of every tab, in order
 
 protected:
     void closeEvent(QCloseEvent *e) override;

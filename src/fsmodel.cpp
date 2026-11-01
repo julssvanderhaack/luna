@@ -1,4 +1,5 @@
 #include "fsmodel.h"
+#include "i18n.h"
 #include "icons.h"
 #include "remote.h"
 #include "settings.h"
@@ -283,8 +284,8 @@ bool FsModel::listDirectory(const QString &path, std::vector<FileEntry> &out, QS
     QByteArray p = QFile::encodeName(path);
     int fd = open(p.constData(), O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (fd < 0) {
-        if (err) *err = errno == EACCES ? QString::fromUtf8("No tienes permiso para ver esta carpeta.")
-                                        : QString::fromUtf8("No se puede abrir la carpeta: %1").arg(QString::fromLocal8Bit(strerror(errno)));
+        if (err) *err = errno == EACCES ? i18n("No tienes permiso para ver esta carpeta.")
+                                        : i18n("No se puede abrir la carpeta: %1").arg(QString::fromLocal8Bit(strerror(errno)));
         return false;
     }
     DIR *d = fdopendir(fd);
@@ -330,7 +331,7 @@ QString FsModel::formatSize(qint64 b)
     double v = b;
     int u = 0;
     while (v >= base && u < 5) v /= base, ++u;
-    static const QLocale loc(QLocale::Spanish, QLocale::Spain);
+    static const QLocale loc = I18n::locale();
     QString num = u == 0 ? QString::number(b) : loc.toString(v, 'f', v < 10 ? 1 : 0);
     return num + " " + (iec ? bi[u] : si[u]);
 }
@@ -339,18 +340,18 @@ QString FsModel::formatDate(qint64 secs)
 {
     if (secs <= 0) return {};
     QDateTime dt = QDateTime::fromSecsSinceEpoch(secs);
-    static const QLocale loc(QLocale::Spanish, QLocale::Spain);
+    static const QLocale loc = I18n::locale();
     switch (Settings::get().dateFormat) {
-    case 1: return loc.toString(dt, "d MMM yyyy, HH:mm");
+    case 1: return loc.toString(dt, i18n("d MMM yyyy, HH:mm"));
     case 2: return dt.toString("yyyy-MM-dd HH:mm");
     default: break;
     }
     const QDate today = QDate::currentDate(), d = dt.date();
-    if (d == today) return QString::fromUtf8("hoy, ") + dt.toString("HH:mm");
-    if (d == today.addDays(-1)) return QString::fromUtf8("ayer, ") + dt.toString("HH:mm");
-    if (d.daysTo(today) < 7 && d < today) return loc.toString(dt, "dddd, HH:mm");
-    if (d.year() == today.year()) return loc.toString(dt, "d MMM");
-    return loc.toString(dt, "d MMM yyyy");
+    if (d == today) return i18n("hoy, ") + dt.toString(i18n("HH:mm"));
+    if (d == today.addDays(-1)) return i18n("ayer, ") + dt.toString(i18n("HH:mm"));
+    if (d.daysTo(today) < 7 && d < today) return loc.toString(dt, i18n("dddd, HH:mm"));
+    if (d.year() == today.year()) return loc.toString(dt, i18n("d MMM"));
+    return loc.toString(dt, i18n("d MMM yyyy"));
 }
 
 QString FsModel::permString(quint32 m, bool isDir, bool isLink)
@@ -392,7 +393,7 @@ QString FsModel::mimeComment(const QString &mime)
     static QHash<QString, QString> cache;
     auto it = cache.find(mime);
     if (it != cache.end()) return *it;
-    QString c = mime == "inode/directory" ? QString::fromUtf8("Carpeta") : QMimeDatabase().mimeTypeForName(mime).comment();
+    QString c = mime == "inode/directory" ? i18n("Carpeta") : QMimeDatabase().mimeTypeForName(mime).comment();
     if (c.isEmpty()) c = mime;
     cache.insert(mime, c);
     return c;
@@ -417,7 +418,7 @@ void FsModel::renumber(Node *n, int from)
 QCollator &FsModel::collator()
 {
     static QCollator c = [] {
-        QCollator c(QLocale(QLocale::Spanish, QLocale::Spain));
+        QCollator c(I18n::locale());
         c.setNumericMode(true);
         c.setCaseSensitivity(Qt::CaseInsensitive);
         c.setIgnorePunctuation(false);
@@ -1047,7 +1048,7 @@ QVariant FsModel::data(const QModelIndex &idx, int role) const
         switch (idx.column()) {
         case Name: return e.name;
         case Size:
-            if (e.isDir) return e.size < 0 ? QString() : e.size == 1 ? QString::fromUtf8("1 elemento") : QString::fromUtf8("%1 elementos").arg(e.size);
+            if (e.isDir) return e.size < 0 ? QString() : e.size == 1 ? i18n("1 elemento") : i18n("%1 elementos").arg(e.size);
             return formatSize(e.size);
         case Type:
             if (m_searchMode) {
@@ -1121,17 +1122,17 @@ bool FsModel::setData(const QModelIndex &idx, const QVariant &value, int role)
     QString newName = value.toString().trimmed();
     if (newName.isEmpty() || newName == n->e.name) return false;
     if (newName.contains('/')) {
-        emit errorOccurred(QString::fromUtf8("El nombre no puede contener «/»."));
+        emit errorOccurred(i18n("El nombre no puede contener «/»."));
         return false;
     }
     const QString oldPath = pathOf(n);
     const QString newPath = QFileInfo(oldPath).path() + '/' + newName;
     if (QFileInfo::exists(newPath)) {
-        emit errorOccurred(QString::fromUtf8("Ya existe «%1».").arg(newName));
+        emit errorOccurred(i18n("Ya existe «%1».").arg(newName));
         return false;
     }
     if (::rename(QFile::encodeName(oldPath).constData(), QFile::encodeName(newPath).constData()) != 0) {
-        emit errorOccurred(QString::fromUtf8("No se pudo renombrar: %1").arg(QString::fromLocal8Bit(strerror(errno))));
+        emit errorOccurred(i18n("No se pudo renombrar: %1").arg(QString::fromLocal8Bit(strerror(errno))));
         return false;
     }
     Undo::get().record(Undo::Rename, {{oldPath, newPath}});
@@ -1153,12 +1154,12 @@ QVariant FsModel::headerData(int section, Qt::Orientation o, int role) const
 {
     if (o != Qt::Horizontal || role != Qt::DisplayRole) return {};
     switch (section) {
-    case Name: return QString::fromUtf8("Nombre");
-    case Size: return QString::fromUtf8("Tamaño");
-    case Type: return m_searchMode ? QString::fromUtf8("Ubicación") : QString::fromUtf8("Tipo");
-    case Modified: return QString::fromUtf8("Modificado");
-    case Permissions: return QString::fromUtf8("Permisos");
-    case Owner: return QString::fromUtf8("Propietario");
+    case Name: return i18n("Nombre");
+    case Size: return i18n("Tamaño");
+    case Type: return m_searchMode ? i18n("Ubicación") : i18n("Tipo");
+    case Modified: return i18n("Modificado");
+    case Permissions: return i18n("Permisos");
+    case Owner: return i18n("Propietario");
     }
     return {};
 }

@@ -1,4 +1,5 @@
 #include "sidebar.h"
+#include "i18n.h"
 #include "discovery.h"
 #include "fileops.h"
 #include "icons.h"
@@ -217,24 +218,24 @@ void Sidebar::reload()
         return it;
     };
     if (s.showPlaces) {
-        m_places = section(QString::fromUtf8("Lugares"));
+        m_places = section(i18n("Lugares"));
         const QString home = QDir::homePath();
-        item(m_places, QString::fromUtf8("Carpeta personal"), home, Icons::get().sidebar("home"), Place);
+        item(m_places, i18n("Carpeta personal"), home, Icons::get().sidebar("home"), Place);
         struct P { QStandardPaths::StandardLocation l; const char *name, *kind; };
-        for (P p : {P{QStandardPaths::DesktopLocation, "Escritorio", "desktop"}, P{QStandardPaths::DocumentsLocation, "Documentos", "documents"},
-                    P{QStandardPaths::DownloadLocation, "Descargas", "downloads"}, P{QStandardPaths::MusicLocation, "Música", "music"},
-                    P{QStandardPaths::PicturesLocation, "Imágenes", "pictures"}, P{QStandardPaths::MoviesLocation, "Vídeos", "videos"}}) {
+        for (P p : {P{QStandardPaths::DesktopLocation, I18N_NOOP("Escritorio"), "desktop"}, P{QStandardPaths::DocumentsLocation, I18N_NOOP("Documentos"), "documents"},
+                    P{QStandardPaths::DownloadLocation, I18N_NOOP("Descargas"), "downloads"}, P{QStandardPaths::MusicLocation, I18N_NOOP("Música"), "music"},
+                    P{QStandardPaths::PicturesLocation, I18N_NOOP("Imágenes"), "pictures"}, P{QStandardPaths::MoviesLocation, I18N_NOOP("Vídeos"), "videos"}}) {
             QString path = QStandardPaths::writableLocation(p.l);
             if (path.isEmpty() || path == home || !QFileInfo(path).isDir()) continue;
-            item(m_places, QString::fromUtf8(p.name), path, Icons::get().sidebar(p.kind), Place);
+            item(m_places, i18n(p.name), path, Icons::get().sidebar(p.kind), Place);
         }
-        item(m_places, QString::fromUtf8("Recientes"), Places::recent, Icons::get().sidebar("recent"), Place);
-        item(m_places, QString::fromUtf8("Destacados"), Places::starred, Icons::get().sidebar("starred"), Place);
+        item(m_places, i18n("Recientes"), Places::recent, Icons::get().sidebar("recent"), Place);
+        item(m_places, i18n("Destacados"), Places::starred, Icons::get().sidebar("starred"), Place);
         const bool full = !QDir(FileOps::trashFiles()).isEmpty(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
-        item(m_places, QString::fromUtf8("Papelera"), FileOps::trashFiles(), Icons::get().sidebar(full ? "trash-full" : "trash"), Place);
+        item(m_places, i18n("Papelera"), FileOps::trashFiles(), Icons::get().sidebar(full ? "trash-full" : "trash"), Place);
     }
     if (s.showBookmarks) {
-        m_bookmarks = section(QString::fromUtf8("Marcadores"));
+        m_bookmarks = section(i18n("Marcadores"));
         QSet<QString> places;
         if (m_places)
             for (int k = 0; k < m_places->childCount(); ++k) places.insert(m_places->child(k)->data(0, PathRole).toString());
@@ -253,17 +254,17 @@ void Sidebar::reload()
         }
     }
     if (s.showDevices) {
-        m_devices = section(QString::fromUtf8("Dispositivos"));
+        m_devices = section(i18n("Dispositivos"));
         loadDevices();
     }
-    m_network = section(QString::fromUtf8("Red"));
+    m_network = section(i18n("Red"));
     for (const Remote::Mount &mt : Remote::get().mounts()) {
         auto *it = item(m_network, mt.label, mt.localPath, Icons::get().sidebar("network"), Device);
         it->setData(0, UriRole, mt.uri);
         it->setData(0, MountedRole, true);
         it->setToolTip(0, mt.uri);
     }
-    auto *conn = item(m_network, QString::fromUtf8("Conectar a un servidor…"), QString(), Icons::get().sidebar("add"), Place);
+    auto *conn = item(m_network, i18n("Conectar a un servidor…"), QString(), Icons::get().sidebar("add"), Place);
     conn->setData(0, UriRole, QString("connect:"));
     fillDiscovered();
     expandAll();
@@ -285,7 +286,7 @@ void Sidebar::fillDiscovered()
         it->setIcon(0, Icons::get().sidebar(s.luna ? "phone" : "network"));
         it->setData(0, KindRole, Place);
         it->setData(0, UriRole, uri);
-        it->setToolTip(0, s.luna ? QString::fromUtf8("Luna Android en %1 (SFTP)").arg(uri) : uri);
+        it->setToolTip(0, s.luna ? i18n("Luna Android en %1 (SFTP)").arg(uri) : uri);
         it->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         m_network->insertChild(at++, it);
         m_found << it;
@@ -309,9 +310,9 @@ void Sidebar::loadDevices()
     auto usageOf = [](const QStorageInfo &si) { return si.bytesTotal() > 0 ? 1.0 - double(si.bytesAvailable()) / si.bytesTotal() : -1.0; };
     auto freeText = [](const QStorageInfo &si) {
         auto gb = [](qint64 b) { return QString::number(b / 1e9, 'f', 1) + " GB"; };
-        return QString::fromUtf8("%1 libres de %2").arg(gb(si.bytesAvailable()), gb(si.bytesTotal()));
+        return i18n("%1 libres de %2").arg(gb(si.bytesAvailable()), gb(si.bytesTotal()));
     };
-    addDev(QString::fromUtf8("Sistema de archivos"), "/", {}, false, usageOf(root), freeText(root));
+    addDev(i18n("Sistema de archivos"), "/", {}, false, usageOf(root), freeText(root));
     QSet<QString> mountedDevs;
     for (const QStorageInfo &si : QStorageInfo::mountedVolumes()) {
         const QString mp = si.rootPath();
@@ -341,8 +342,8 @@ void Sidebar::loadDevices()
                 if (o["type"].toString() != "part" && o["type"].toString() != "disk") continue;
                 QString label = o["label"].toString();
                 double gb = o["size"].toDouble() / 1e9;
-                if (label.isEmpty()) label = QString::fromUtf8("Volumen de %1 GB").arg(gb, 0, 'f', 1);
-                addDev(label, {}, dev, true, -1, QString::fromUtf8("%1 · sin montar (clic para montar)").arg(dev));
+                if (label.isEmpty()) label = i18n("Volumen de %1 GB").arg(gb, 0, 'f', 1);
+                addDev(label, {}, dev, true, -1, i18n("%1 · sin montar (clic para montar)").arg(dev));
             }
         };
         walk(QJsonDocument::fromJson(p->readAllStandardOutput()).object()["blockdevices"].toArray());
@@ -402,16 +403,16 @@ void Sidebar::contextMenuEvent(QContextMenuEvent *e)
     if (it && it->data(0, KindRole).toInt() != Header) {
         const QString path = it->data(0, PathRole).toString();
         if (!path.isEmpty()) {
-            m.addAction(Icons::get().ui("open"), "Abrir", this, [this, path] { emit open(path); });
-            m.addAction(Icons::get().ui("newtab"), QString::fromUtf8("Abrir en pestaña nueva"), this, [this, path] { emit openInNewTab(path); });
-            m.addAction(Icons::get().ui("split"), "Abrir en el otro panel", this, [this, path] { emit openInOtherPane(path); });
+            m.addAction(Icons::get().ui("open"), i18n("Abrir"), this, [this, path] { emit open(path); });
+            m.addAction(Icons::get().ui("newtab"), i18n("Abrir en pestaña nueva"), this, [this, path] { emit openInNewTab(path); });
+            m.addAction(Icons::get().ui("split"), i18n("Abrir en el otro panel"), this, [this, path] { emit openInOtherPane(path); });
         }
         if (it->data(0, KindRole).toInt() == BookmarkItem) {
             const QString path = it->data(0, UriRole).toString().isEmpty() ? it->data(0, PathRole).toString() : it->data(0, UriRole).toString();
             m.addSeparator();
-            m.addAction(Icons::get().ui("edit"), "Renombrar marcador…", this, [this, it, path] {
+            m.addAction(Icons::get().ui("edit"), i18n("Renombrar marcador…"), this, [this, it, path] {
                 bool ok;
-                QString t = QInputDialog::getText(this, "Renombrar marcador", "Nombre:", QLineEdit::Normal, it->text(0), &ok);
+                QString t = QInputDialog::getText(this, i18n("Renombrar marcador"), i18n("Nombre:"), QLineEdit::Normal, it->text(0), &ok);
                 if (!ok) return;
                 auto b = readBookmarks();
                 for (auto &x : b)
@@ -419,7 +420,7 @@ void Sidebar::contextMenuEvent(QContextMenuEvent *e)
                 writeBookmarks(b);
                 reload();
             });
-            m.addAction(Icons::get().ui("close"), "Quitar marcador", this, [this, path] {
+            m.addAction(Icons::get().ui("close"), i18n("Quitar marcador"), this, [this, path] {
                 auto b = readBookmarks();
                 b.erase(std::remove_if(b.begin(), b.end(), [&](const Bookmark &x) { return x.path == path; }), b.end());
                 writeBookmarks(b);
@@ -429,12 +430,12 @@ void Sidebar::contextMenuEvent(QContextMenuEvent *e)
         if (it->data(0, MountedRole).toBool() && !it->data(0, UriRole).toString().isEmpty()) {
             const QString uri = it->data(0, UriRole).toString();
             m.addSeparator();
-            m.addAction(Icons::get().ui("eject"), "Desconectar", this, [this, uri] { Remote::get().unmount(uri, this); });
-            m.addAction(Icons::get().ui("star"), QString::fromUtf8("Añadir a marcadores"), this, [this, uri] { addBookmark(uri); });
+            m.addAction(Icons::get().ui("eject"), i18n("Desconectar"), this, [this, uri] { Remote::get().unmount(uri, this); });
+            m.addAction(Icons::get().ui("star"), i18n("Añadir a marcadores"), this, [this, uri] { addBookmark(uri); });
         } else if (it->data(0, MountedRole).toBool()) {
             const QString dev = it->data(0, DeviceRole).toString();
             m.addSeparator();
-            m.addAction(Icons::get().ui("eject"), "Expulsar", this, [this, dev] {
+            m.addAction(Icons::get().ui("eject"), i18n("Expulsar"), this, [this, dev] {
                 if (QProcess::execute("udisksctl", {"unmount", "-b", dev, "--no-user-interaction"}) == 0)
                     QProcess::startDetached("udisksctl", {"power-off", "-b", dev, "--no-user-interaction"});
                 reload();
@@ -442,22 +443,22 @@ void Sidebar::contextMenuEvent(QContextMenuEvent *e)
         }
         if (path == FileOps::trashFiles()) {
             m.addSeparator();
-            m.addAction(Icons::get().ui("trash"), "Vaciar papelera", this, [] { FileOps::get().emptyTrash(); });
+            m.addAction(Icons::get().ui("trash"), i18n("Vaciar papelera"), this, [] { FileOps::get().emptyTrash(); });
         }
     }
     m.addSeparator();
-    m.addAction(QString::fromUtf8("Mostrar lugares"), this, [] {
+    m.addAction(i18n("Mostrar lugares"), this, [] {
         Settings::get().showPlaces = !Settings::get().showPlaces;
         Settings::get().changed();
     })->setCheckable(true);
     m.actions().last()->setChecked(Settings::get().showPlaces);
-    auto *ab = m.addAction(QString::fromUtf8("Mostrar marcadores"), this, [] {
+    auto *ab = m.addAction(i18n("Mostrar marcadores"), this, [] {
         Settings::get().showBookmarks = !Settings::get().showBookmarks;
         Settings::get().changed();
     });
     ab->setCheckable(true);
     ab->setChecked(Settings::get().showBookmarks);
-    auto *ad = m.addAction(QString::fromUtf8("Mostrar dispositivos"), this, [] {
+    auto *ad = m.addAction(i18n("Mostrar dispositivos"), this, [] {
         Settings::get().showDevices = !Settings::get().showDevices;
         Settings::get().changed();
     });

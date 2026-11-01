@@ -1,4 +1,5 @@
 #include "places.h"
+#include "i18n.h"
 #include "fileops.h"
 #include <QDateTime>
 #include <QDir>
@@ -20,10 +21,10 @@ bool Places::isVirtual(const QString &path) { return path == recent || path == s
 
 QString Places::displayName(const QString &path)
 {
-    if (path == recent) return QString::fromUtf8("Recientes");
-    if (path == starred) return QString::fromUtf8("Destacados");
-    if (path == FileOps::trashFiles()) return QString::fromUtf8("Papelera");
-    if (path == QDir::homePath()) return QString::fromUtf8("Carpeta personal");
+    if (path == recent) return i18n("Recientes");
+    if (path == starred) return i18n("Destacados");
+    if (path == FileOps::trashFiles()) return i18n("Papelera");
+    if (path == QDir::homePath()) return i18n("Carpeta personal");
     const QString n = QFileInfo(path).fileName();
     return n.isEmpty() ? QStringLiteral("/") : n;
 }

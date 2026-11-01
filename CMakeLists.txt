@@ -43,6 +43,7 @@ add_executable(luna
   src/jump.h src/jump.cpp
   src/discovery.h src/discovery.cpp
   src/mainwindow.h src/mainwindow.cpp
+  src/i18n.h src/i18n.cpp
   data/luna.qrc
 )
 target_link_libraries(luna PRIVATE Qt6::Widgets Qt6::Svg PkgConfig::MEDIA)

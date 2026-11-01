@@ -1,4 +1,5 @@
 #include "remote.h"
+#include "i18n.h"
 #include "icons.h"
 #include "settings.h"
 #include <QCheckBox>
@@ -154,13 +155,13 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
     if (!uri.contains("://")) uri = "sftp://" + uri;
     QUrl url(uri);
     if (!url.isValid() || url.host().isEmpty()) {
-        QMessageBox::warning(parent, "Conectar", QString::fromUtf8("La dirección «%1» no es válida.").arg(uri0));
+        QMessageBox::warning(parent, i18n("Conectar"), i18n("La dirección «%1» no es válida.").arg(uri0));
         done({});
         return;
     }
     if (!ensureFuse()) {
-        QMessageBox::warning(parent, "Conectar",
-                             QString::fromUtf8("No se pudo poner en marcha gvfsd-fuse, el puente de GVFS que Luna usa para abrir "
+        QMessageBox::warning(parent, i18n("Conectar"),
+                             i18n("No se pudo poner en marcha gvfsd-fuse, el puente de GVFS que Luna usa para abrir "
                                                "carpetas remotas en %1.").arg(gvfsRoot()));
         done({});
         return;
@@ -189,19 +190,19 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
         const QString b = buffer->trimmed();
         if (b.endsWith("User:")) {
             bool ok;
-            QString u = QInputDialog::getText(owner, "Conectar", QString::fromUtf8("Usuario para %1:").arg(url.host()), QLineEdit::Normal,
+            QString u = QInputDialog::getText(owner, i18n("Conectar"), i18n("Usuario para %1:").arg(url.host()), QLineEdit::Normal,
                                               qEnvironmentVariable("USER"), &ok);
             if (!ok) proc->kill();
             else answer(u);
         } else if (b.endsWith("Domain:")) {
             bool ok;
-            QString dmn = QInputDialog::getText(owner, "Conectar", "Dominio (grupo de trabajo):", QLineEdit::Normal, "WORKGROUP", &ok);
+            QString dmn = QInputDialog::getText(owner, i18n("Conectar"), i18n("Dominio (grupo de trabajo):"), QLineEdit::Normal, "WORKGROUP", &ok);
             if (!ok) proc->kill();
             else answer(dmn);
         } else if (b.endsWith("Password:")) {
             bool ok;
-            QString pw = QInputDialog::getText(owner, "Conectar",
-                                               QString::fromUtf8("Contraseña de %1:").arg(url.userName().isEmpty() ? url.host() : url.userName() + "@" + url.host()),
+            QString pw = QInputDialog::getText(owner, i18n("Conectar"),
+                                               i18n("Contraseña de %1:").arg(url.userName().isEmpty() ? url.host() : url.userName() + "@" + url.host()),
                                                QLineEdit::Password, {}, &ok);
             if (!ok) proc->kill();
             else answer(pw);
@@ -217,13 +218,13 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
                 else if (!l.trimmed().endsWith("Choice:")) text += l + "\n";
             }
             QMessageBox box(owner);
-            box.setWindowTitle("Conectar");
-            box.setText(text.trimmed().isEmpty() ? QString::fromUtf8("El servidor hace una pregunta:") : text.trimmed());
+            box.setWindowTitle(i18n("Conectar"));
+            box.setText(text.trimmed().isEmpty() ? i18n("El servidor hace una pregunta:") : text.trimmed());
             QList<QAbstractButton *> buttons;
             for (const QString &c : choices) {
                 QString label = c;
-                if (c == "Log In Anyway") label = QString::fromUtf8("Conectar de todos modos");
-                else if (c == "Cancel Login" || c == "Cancel") label = "Cancelar";
+                if (c == "Log In Anyway") label = i18n("Conectar de todos modos");
+                else if (c == "Cancel Login" || c == "Cancel") label = i18n("Cancelar");
                 buttons << box.addButton(label, QMessageBox::AcceptRole);
             }
             box.exec();
@@ -238,8 +239,8 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
         static const QRegularExpression alreadyRe(QString::fromUtf8("already mounted|ya está montad"), QRegularExpression::CaseInsensitiveOption);
         if (code != 0 && !out.contains(alreadyRe)) {
             QString msg = out.section('\n', -1).trimmed().section(": ", -1);
-            if (msg.isEmpty()) msg = QString::fromUtf8("No se pudo conectar.");
-            QMessageBox::warning(owner, "Conectar", QString::fromUtf8("No se pudo conectar con %1:\n%2").arg(url.host(), msg));
+            if (msg.isEmpty()) msg = i18n("No se pudo conectar.");
+            QMessageBox::warning(owner, i18n("Conectar"), i18n("No se pudo conectar con %1:\n%2").arg(url.host(), msg));
             done({});
             return;
         }
@@ -247,8 +248,8 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
         emit mountsChanged();
         const QString path = localPathFor(uri);
         if (path.isEmpty() || !QFileInfo(path).exists()) {
-            QMessageBox::warning(owner, "Conectar",
-                                 QString::fromUtf8("Se ha conectado con %1, pero su carpeta no aparece en %2.").arg(url.host(), gvfsRoot()));
+            QMessageBox::warning(owner, i18n("Conectar"),
+                                 i18n("Se ha conectado con %1, pero su carpeta no aparece en %2.").arg(url.host(), gvfsRoot()));
             done({});
             return;
         }
@@ -262,7 +263,7 @@ void Remote::unmount(const QString &uri, QWidget *parent)
     auto *p = new QProcess(parent);
     connect(p, &QProcess::finished, p, [this, p, parent](int code) {
         p->deleteLater();
-        if (code != 0) QMessageBox::warning(parent, "Desconectar", QString::fromUtf8("No se pudo desconectar:\n") + QString::fromUtf8(p->readAllStandardError()).trimmed());
+        if (code != 0) QMessageBox::warning(parent, i18n("Desconectar"), i18n("No se pudo desconectar:\n") + QString::fromUtf8(p->readAllStandardError()).trimmed());
         emit mountsChanged();
     });
     p->start("gio", {"mount", "-u", uri});
@@ -271,42 +272,42 @@ void Remote::unmount(const QString &uri, QWidget *parent)
 // ----------------------------------------------------------- ConnectDialog
 ConnectDialog::ConnectDialog(QWidget *parent) : QDialog(parent)
 {
-    setWindowTitle("Conectar con un servidor");
+    setWindowTitle(i18n("Conectar con un servidor"));
     resize(480, 480);
     auto *v = new QVBoxLayout(this);
     auto *form = new QFormLayout;
     m_proto = new QComboBox;
     m_proto->addItem("SSH / SFTP", "sftp");
     m_proto->addItem("FTP", "ftp");
-    m_proto->addItem("FTPS (FTP con TLS)", "ftps");
-    m_proto->addItem("Carpeta compartida de Windows (SMB)", "smb");
+    m_proto->addItem(i18n("FTPS (FTP con TLS)"), "ftps");
+    m_proto->addItem(i18n("Carpeta compartida de Windows (SMB)"), "smb");
     m_proto->addItem("NFS", "nfs");
-    form->addRow("Tipo:", m_proto);
+    form->addRow(i18n("Tipo:"), m_proto);
     m_host = new QLineEdit;
-    m_host->setPlaceholderText("servidor.ejemplo.com o 192.168.1.10");
-    form->addRow("Servidor:", m_host);
+    m_host->setPlaceholderText(i18n("servidor.ejemplo.com o 192.168.1.10"));
+    form->addRow(i18n("Servidor:"), m_host);
     m_port = new QSpinBox;
     m_port->setRange(0, 65535);
-    m_port->setSpecialValueText("predeterminado");
-    form->addRow("Puerto:", m_port);
+    m_port->setSpecialValueText(i18n("predeterminado"));
+    form->addRow(i18n("Puerto:"), m_port);
     m_share = new QLineEdit;
-    m_share->setPlaceholderText("nombre del recurso compartido");
-    form->addRow("Recurso:", m_share);
+    m_share->setPlaceholderText(i18n("nombre del recurso compartido"));
+    form->addRow(i18n("Recurso:"), m_share);
     m_user = new QLineEdit;
     m_user->setPlaceholderText(qEnvironmentVariable("USER"));
-    form->addRow("Usuario:", m_user);
-    m_anon = new QCheckBox(QString::fromUtf8("Acceso anónimo"));
+    form->addRow(i18n("Usuario:"), m_user);
+    m_anon = new QCheckBox(i18n("Acceso anónimo"));
     form->addRow("", m_anon);
     m_folder = new QLineEdit;
-    m_folder->setPlaceholderText("/ (opcional)");
-    form->addRow("Carpeta:", m_folder);
+    m_folder->setPlaceholderText(i18n("/ (opcional)"));
+    form->addRow(i18n("Carpeta:"), m_folder);
     v->addLayout(form);
-    auto *note = new QLabel(QString::fromUtf8("La contraseña se pide al conectar. También puedes escribir la dirección "
+    auto *note = new QLabel(i18n("La contraseña se pide al conectar. También puedes escribir la dirección "
                                               "directamente en la barra de ruta: sftp://usuario@servidor/carpeta"));
     note->setProperty("role", "dim");
     note->setWordWrap(true);
     v->addWidget(note);
-    v->addWidget(new QLabel("<b>Recientes</b>"));
+    v->addWidget(new QLabel(i18n("<b>Recientes</b>")));
     m_recent = new QListWidget;
     for (const QString &r : Remote::get().recent()) {
         auto *it = new QListWidgetItem(Icons::get().place("network"), r);
@@ -314,8 +315,8 @@ ConnectDialog::ConnectDialog(QWidget *parent) : QDialog(parent)
     }
     v->addWidget(m_recent, 1);
     auto *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    bb->button(QDialogButtonBox::Ok)->setText("Conectar");
-    bb->button(QDialogButtonBox::Cancel)->setText("Cancelar");
+    bb->button(QDialogButtonBox::Ok)->setText(i18n("Conectar"));
+    bb->button(QDialogButtonBox::Cancel)->setText(i18n("Cancelar"));
     v->addWidget(bb);
     connect(bb, &QDialogButtonBox::accepted, this, [this] {
         if (!m_host->text().trimmed().isEmpty()) accept();

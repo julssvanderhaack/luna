@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
     <file>luna.svg</file>
+    <file alias="i18n/luna_en_US.ts">../i18n/luna_en_US.ts</file>
   </qresource>
 </RCC>

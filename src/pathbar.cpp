@@ -1,4 +1,5 @@
 #include "pathbar.h"
+#include "i18n.h"
 #include "places.h"
 #include "fileops.h"
 #include "icons.h"
@@ -39,7 +40,7 @@ PathBar::PathBar(QWidget *parent) : QWidget(parent)
     m_stack->addWidget(m_crumbs);
     m_edit = new QLineEdit;
     m_edit->installEventFilter(this);
-    m_edit->setPlaceholderText(QString::fromUtf8("Ruta o dirección (sftp://usuario@servidor, smb://, ftp://)"));
+    m_edit->setPlaceholderText(i18n("Ruta o dirección (sftp://usuario@servidor, smb://, ftp://)"));
     auto *fsm = new QFileSystemModel(this);
     fsm->setFilter(QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden);
     fsm->setRootPath("/");
@@ -51,7 +52,7 @@ PathBar::PathBar(QWidget *parent) : QWidget(parent)
 
     m_connect = new QToolButton;
     m_connect->setIcon(Icons::get().ui("network"));
-    m_connect->setToolTip(QString::fromUtf8("Conectar a un servidor (SSH, FTP, SMB…)"));
+    m_connect->setToolTip(i18n("Conectar a un servidor (SSH, FTP, SMB…)"));
     m_connect->setAutoRaise(true);
     m_connect->setFocusPolicy(Qt::NoFocus);
     connect(m_connect, &QToolButton::clicked, this, [this] { emit connectRequested({}); });
@@ -76,7 +77,7 @@ void PathBar::setTextMode(bool text)
 {
     m_textMode = text;
     m_toggle->setIcon(Icons::get().ui(text ? "crumbs" : "edit"));
-    m_toggle->setToolTip(text ? QString::fromUtf8("Mostrar la ruta como botones") : QString::fromUtf8("Escribir la ruta (Ctrl+L)"));
+    m_toggle->setToolTip(text ? i18n("Mostrar la ruta como botones") : i18n("Escribir la ruta (Ctrl+L)"));
     m_edit->setText(m_path);
     m_stack->setCurrentWidget(text ? static_cast<QWidget *>(m_edit) : m_crumbs);
     setCursor(text ? Qt::IBeamCursor : Qt::ArrowCursor);
@@ -186,7 +187,7 @@ void PathBar::rebuild()
     if (Places::isVirtual(m_path)) {
         crumbs << Crumb{Places::displayName(m_path), m_path, Icons::get().place(m_path == Places::recent ? "recent" : "starred")};
     } else if (m_path == FileOps::trashFiles() || m_path.startsWith(FileOps::trashFiles() + '/')) {
-        crumbs << Crumb{QString::fromUtf8("Papelera"), FileOps::trashFiles(), Icons::get().place("trash")};
+        crumbs << Crumb{i18n("Papelera"), FileOps::trashFiles(), Icons::get().place("trash")};
         tail(FileOps::trashFiles(), m_path.mid(FileOps::trashFiles().size()));
     } else if (Remote::isRemotePath(m_path)) {
         const QString rel = m_path.mid(Remote::gvfsRoot().size() + 1);
@@ -195,7 +196,7 @@ void PathBar::rebuild()
         crumbs << Crumb{Remote::describe(mount), base, Icons::get().place("network")};
         tail(base, rel.mid(mount.size()));
     } else if (m_path == home || m_path.startsWith(home + '/')) {
-        crumbs << Crumb{QString::fromUtf8("Carpeta personal"), home, Icons::get().place("home")};
+        crumbs << Crumb{i18n("Carpeta personal"), home, Icons::get().place("home")};
         tail(home, m_path.mid(home.size()));
     } else {
         crumbs << Crumb{QString(), "/", Icons::get().place("root")};

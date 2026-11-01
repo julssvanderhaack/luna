@@ -1,4 +1,5 @@
 #include "fsmodel.h"
+#include "i18n.h"
 #include "icons.h"
 #include "thumbs.h"
 #include <QThreadPool>
@@ -85,6 +86,7 @@ int main(int argc, char **argv)
     QPixmapCache::setCacheLimit(64 * 1024);
 
     Settings::get().load();   // first: the theme takes the accent colour from it
+    I18n::install(Settings::get().language);   // before any text is built
     Theme &th = Theme::get();
     th.load();
     Icons::get().reload();
@@ -437,8 +439,10 @@ int main(int argc, char **argv)
             s->show();
             QTimer::singleShot(500, s, [=] {
                 shot(s, "9-ajustes");
-                s->showPage("Comportamiento");
+                s->showPage(i18n("Comportamiento"));
                 shot(s, "9b-comportamiento");
+                s->showPage(i18n("Apariencia"));
+                shot(s, "9c-apariencia");
                 s->close();
                 auto *c = new ConnectDialog(w);
                 c->show();

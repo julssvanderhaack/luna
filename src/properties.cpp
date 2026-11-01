@@ -1,4 +1,5 @@
 #include "properties.h"
+#include "i18n.h"
 #include "apps.h"
 #include "fileops.h"
 #include "fsmodel.h"
@@ -72,8 +73,8 @@ QString fmtBitrate(double bps)
 
 QString dateOf(const QDateTime &d)
 {
-    if (!d.isValid()) return QString::fromUtf8("desconocida");
-    return QLocale(QLocale::Spanish, QLocale::Spain).toString(d, "dddd, d 'de' MMMM 'de' yyyy, HH:mm:ss");
+    if (!d.isValid()) return i18n("desconocida");
+    return I18n::locale().toString(d, i18n("dddd, d 'de' MMMM 'de' yyyy, HH:mm:ss"));
 }
 
 using Section = QList<QPair<QString, QString>>;
@@ -90,55 +91,55 @@ Sections mediaSections(const QString &path)
     MediaInfoLib::MediaInfo m;
     if (m.Open(path.toStdWString()) == 0) return out;
     using namespace MediaInfoLib;
-    auto add = [](Section &s, const char *label, const QString &v) {
-        if (!v.isEmpty()) s << qMakePair(QString::fromUtf8(label), v);
+    auto add = [](Section &s, const QString &label, const QString &v) {
+        if (!v.isEmpty()) s << qMakePair(label, v);
     };
     Section g;
-    add(g, "Título", mi(m, Stream_General, 0, L"Title"));
-    add(g, "Artista", mi(m, Stream_General, 0, L"Performer"));
-    add(g, "Álbum", mi(m, Stream_General, 0, L"Album"));
-    add(g, "Artista del álbum", mi(m, Stream_General, 0, L"Album/Performer"));
+    add(g, i18n("Título"), mi(m, Stream_General, 0, L"Title"));
+    add(g, i18n("Artista"), mi(m, Stream_General, 0, L"Performer"));
+    add(g, i18n("Álbum"), mi(m, Stream_General, 0, L"Album"));
+    add(g, i18n("Artista del álbum"), mi(m, Stream_General, 0, L"Album/Performer"));
     QString track = mi(m, Stream_General, 0, L"Track/Position");
-    if (!track.isEmpty() && !mi(m, Stream_General, 0, L"Track/Position_Total").isEmpty()) track += " de " + mi(m, Stream_General, 0, L"Track/Position_Total");
-    add(g, "Pista", track);
-    add(g, "Género", mi(m, Stream_General, 0, L"Genre"));
-    if (m.Count_Get(Stream_Image) == 0) add(g, "Año", mi(m, Stream_General, 0, L"Recorded_Date"));
-    add(g, "Compositor", mi(m, Stream_General, 0, L"Composer"));
-    add(g, "Contenedor", mi(m, Stream_General, 0, L"Format"));
-    add(g, "Duración", fmtDuration(mi(m, Stream_General, 0, L"Duration").toDouble()));
-    add(g, "Tasa de bits total", fmtBitrate(mi(m, Stream_General, 0, L"OverallBitRate").toDouble()));
-    if (m.Count_Get(Stream_Image) == 0) add(g, "Fecha de codificación", mi(m, Stream_General, 0, L"Encoded_Date"));
-    add(g, "Aplicación", mi(m, Stream_General, 0, L"Encoded_Application"));
-    add(g, "Comentario", mi(m, Stream_General, 0, L"Comment"));
-    if (!g.isEmpty()) out << qMakePair(QString::fromUtf8("General"), g);
+    if (!track.isEmpty() && !mi(m, Stream_General, 0, L"Track/Position_Total").isEmpty()) track += i18n(" de ") + mi(m, Stream_General, 0, L"Track/Position_Total");
+    add(g, i18n("Pista"), track);
+    add(g, i18n("Género"), mi(m, Stream_General, 0, L"Genre"));
+    if (m.Count_Get(Stream_Image) == 0) add(g, i18n("Año"), mi(m, Stream_General, 0, L"Recorded_Date"));
+    add(g, i18n("Compositor"), mi(m, Stream_General, 0, L"Composer"));
+    add(g, i18n("Contenedor"), mi(m, Stream_General, 0, L"Format"));
+    add(g, i18n("Duración"), fmtDuration(mi(m, Stream_General, 0, L"Duration").toDouble()));
+    add(g, i18n("Tasa de bits total"), fmtBitrate(mi(m, Stream_General, 0, L"OverallBitRate").toDouble()));
+    if (m.Count_Get(Stream_Image) == 0) add(g, i18n("Fecha de codificación"), mi(m, Stream_General, 0, L"Encoded_Date"));
+    add(g, i18n("Aplicación"), mi(m, Stream_General, 0, L"Encoded_Application"));
+    add(g, i18n("Comentario"), mi(m, Stream_General, 0, L"Comment"));
+    if (!g.isEmpty()) out << qMakePair(i18n("General"), g);
 
     for (size_t i = 0; i < m.Count_Get(Stream_Video); ++i) {
         Section v;
-        add(v, "Códec", mi(m, Stream_Video, i, L"Format") + (mi(m, Stream_Video, i, L"Format_Profile").isEmpty() ? QString() : " (" + mi(m, Stream_Video, i, L"Format_Profile") + ")"));
+        add(v, i18n("Códec"), mi(m, Stream_Video, i, L"Format") + (mi(m, Stream_Video, i, L"Format_Profile").isEmpty() ? QString() : " (" + mi(m, Stream_Video, i, L"Format_Profile") + ")"));
         QString w = mi(m, Stream_Video, i, L"Width"), h = mi(m, Stream_Video, i, L"Height");
-        if (!w.isEmpty()) add(v, "Resolución", w + QString::fromUtf8(" × ") + h);
-        add(v, "Relación de aspecto", mi(m, Stream_Video, i, L"DisplayAspectRatio/String"));
+        if (!w.isEmpty()) add(v, i18n("Resolución"), w + QString::fromUtf8(" × ") + h);
+        add(v, i18n("Relación de aspecto"), mi(m, Stream_Video, i, L"DisplayAspectRatio/String"));
         QString fps = mi(m, Stream_Video, i, L"FrameRate");
-        if (!fps.isEmpty()) add(v, "Fotogramas por segundo", QString::number(fps.toDouble(), 'g', 5));
-        add(v, "Tasa de bits", fmtBitrate(mi(m, Stream_Video, i, L"BitRate").toDouble()));
-        add(v, "Profundidad de color", mi(m, Stream_Video, i, L"BitDepth").isEmpty() ? QString() : mi(m, Stream_Video, i, L"BitDepth") + " bits");
+        if (!fps.isEmpty()) add(v, i18n("Fotogramas por segundo"), QString::number(fps.toDouble(), 'g', 5));
+        add(v, i18n("Tasa de bits"), fmtBitrate(mi(m, Stream_Video, i, L"BitRate").toDouble()));
+        add(v, i18n("Profundidad de color"), mi(m, Stream_Video, i, L"BitDepth").isEmpty() ? QString() : mi(m, Stream_Video, i, L"BitDepth") + " bits");
         add(v, "HDR", mi(m, Stream_Video, i, L"HDR_Format"));
-        add(v, "Duración", fmtDuration(mi(m, Stream_Video, i, L"Duration").toDouble()));
-        if (!v.isEmpty()) out << qMakePair(m.Count_Get(Stream_Video) > 1 ? QString::fromUtf8("Vídeo %1").arg(i + 1) : QString::fromUtf8("Vídeo"), v);
+        add(v, i18n("Duración"), fmtDuration(mi(m, Stream_Video, i, L"Duration").toDouble()));
+        if (!v.isEmpty()) out << qMakePair(m.Count_Get(Stream_Video) > 1 ? i18n("Vídeo %1").arg(i + 1) : i18n("Vídeo"), v);
     }
     for (size_t i = 0; i < m.Count_Get(Stream_Audio); ++i) {
         Section a;
-        add(a, "Códec", mi(m, Stream_Audio, i, L"Format") + (mi(m, Stream_Audio, i, L"Format_Profile").isEmpty() ? QString() : " " + mi(m, Stream_Audio, i, L"Format_Profile")));
+        add(a, i18n("Códec"), mi(m, Stream_Audio, i, L"Format") + (mi(m, Stream_Audio, i, L"Format_Profile").isEmpty() ? QString() : " " + mi(m, Stream_Audio, i, L"Format_Profile")));
         QString ch = mi(m, Stream_Audio, i, L"Channel(s)");
-        add(a, "Canales", ch == "1" ? QString::fromUtf8("1 (mono)") : ch == "2" ? QString::fromUtf8("2 (estéreo)") : ch);
+        add(a, i18n("Canales"), ch == "1" ? i18n("1 (mono)") : ch == "2" ? i18n("2 (estéreo)") : ch);
         QString sr = mi(m, Stream_Audio, i, L"SamplingRate");
-        if (!sr.isEmpty()) add(a, "Frecuencia de muestreo", QString::number(sr.toDouble() / 1000, 'g', 4) + " kHz");
+        if (!sr.isEmpty()) add(a, i18n("Frecuencia de muestreo"), QString::number(sr.toDouble() / 1000, 'g', 4) + " kHz");
         QString br = fmtBitrate(mi(m, Stream_Audio, i, L"BitRate").toDouble());
         QString mode = mi(m, Stream_Audio, i, L"BitRate_Mode");
-        if (!br.isEmpty()) add(a, "Tasa de bits", br + (mode == "VBR" ? QString::fromUtf8(" (variable)") : mode == "CBR" ? QString::fromUtf8(" (constante)") : QString()));
-        add(a, "Profundidad", mi(m, Stream_Audio, i, L"BitDepth").isEmpty() ? QString() : mi(m, Stream_Audio, i, L"BitDepth") + " bits");
-        add(a, "Idioma", mi(m, Stream_Audio, i, L"Language/String"));
-        if (!a.isEmpty()) out << qMakePair(m.Count_Get(Stream_Audio) > 1 ? QString::fromUtf8("Audio %1").arg(i + 1) : QString::fromUtf8("Audio"), a);
+        if (!br.isEmpty()) add(a, i18n("Tasa de bits"), br + (mode == "VBR" ? i18n(" (variable)") : mode == "CBR" ? i18n(" (constante)") : QString()));
+        add(a, i18n("Profundidad"), mi(m, Stream_Audio, i, L"BitDepth").isEmpty() ? QString() : mi(m, Stream_Audio, i, L"BitDepth") + " bits");
+        add(a, i18n("Idioma"), mi(m, Stream_Audio, i, L"Language/String"));
+        if (!a.isEmpty()) out << qMakePair(m.Count_Get(Stream_Audio) > 1 ? i18n("Audio %1").arg(i + 1) : i18n("Audio"), a);
     }
     if (size_t n = m.Count_Get(Stream_Text)) {
         Section t;
@@ -147,18 +148,18 @@ Sections mediaSections(const QString &path)
             QString l = mi(m, Stream_Text, i, L"Language/String");
             langs << (l.isEmpty() ? mi(m, Stream_Text, i, L"Format") : l);
         }
-        add(t, "Pistas", langs.join(", "));
-        out << qMakePair(QString::fromUtf8("Subtítulos"), t);
+        add(t, i18n("Pistas"), langs.join(", "));
+        out << qMakePair(i18n("Subtítulos"), t);
     }
     if (m.Count_Get(Stream_Image) && m.Count_Get(Stream_Video) == 0) {
         Section im;
-        add(im, "Formato", mi(m, Stream_Image, 0, L"Format"));
+        add(im, i18n("Formato"), mi(m, Stream_Image, 0, L"Format"));
         QString w = mi(m, Stream_Image, 0, L"Width"), h = mi(m, Stream_Image, 0, L"Height");
-        if (!w.isEmpty()) add(im, "Dimensiones", w + QString::fromUtf8(" × ") + h + QString::fromUtf8(" píxeles"));
-        add(im, "Profundidad de color", mi(m, Stream_Image, 0, L"BitDepth").isEmpty() ? QString() : mi(m, Stream_Image, 0, L"BitDepth") + " bits");
-        add(im, "Espacio de color", mi(m, Stream_Image, 0, L"ColorSpace"));
-        add(im, "Compresión", mi(m, Stream_Image, 0, L"Compression_Mode/String"));
-        if (!im.isEmpty()) out << qMakePair(QString::fromUtf8("Imagen"), im);
+        if (!w.isEmpty()) add(im, i18n("Dimensiones"), w + QString::fromUtf8(" × ") + h + i18n(" píxeles"));
+        add(im, i18n("Profundidad de color"), mi(m, Stream_Image, 0, L"BitDepth").isEmpty() ? QString() : mi(m, Stream_Image, 0, L"BitDepth") + " bits");
+        add(im, i18n("Espacio de color"), mi(m, Stream_Image, 0, L"ColorSpace"));
+        add(im, i18n("Compresión"), mi(m, Stream_Image, 0, L"Compression_Mode/String"));
+        if (!im.isEmpty()) out << qMakePair(i18n("Imagen"), im);
     }
     m.Close();
     return out;
@@ -179,30 +180,30 @@ Sections exifSections(const QString &path)
             return QString::fromStdString(it->print(&ex)).trimmed();
         };
         Section cam, shot, gps;
-        auto add = [](Section &s, const char *label, const QString &v) {
-            if (!v.isEmpty() && v != "(0)") s << qMakePair(QString::fromUtf8(label), v);
+        auto add = [](Section &s, const QString &label, const QString &v) {
+            if (!v.isEmpty() && v != "(0)") s << qMakePair(label, v);
         };
         QString make = get("Exif.Image.Make"), model = get("Exif.Image.Model");
         if (!model.isEmpty() && !model.startsWith(make, Qt::CaseInsensitive)) model = make + " " + model;
-        add(cam, "Cámara", model.isEmpty() ? make : model);
-        add(cam, "Objetivo", get("Exif.Photo.LensModel"));
+        add(cam, i18n("Cámara"), model.isEmpty() ? make : model);
+        add(cam, i18n("Objetivo"), get("Exif.Photo.LensModel"));
         add(cam, "Software", get("Exif.Image.Software"));
         QDateTime taken = QDateTime::fromString(get("Exif.Photo.DateTimeOriginal"), "yyyy:MM:dd HH:mm:ss");
-        add(shot, "Fecha de la foto", taken.isValid() ? QLocale(QLocale::Spanish, QLocale::Spain).toString(taken, "d 'de' MMMM 'de' yyyy, HH:mm:ss") : get("Exif.Photo.DateTimeOriginal"));
-        add(shot, "Exposición", get("Exif.Photo.ExposureTime"));
-        add(shot, "Apertura", get("Exif.Photo.FNumber"));
+        add(shot, i18n("Fecha de la foto"), taken.isValid() ? I18n::locale().toString(taken, i18n("d 'de' MMMM 'de' yyyy, HH:mm:ss")) : get("Exif.Photo.DateTimeOriginal"));
+        add(shot, i18n("Exposición"), get("Exif.Photo.ExposureTime"));
+        add(shot, i18n("Apertura"), get("Exif.Photo.FNumber"));
         add(shot, "ISO", get("Exif.Photo.ISOSpeedRatings"));
-        add(shot, "Distancia focal", get("Exif.Photo.FocalLength"));
-        add(shot, "Focal equivalente 35 mm", get("Exif.Photo.FocalLengthIn35mmFilm"));
-        add(shot, "Flash", get("Exif.Photo.Flash"));
-        add(shot, "Balance de blancos", get("Exif.Photo.WhiteBalance"));
+        add(shot, i18n("Distancia focal"), get("Exif.Photo.FocalLength"));
+        add(shot, i18n("Focal equivalente 35 mm"), get("Exif.Photo.FocalLengthIn35mmFilm"));
+        add(shot, i18n("Flash"), get("Exif.Photo.Flash"));
+        add(shot, i18n("Balance de blancos"), get("Exif.Photo.WhiteBalance"));
         static const QHash<QString, QString> orient = {
-            {"top, left", QString::fromUtf8("normal")}, {"top, right", QString::fromUtf8("volteada en horizontal")},
-            {"bottom, right", QString::fromUtf8("girada 180°")}, {"bottom, left", QString::fromUtf8("volteada en vertical")},
-            {"left, top", QString::fromUtf8("traspuesta")}, {"right, top", QString::fromUtf8("girada 90° (vertical)")},
-            {"right, bottom", QString::fromUtf8("transversa")}, {"left, bottom", QString::fromUtf8("girada 270° (vertical)")}};
+            {"top, left", i18n("normal")}, {"top, right", i18n("volteada en horizontal")},
+            {"bottom, right", i18n("girada 180°")}, {"bottom, left", i18n("volteada en vertical")},
+            {"left, top", i18n("traspuesta")}, {"right, top", i18n("girada 90° (vertical)")},
+            {"right, bottom", i18n("transversa")}, {"left, bottom", i18n("girada 270° (vertical)")}};
         const QString o = get("Exif.Image.Orientation");
-        add(shot, "Orientación", orient.value(o, o));
+        add(shot, i18n("Orientación"), orient.value(o, o));
         auto coord = [&](const char *key, const char *refKey) -> double {
             auto it = ex.findKey(Exiv2::ExifKey(key));
             if (it == ex.end() || it->count() < 3) return NAN;
@@ -218,13 +219,13 @@ Sections exifSections(const QString &path)
         double lon = coord("Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef");
         if (std::isfinite(lat) && std::isfinite(lon)) {
             const QString ll = QString("%1, %2").arg(lat, 0, 'f', 6).arg(lon, 0, 'f', 6);
-            add(gps, "Coordenadas", QString("<a href=\"https://www.openstreetmap.org/?mlat=%1&mlon=%2#map=16/%1/%2\">%3</a>")
+            add(gps, i18n("Coordenadas"), QString("<a href=\"https://www.openstreetmap.org/?mlat=%1&mlon=%2#map=16/%1/%2\">%3</a>")
                                         .arg(lat, 0, 'f', 6).arg(lon, 0, 'f', 6).arg(ll));
-            add(gps, "Altitud", get("Exif.GPSInfo.GPSAltitude"));
+            add(gps, i18n("Altitud"), get("Exif.GPSInfo.GPSAltitude"));
         }
-        if (!cam.isEmpty()) out << qMakePair(QString::fromUtf8("Cámara"), cam);
-        if (!shot.isEmpty()) out << qMakePair(QString::fromUtf8("Toma"), shot);
-        if (!gps.isEmpty()) out << qMakePair(QString::fromUtf8("Ubicación"), gps);
+        if (!cam.isEmpty()) out << qMakePair(i18n("Cámara"), cam);
+        if (!shot.isEmpty()) out << qMakePair(i18n("Toma"), shot);
+        if (!gps.isEmpty()) out << qMakePair(i18n("Ubicación"), gps);
     } catch (const std::exception &) {
     }
     return out;
@@ -234,9 +235,9 @@ Sections exifSections(const QString &path)
 
 QList<QPair<QString, QString>> mediaSummary(const QString &path)
 {
-    static const QStringList keep = {QString::fromUtf8("Título"), "Artista", QString::fromUtf8("Álbum"), QString::fromUtf8("Duración"),
-                                     QString::fromUtf8("Resolución"), QString::fromUtf8("Códec"), "Fotogramas por segundo", "Canales",
-                                     "Frecuencia de muestreo", "Tasa de bits"};
+    static const QStringList keep = {i18n("Título"), i18n("Artista"), i18n("Álbum"), i18n("Duración"),
+                                     i18n("Resolución"), i18n("Códec"), i18n("Fotogramas por segundo"), i18n("Canales"),
+                                     i18n("Frecuencia de muestreo"), i18n("Tasa de bits")};
     QList<QPair<QString, QString>> out;
     QSet<QString> seen;
     for (const auto &section : mediaSections(path))
@@ -253,21 +254,21 @@ PropertiesDialog::PropertiesDialog(const QStringList &paths, QWidget *parent) : 
     setAttribute(Qt::WA_DeleteOnClose);
     m_single = paths.size() == 1;
     m_isDir = m_single && QFileInfo(paths[0]).isDir();
-    setWindowTitle(m_single ? QString::fromUtf8("Propiedades de «%1»").arg(QFileInfo(paths[0]).fileName())
-                            : QString::fromUtf8("Propiedades de %1 elementos").arg(paths.size()));
+    setWindowTitle(m_single ? i18n("Propiedades de «%1»").arg(QFileInfo(paths[0]).fileName())
+                            : i18n("Propiedades de %1 elementos").arg(paths.size()));
     resize(500, 600);
     auto *v = new QVBoxLayout(this);
     auto *tabs = new QTabWidget;
-    tabs->addTab(generalTab(), "General");
-    tabs->addTab(permissionsTab(), "Permisos");
+    tabs->addTab(generalTab(), i18n("General"));
+    tabs->addTab(permissionsTab(), i18n("Permisos"));
     if (m_single && !m_isDir) {
         const QString mime = QMimeDatabase().mimeTypeForFile(paths[0]).name();
         if (mime.startsWith("image/") || mime.startsWith("video/") || mime.startsWith("audio/"))
-            tabs->addTab(metadataTab(), "Metadatos");
-        tabs->addTab(openWithTab(), "Abrir con");
+            tabs->addTab(metadataTab(), i18n("Metadatos"));
+        tabs->addTab(openWithTab(), i18n("Abrir con"));
     }
     v->addWidget(tabs);
-    auto *close = new QPushButton("Cerrar");
+    auto *close = new QPushButton(i18n("Cerrar"));
     connect(close, &QPushButton::clicked, this, &QDialog::close);
     auto *row = new QHBoxLayout;
     row->addStretch();
@@ -302,7 +303,7 @@ QWidget *PropertiesDialog::generalTab()
             const QString np = fi.absolutePath() + '/' + n;
             if (!QFileInfo::exists(np) && QFile::rename(m_paths[0], np)) {
                 m_paths[0] = np;
-                setWindowTitle(QString::fromUtf8("Propiedades de «%1»").arg(n));
+                setWindowTitle(i18n("Propiedades de «%1»").arg(n));
             } else {
                 name->setText(fi.fileName());
             }
@@ -310,7 +311,7 @@ QWidget *PropertiesDialog::generalTab()
         nameCol->addWidget(name);
         nameCol->addWidget(value(FsModel::mimeComment(e.mime) + "  ·  " + e.mime));
     } else {
-        nameCol->addWidget(value(QString::fromUtf8("<b>%1 elementos</b>").arg(m_paths.size())));
+        nameCol->addWidget(value(i18n("<b>%1 elementos</b>").arg(m_paths.size())));
     }
     top->addLayout(nameCol, 1);
     v->addLayout(top);
@@ -318,8 +319,8 @@ QWidget *PropertiesDialog::generalTab()
     auto *form = new QFormLayout;
     form->setLabelAlignment(Qt::AlignRight);
     form->setHorizontalSpacing(14);
-    m_size = value(QString::fromUtf8("calculando…"));
-    form->addRow(QString::fromUtf8("Tamaño:"), m_size);
+    m_size = value(i18n("calculando…"));
+    form->addRow(i18n("Tamaño:"), m_size);
     // Recursive size in the background
     QPointer<QLabel> sizeLabel = m_size;
     const QStringList paths = m_paths;
@@ -346,8 +347,8 @@ QWidget *PropertiesDialog::generalTab()
                 bytes += fi.isSymLink() ? 0 : fi.size();
             }
         }
-        QString t = FsModel::formatSize(bytes) + QString::fromUtf8("  (%1 bytes)").arg(QLocale(QLocale::Spanish).toString(bytes));
-        if (dirs) t += QString::fromUtf8("\n%1 archivos, %2 carpetas").arg(files).arg(dirs - (paths.size() == 1 ? 1 : 0));
+        QString t = FsModel::formatSize(bytes) + QString::fromUtf8("  (%1 bytes)").arg(I18n::locale().toString(bytes));
+        if (dirs) t += i18n("\n%1 archivos, %2 carpetas").arg(files).arg(dirs - (paths.size() == 1 ? 1 : 0));
         QMetaObject::invokeMethod(qApp, [sizeLabel, t] {
             if (sizeLabel) sizeLabel->setText(t);
         });
@@ -357,22 +358,22 @@ QWidget *PropertiesDialog::generalTab()
         auto *loc = value(QString("<a href=\"%1\">%2</a>").arg(QUrl::fromLocalFile(fi.absolutePath()).toString(), fi.absolutePath().toHtmlEscaped()));
         loc->setOpenExternalLinks(false);
         connect(loc, &QLabel::linkActivated, this, [](const QString &u) { QDesktopServices::openUrl(QUrl(u)); });
-        form->addRow(QString::fromUtf8("Ubicación:"), loc);
-        if (fi.isSymLink()) form->addRow(QString::fromUtf8("Enlace a:"), value(fi.symLinkTarget()));
-        if (first.startsWith(FileOps::trashFiles())) form->addRow(QString::fromUtf8("Ubicación original:"), value(FileOps::originalPath(first)));
-        form->addRow(QString::fromUtf8("Creado:"), value(dateOf(fi.birthTime())));
-        form->addRow(QString::fromUtf8("Modificado:"), value(dateOf(fi.lastModified())));
-        form->addRow(QString::fromUtf8("Último acceso:"), value(dateOf(fi.lastRead())));
+        form->addRow(i18n("Ubicación:"), loc);
+        if (fi.isSymLink()) form->addRow(i18n("Enlace a:"), value(fi.symLinkTarget()));
+        if (first.startsWith(FileOps::trashFiles())) form->addRow(i18n("Ubicación original:"), value(FileOps::originalPath(first)));
+        form->addRow(i18n("Creado:"), value(dateOf(fi.birthTime())));
+        form->addRow(i18n("Modificado:"), value(dateOf(fi.lastModified())));
+        form->addRow(i18n("Último acceso:"), value(dateOf(fi.lastRead())));
         if (!fi.isDir() && QString(e.mime).startsWith("image/")) {
             QImageReader r(first);
             QSize s = r.size();
-            if (s.isValid()) form->addRow(QString::fromUtf8("Dimensiones:"), value(QString::fromUtf8("%1 × %2 píxeles").arg(s.width()).arg(s.height())));
+            if (s.isValid()) form->addRow(i18n("Dimensiones:"), value(i18n("%1 × %2 píxeles").arg(s.width()).arg(s.height())));
         }
     }
     QStorageInfo si(QFileInfo(first).absolutePath());
     if (si.isValid())
-        form->addRow(QString::fromUtf8("Espacio libre:"),
-                     value(QString::fromUtf8("%1 de %2 en %3").arg(FsModel::formatSize(si.bytesAvailable()), FsModel::formatSize(si.bytesTotal()),
+        form->addRow(i18n("Espacio libre:"),
+                     value(i18n("%1 de %2 en %3").arg(FsModel::formatSize(si.bytesAvailable()), FsModel::formatSize(si.bytesTotal()),
                                                                     si.displayName())));
     v->addLayout(form);
     v->addStretch();
@@ -387,7 +388,7 @@ QWidget *PropertiesDialog::permissionsTab()
     FileEntry e = FsModel::statPath(m_paths[0], &ok);
     const bool owner = e.uid == getuid() || getuid() == 0;
     auto *form = new QFormLayout;
-    form->addRow("Propietario:", value(FsModel::userName(e.uid)));
+    form->addRow(i18n("Propietario:"), value(FsModel::userName(e.uid)));
     m_group = new QComboBox;
     // Groups the user belongs to (the only ones chgrp allows)
     gid_t groups[128];
@@ -402,18 +403,18 @@ QWidget *PropertiesDialog::permissionsTab()
         gid_t g = m_group->currentData().toUInt();
         for (const QString &p : m_paths) chown(QFile::encodeName(p).constData(), uid_t(-1), g);
     });
-    form->addRow("Grupo:", m_group);
+    form->addRow(i18n("Grupo:"), m_group);
     v->addLayout(form);
 
     auto *grid = new QGridLayout;
     grid->setHorizontalSpacing(18);
     const bool dir = m_isDir;
-    grid->addWidget(new QLabel("<b>Lectura</b>"), 0, 1, Qt::AlignCenter);
-    grid->addWidget(new QLabel("<b>Escritura</b>"), 0, 2, Qt::AlignCenter);
-    grid->addWidget(new QLabel(dir ? "<b>Acceso</b>" : QString::fromUtf8("<b>Ejecución</b>")), 0, 3, Qt::AlignCenter);
-    const char *who[] = {"Propietario", "Grupo", "Otros"};
+    grid->addWidget(new QLabel(i18n("<b>Lectura</b>")), 0, 1, Qt::AlignCenter);
+    grid->addWidget(new QLabel(i18n("<b>Escritura</b>")), 0, 2, Qt::AlignCenter);
+    grid->addWidget(new QLabel(dir ? i18n("<b>Acceso</b>") : i18n("<b>Ejecución</b>")), 0, 3, Qt::AlignCenter);
+    const char *who[] = {I18N_NOOP("Propietario"), I18N_NOOP("Grupo"), I18N_NOOP("Otros")};
     for (int r = 0; r < 3; ++r) {
-        grid->addWidget(new QLabel(QString::fromUtf8(who[r])), r + 1, 0);
+        grid->addWidget(new QLabel(i18n(who[r])), r + 1, 0);
         for (int c = 0; c < 3; ++c) {
             auto *cb = new QCheckBox;
             cb->setEnabled(owner);
@@ -429,7 +430,7 @@ QWidget *PropertiesDialog::permissionsTab()
     v->addLayout(grid);
 
     if (!dir) {
-        m_exec = new QCheckBox(QString::fromUtf8("Permitir ejecutar el archivo como un programa"));
+        m_exec = new QCheckBox(i18n("Permitir ejecutar el archivo como un programa"));
         m_exec->setEnabled(owner);
         connect(m_exec, &QCheckBox::toggled, this, [this](bool on) {
             if (m_updating) return;
@@ -441,10 +442,10 @@ QWidget *PropertiesDialog::permissionsTab()
         });
         v->addWidget(m_exec);
     }
-    v->addWidget(sectionLabel("Especiales"));
-    m_suid = new QCheckBox("Establecer UID (setuid)");
-    m_sgid = new QCheckBox("Establecer GID (setgid)");
-    m_sticky = new QCheckBox(QString::fromUtf8("Bit pegajoso (sticky): solo el dueño puede borrar"));
+    v->addWidget(sectionLabel(i18n("Especiales")));
+    m_suid = new QCheckBox(i18n("Establecer UID (setuid)"));
+    m_sgid = new QCheckBox(i18n("Establecer GID (setgid)"));
+    m_sticky = new QCheckBox(i18n("Bit pegajoso (sticky): solo el dueño puede borrar"));
     for (auto [cb, bit] : {std::pair{m_suid, quint32(S_ISUID)}, std::pair{m_sgid, quint32(S_ISGID)}, std::pair{m_sticky, quint32(S_ISVTX)}}) {
         cb->setEnabled(owner);
         connect(cb, &QCheckBox::toggled, this, [this, bit = bit](bool on) {
@@ -453,7 +454,7 @@ QWidget *PropertiesDialog::permissionsTab()
         v->addWidget(cb);
     }
     auto *octRow = new QHBoxLayout;
-    octRow->addWidget(new QLabel("Valor octal:"));
+    octRow->addWidget(new QLabel(i18n("Valor octal:")));
     m_octal = new QLineEdit;
     m_octal->setMaximumWidth(80);
     m_octal->setFont(QFont(Theme::get().mono));
@@ -469,12 +470,12 @@ QWidget *PropertiesDialog::permissionsTab()
     v->addSpacing(6);
     v->addLayout(octRow);
     if (dir) {
-        m_recursive = new QCheckBox(QString::fromUtf8("Aplicar también a todo lo que contiene\n(a los archivos no se les añade ejecución)"));
+        m_recursive = new QCheckBox(i18n("Aplicar también a todo lo que contiene\n(a los archivos no se les añade ejecución)"));
         m_recursive->setEnabled(owner);
         v->addWidget(m_recursive);
     }
     if (!owner) {
-        auto *l = new QLabel(QString::fromUtf8("Solo el propietario puede cambiar los permisos."));
+        auto *l = new QLabel(i18n("Solo el propietario puede cambiar los permisos."));
         l->setProperty("role", "dim");
         v->addWidget(l);
     }
@@ -526,7 +527,7 @@ QWidget *PropertiesDialog::metadataTab()
     scroll->setWidgetResizable(true);
     auto *w = new QWidget;
     auto *v = new QVBoxLayout(w);
-    auto *wait = new QLabel(QString::fromUtf8("Leyendo metadatos…"));
+    auto *wait = new QLabel(i18n("Leyendo metadatos…"));
     wait->setProperty("role", "dim");
     v->addWidget(wait);
     v->addStretch();
@@ -545,7 +546,7 @@ QWidget *PropertiesDialog::metadataTab()
                 delete it;
             }
             if (s.isEmpty()) {
-                auto *l = new QLabel(QString::fromUtf8("Este archivo no tiene metadatos legibles."));
+                auto *l = new QLabel(i18n("Este archivo no tiene metadatos legibles."));
                 l->setProperty("role", "dim");
                 v->addWidget(l);
             }
@@ -568,22 +569,22 @@ QWidget *PropertiesDialog::openWithTab()
     auto *w = new QWidget;
     auto *v = new QVBoxLayout(w);
     const QString mime = QMimeDatabase().mimeTypeForFile(m_paths[0]).name();
-    auto *info = new QLabel(QString::fromUtf8("Aplicación predeterminada para «%1» (%2):").arg(FsModel::mimeComment(mime), mime));
+    auto *info = new QLabel(i18n("Aplicación predeterminada para «%1» (%2):").arg(FsModel::mimeComment(mime), mime));
     info->setWordWrap(true);
     v->addWidget(info);
     auto *list = new QListWidget;
     list->setIconSize(QSize(26, 26));
     const QString def = Apps::get().defaultFor(mime);
     for (const AppInfo *a : Apps::get().forMime(mime)) {
-        auto *it = new QListWidgetItem(Icons::get().app(a->icon), a->name + (a->id == def ? QString::fromUtf8("  ✓ predeterminada") : QString()));
+        auto *it = new QListWidgetItem(Icons::get().app(a->icon), a->name + (a->id == def ? i18n("  ✓ predeterminada") : QString()));
         it->setData(Qt::UserRole, a->id);
         list->addItem(it);
         if (a->id == def) list->setCurrentItem(it);
     }
     v->addWidget(list, 1);
     auto *row = new QHBoxLayout;
-    auto *other = new QPushButton(QString::fromUtf8("Otra aplicación…"));
-    auto *set = new QPushButton("Establecer como predeterminada");
+    auto *other = new QPushButton(i18n("Otra aplicación…"));
+    auto *set = new QPushButton(i18n("Establecer como predeterminada"));
     set->setProperty("role", "primary");
     row->addWidget(other);
     row->addStretch();
@@ -594,7 +595,7 @@ QWidget *PropertiesDialog::openWithTab()
         for (int i = 0; i < list->count(); ++i) {
             auto *it = list->item(i);
             const AppInfo *a = Apps::get().byId(it->data(Qt::UserRole).toString());
-            if (a) it->setText(a->name + (a->id == d ? QString::fromUtf8("  ✓ predeterminada") : QString()));
+            if (a) it->setText(a->name + (a->id == d ? i18n("  ✓ predeterminada") : QString()));
         }
     };
     connect(set, &QPushButton::clicked, this, [list, mime, refill] {
@@ -619,7 +620,7 @@ QWidget *PropertiesDialog::openWithTab()
         for (int i = 0; i < list->count(); ++i) {
             auto *it = list->item(i);
             const AppInfo *x = Apps::get().byId(it->data(Qt::UserRole).toString());
-            if (x) it->setText(x->name + (x->id == a->id ? QString::fromUtf8("  ✓ predeterminada") : QString()));
+            if (x) it->setText(x->name + (x->id == a->id ? i18n("  ✓ predeterminada") : QString()));
         }
     });
     return w;

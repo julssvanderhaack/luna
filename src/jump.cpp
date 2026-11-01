@@ -1,4 +1,5 @@
 #include "jump.h"
+#include "i18n.h"
 #include "fsmodel.h"
 #include "icons.h"
 #include <QDir>
@@ -49,18 +50,18 @@ void JumpDialog::recordVisit(const QString &dir)
 
 JumpDialog::JumpDialog(QWidget *parent) : QDialog(parent)
 {
-    setWindowTitle("Ir a una carpeta");
+    setWindowTitle(i18n("Ir a una carpeta"));
     auto *v = new QVBoxLayout(this);
     v->setContentsMargins(12, 12, 12, 10);
     m_edit = new QLineEdit;
-    m_edit->setPlaceholderText(QString::fromUtf8("Escribe partes de la ruta, p. ej. «luna src»"));
+    m_edit->setPlaceholderText(i18n("Escribe partes de la ruta, p. ej. «luna src»"));
     m_edit->setClearButtonEnabled(true);
     m_edit->installEventFilter(this);
     m_list = new QListWidget;
     m_list->setUniformItemSizes(true);
     m_list->setFocusPolicy(Qt::NoFocus);
-    auto *hint = new QLabel(haveZoxide() ? QString::fromUtf8("Carpetas frecuentes de zoxide y tus marcadores  ·  Intro abre  ·  Esc cierra")
-                                         : QString::fromUtf8("Tus marcadores (instala zoxide para recordar las carpetas que visitas)"));
+    auto *hint = new QLabel(haveZoxide() ? i18n("Carpetas frecuentes de zoxide y tus marcadores  ·  Intro abre  ·  Esc cierra")
+                                         : i18n("Tus marcadores (instala zoxide para recordar las carpetas que visitas)"));
     hint->setProperty("role", "dim");
     hint->setStyleSheet("font-size: 11px;");
     v->addWidget(m_edit);
@@ -140,7 +141,7 @@ void JumpDialog::fill(const QString &query)
         m_list->addItem(it);
     }
     if (hits.isEmpty() && !words.isEmpty()) {
-        auto *none = new QListWidgetItem(QString::fromUtf8("Sin coincidencias"));
+        auto *none = new QListWidgetItem(i18n("Sin coincidencias"));
         none->setFlags(Qt::NoItemFlags);
         m_list->addItem(none);
         return;

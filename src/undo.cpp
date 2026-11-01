@@ -1,4 +1,5 @@
 #include "undo.h"
+#include "i18n.h"
 #include "fileops.h"
 #include "places.h"
 #include <QDir>
@@ -70,22 +71,22 @@ QString Undo::describe(const Op &op)
     const QString path = op.pairs.isEmpty() ? QString() : op.type == Trash || op.type == Copy || op.type == Move || op.type == Rename
                                                              ? op.pairs[0].first
                                                              : op.pairs[0].second;
-    const QString what = op.pairs.size() == 1 ? QString::fromUtf8("«%1»").arg(QFileInfo(path).fileName())
-                                              : QString::fromUtf8("%1 elementos").arg(op.pairs.size());
+    const QString what = op.pairs.size() == 1 ? i18n("«%1»").arg(QFileInfo(path).fileName())
+                                              : i18n("%1 elementos").arg(op.pairs.size());
     switch (op.type) {
-    case Copy: return QString::fromUtf8("copiar %1").arg(what);
-    case Move: return QString::fromUtf8("mover %1").arg(what);
-    case Link: return QString::fromUtf8("crear enlace a %1").arg(what);
-    case Trash: return QString::fromUtf8("mover a la papelera %1").arg(what);
-    case Restore: return QString::fromUtf8("restaurar %1").arg(what);
-    case Rename: return QString::fromUtf8("renombrar %1").arg(what);
-    case Create: return QString::fromUtf8("crear %1").arg(what);
+    case Copy: return i18n("copiar %1").arg(what);
+    case Move: return i18n("mover %1").arg(what);
+    case Link: return i18n("crear enlace a %1").arg(what);
+    case Trash: return i18n("mover a la papelera %1").arg(what);
+    case Restore: return i18n("restaurar %1").arg(what);
+    case Rename: return i18n("renombrar %1").arg(what);
+    case Create: return i18n("crear %1").arg(what);
     }
     return {};
 }
 
-QString Undo::undoText() const { return m_undo.isEmpty() ? QString::fromUtf8("Deshacer") : QString::fromUtf8("Deshacer ") + describe(m_undo.last()); }
-QString Undo::redoText() const { return m_redo.isEmpty() ? QString::fromUtf8("Rehacer") : QString::fromUtf8("Rehacer ") + describe(m_redo.last()); }
+QString Undo::undoText() const { return m_undo.isEmpty() ? i18n("Deshacer") : i18n("Deshacer ") + describe(m_undo.last()); }
+QString Undo::redoText() const { return m_redo.isEmpty() ? i18n("Rehacer") : i18n("Rehacer ") + describe(m_redo.last()); }
 
 void Undo::undo()
 {
@@ -132,9 +133,9 @@ void Undo::run(const Op &op, bool backwards)
         for (const auto &x : op.pairs) {
             if (backwards) {
                 if (QFileInfo(x.second).isSymLink() && ::unlink(enc(x.second).constData()) != 0)
-                    errors << QString::fromUtf8("No se pudo quitar el enlace «%1»: %2").arg(QFileInfo(x.second).fileName(), errText());
+                    errors << i18n("No se pudo quitar el enlace «%1»: %2").arg(QFileInfo(x.second).fileName(), errText());
             } else if (::symlink(enc(x.first).constData(), enc(x.second).constData()) != 0) {
-                errors << QString::fromUtf8("No se pudo crear el enlace «%1»: %2").arg(QFileInfo(x.second).fileName(), errText());
+                errors << i18n("No se pudo crear el enlace «%1»: %2").arg(QFileInfo(x.second).fileName(), errText());
             }
         }
         break;
@@ -156,11 +157,11 @@ void Undo::run(const Op &op, bool backwards)
         for (const auto &x : op.pairs) {
             const QString &from = backwards ? x.second : x.first, &to = backwards ? x.first : x.second;
             if (QFileInfo::exists(to) || QFileInfo(to).isSymLink()) {
-                errors << QString::fromUtf8("Ya existe «%1».").arg(QFileInfo(to).fileName());
+                errors << i18n("Ya existe «%1».").arg(QFileInfo(to).fileName());
                 continue;
             }
             if (::rename(enc(from).constData(), enc(to).constData()) != 0)
-                errors << QString::fromUtf8("No se pudo renombrar «%1»: %2").arg(QFileInfo(from).fileName(), errText());
+                errors << i18n("No se pudo renombrar «%1»: %2").arg(QFileInfo(from).fileName(), errText());
         }
         break;
     case Create:
@@ -173,7 +174,7 @@ void Undo::run(const Op &op, bool backwards)
                 QFile f(x.second);
                 return !f.exists() && f.open(QIODevice::WriteOnly);
             }();
-            if (!ok) errors << QString::fromUtf8("No se pudo crear «%1».").arg(QFileInfo(x.second).fileName());
+            if (!ok) errors << i18n("No se pudo crear «%1».").arg(QFileInfo(x.second).fileName());
         }
         break;
     }
@@ -189,8 +190,8 @@ void Undo::finish(const Op &result, bool backwards, const QStringList &errors)
         remapStars(backwards ? Op{result.type, swapped(result.pairs), result.dir} : result);
         (backwards ? m_redo : m_undo).append(result);
     }
-    QString text = (backwards ? QString::fromUtf8("Deshecho: ") : QString::fromUtf8("Rehecho: ")) + describe(result);
-    if (!errors.isEmpty()) text += QString::fromUtf8(" (con errores: %1)").arg(errors.first());
+    QString text = (backwards ? i18n("Deshecho: ") : i18n("Rehecho: ")) + describe(result);
+    if (!errors.isEmpty()) text += i18n(" (con errores: %1)").arg(errors.first());
     emit message(text);
     emit changed();
 }

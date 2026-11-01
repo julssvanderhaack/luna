@@ -1,4 +1,5 @@
 #include "fileops.h"
+#include "i18n.h"
 #include "undo.h"
 #include <QApplication>
 #include <QClipboard>
@@ -26,16 +27,16 @@ Job::Job(Kind k, QStringList srcs, QString dest) : m_kind(k), m_srcs(std::move(s
 QString Job::title() const
 {
     const int n = m_srcs.size();
-    const QString what = n == 1 ? QString::fromUtf8("«%1»").arg(QFileInfo(m_srcs[0]).fileName()) : QString::fromUtf8("%1 elementos").arg(n);
+    const QString what = n == 1 ? i18n("«%1»").arg(QFileInfo(m_srcs[0]).fileName()) : i18n("%1 elementos").arg(n);
     switch (m_kind) {
-    case Copy: return QString::fromUtf8("Copiando %1").arg(what);
-    case Move: return QString::fromUtf8("Moviendo %1").arg(what);
-    case Link: return QString::fromUtf8("Enlazando %1").arg(what);
-    case Delete: return QString::fromUtf8("Eliminando %1").arg(what);
-    case EmptyTrash: return QString::fromUtf8("Vaciando la papelera");
-    case Restore: return QString::fromUtf8("Restaurando %1").arg(what);
-    case CopyTo: return QString::fromUtf8("Copiando %1").arg(what);
-    case MoveTo: return QString::fromUtf8("Moviendo %1").arg(what);
+    case Copy: return i18n("Copiando %1").arg(what);
+    case Move: return i18n("Moviendo %1").arg(what);
+    case Link: return i18n("Enlazando %1").arg(what);
+    case Delete: return i18n("Eliminando %1").arg(what);
+    case EmptyTrash: return i18n("Vaciando la papelera");
+    case Restore: return i18n("Restaurando %1").arg(what);
+    case CopyTo: return i18n("Copiando %1").arg(what);
+    case MoveTo: return i18n("Moviendo %1").arg(what);
     }
     return {};
 }
@@ -97,7 +98,7 @@ void Job::run()
             QString dst = m_targets.value(i);
             if (dst.isEmpty() || dst == src) break;
             if ((dst + '/').startsWith(src + '/')) {
-                m_errors << QString::fromUtf8("No se puede copiar «%1» dentro de sí misma.").arg(name);
+                m_errors << i18n("No se puede copiar «%1» dentro de sí misma.").arg(name);
                 break;
             }
             QDir().mkpath(QFileInfo(dst).absolutePath());
@@ -111,7 +112,7 @@ void Job::run()
                 break;
             }
             if (move && errno != EXDEV && errno != ENOTEMPTY && errno != EEXIST) {
-                m_errors << QString::fromUtf8("No se pudo mover «%1»: %2").arg(name, errText());
+                m_errors << i18n("No se pudo mover «%1»: %2").arg(name, errText());
                 break;
             }
             if (copyTree(src, dst, move)) done(src, dst);
@@ -124,7 +125,7 @@ void Job::run()
             if (samePlace && m_kind == Move) break;
             if (samePlace) dst = m_dest + '/' + FileOps::uniqueName(m_dest, name);
             if ((m_dest + '/').startsWith(src + '/')) {
-                m_errors << QString::fromUtf8("No se puede copiar «%1» dentro de sí misma.").arg(name);
+                m_errors << i18n("No se puede copiar «%1» dentro de sí misma.").arg(name);
                 break;
             }
             bool skip = false;
@@ -137,7 +138,7 @@ void Job::run()
                 break;
             }
             if (m_kind == Move && errno != EXDEV && errno != ENOTEMPTY && errno != EEXIST) {
-                m_errors << QString::fromUtf8("No se pudo mover «%1»: %2").arg(name, errText());
+                m_errors << i18n("No se pudo mover «%1»: %2").arg(name, errText());
                 break;
             }
             if (copyTree(src, dst, m_kind == Move)) done(src, dst);
@@ -146,7 +147,7 @@ void Job::run()
         case Link: {
             QString dst = m_dest + '/' + FileOps::uniqueName(m_dest, name);
             if (::symlink(enc(src).constData(), enc(dst).constData()) != 0)
-                m_errors << QString::fromUtf8("No se pudo crear el enlace a «%1»: %2").arg(name, errText());
+                m_errors << i18n("No se pudo crear el enlace a «%1»: %2").arg(name, errText());
             else done(src, dst);
             ++m_doneFiles;
             break;
@@ -159,7 +160,7 @@ void Job::run()
         case Restore: {
             QString orig = FileOps::originalPath(src);
             if (orig.isEmpty()) {
-                m_errors << QString::fromUtf8("No se sabe de dónde vino «%1».").arg(name);
+                m_errors << i18n("No se sabe de dónde vino «%1».").arg(name);
                 break;
             }
             QFileInfo of(orig);
@@ -172,7 +173,7 @@ void Job::run()
                 QFile::remove(FileOps::trashInfo() + '/' + name + ".trashinfo");
                 done(src, orig);
             } else {
-                m_errors << QString::fromUtf8("No se pudo restaurar «%1»: %2").arg(name, errText());
+                m_errors << i18n("No se pudo restaurar «%1»: %2").arg(name, errText());
             }
             ++m_doneFiles;
             emit progress(0, 0, m_doneFiles, m_totalFiles, name);
@@ -180,7 +181,7 @@ void Job::run()
         }
         }
     }
-    if (m_cancel) m_errors << QString::fromUtf8("Cancelado.");
+    if (m_cancel) m_errors << i18n("Cancelado.");
     emit finished(m_errors);
     deleteLater();
 }
@@ -223,14 +224,14 @@ bool Job::copyFile(const QString &src, const QString &dst)
 {
     int in = ::open(enc(src).constData(), O_RDONLY | O_CLOEXEC);
     if (in < 0) {
-        m_errors << QString::fromUtf8("No se pudo leer «%1»: %2").arg(src, errText());
+        m_errors << i18n("No se pudo leer «%1»: %2").arg(src, errText());
         return false;
     }
     struct stat st;
     fstat(in, &st);
     int out = ::open(enc(dst).constData(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, st.st_mode & 07777);
     if (out < 0) {
-        m_errors << QString::fromUtf8("No se pudo escribir «%1»: %2").arg(dst, errText());
+        m_errors << i18n("No se pudo escribir «%1»: %2").arg(dst, errText());
         ::close(in);
         return false;
     }
@@ -265,7 +266,7 @@ bool Job::copyFile(const QString &src, const QString &dst)
             }
         }
         if (n < 0) {
-            m_errors << QString::fromUtf8("Error copiando «%1»: %2").arg(name, errText());
+            m_errors << i18n("Error copiando «%1»: %2").arg(name, errText());
             ok = false;
             break;
         }
@@ -290,7 +291,7 @@ bool Job::copyTree(const QString &src, const QString &dst, bool move)
 {
     struct stat st;
     if (lstat(enc(src).constData(), &st) != 0) {
-        m_errors << QString::fromUtf8("«%1» ya no existe.").arg(src);
+        m_errors << i18n("«%1» ya no existe.").arg(src);
         return false;
     }
     bool ok = true;
@@ -298,13 +299,13 @@ bool Job::copyTree(const QString &src, const QString &dst, bool move)
         char buf[4096];
         ssize_t n = readlink(enc(src).constData(), buf, sizeof buf - 1);
         if (n < 0 || ::symlink(QByteArray(buf, int(n)).constData(), enc(dst).constData()) != 0) {
-            m_errors << QString::fromUtf8("No se pudo copiar el enlace «%1»: %2").arg(src, errText());
+            m_errors << i18n("No se pudo copiar el enlace «%1»: %2").arg(src, errText());
             ok = false;
         }
         ++m_doneFiles;
     } else if (S_ISDIR(st.st_mode)) {
         if (::mkdir(enc(dst).constData(), (st.st_mode & 07777) | S_IRWXU) != 0 && errno != EEXIST) {
-            m_errors << QString::fromUtf8("No se pudo crear «%1»: %2").arg(dst, errText());
+            m_errors << i18n("No se pudo crear «%1»: %2").arg(dst, errText());
             return false;
         }
         const QStringList kids = QDir(src).entryList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
@@ -341,13 +342,13 @@ bool Job::removeTree(const QString &path)
             removeTree(path + '/' + k);
         }
         if (::rmdir(enc(path).constData()) != 0) {
-            m_errors << QString::fromUtf8("No se pudo eliminar «%1»: %2").arg(path, errText());
+            m_errors << i18n("No se pudo eliminar «%1»: %2").arg(path, errText());
             return false;
         }
         return true;
     }
     if (::unlink(enc(path).constData()) != 0) {
-        m_errors << QString::fromUtf8("No se pudo eliminar «%1»: %2").arg(path, errText());
+        m_errors << i18n("No se pudo eliminar «%1»: %2").arg(path, errText());
         return false;
     }
     m_doneBytes += S_ISREG(st.st_mode) ? st.st_size : 0;
@@ -417,7 +418,7 @@ QStringList FileOps::trash(const QStringList &paths, QList<QPair<QString, QStrin
     QList<QPair<QString, QString>> moved;
     for (const QString &p : paths) {
         QFile f(p);
-        if (!f.moveToTrash()) errors << QString::fromUtf8("No se pudo mover a la papelera «%1»: %2").arg(QFileInfo(p).fileName(), f.errorString());
+        if (!f.moveToTrash()) errors << i18n("No se pudo mover a la papelera «%1»: %2").arg(QFileInfo(p).fileName(), f.errorString());
         else moved.append({p, f.fileName()});   // QFile now names the trashed copy
     }
     if (m_recording) Undo::get().record(Undo::Trash, moved);
@@ -438,7 +439,7 @@ QString FileOps::uniqueName(const QString &dir, const QString &name)
     static const QRegularExpression copyRe(" \\(copia(?: \\d+)?\\)$");
     base.remove(copyRe);
     for (int i = 1;; ++i) {
-        QString n = base + (i == 1 ? QString::fromUtf8(" (copia)") : QString::fromUtf8(" (copia %1)").arg(i)) + ext;
+        QString n = base + (i == 1 ? i18n(" (copia)") : i18n(" (copia %1)").arg(i)) + ext;
         if (!QFileInfo::exists(dir + '/' + n)) return n;
     }
 }

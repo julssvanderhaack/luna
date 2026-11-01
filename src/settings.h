@@ -47,6 +47,7 @@ public:
     int wheelSpeed = 100;          // % of Qt's 3 lines per notch
     int touchSpeed = 250;          // % of the finger's movement
     bool restoreSession = true;
+    QString language;              // "" follows the system, else "es", "en_US"… (applies on restart)
     bool typeToSearch = true;      // typing filters (false: jumps to name)
     bool searchRecursiveDefault = false;
     int executableText = 0;        // 0 preguntar, 1 abrir, 2 ejecutar

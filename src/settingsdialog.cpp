@@ -1,7 +1,10 @@
 #include "settingsdialog.h"
+#include "i18n.h"
 #include "icons.h"
+#include "mainwindow.h"
 #include "settings.h"
 #include "theme.h"
+#include <QApplication>
 #include <QCheckBox>
 #include <QColorDialog>
 #include <QComboBox>
@@ -11,10 +14,12 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPixmap>
+#include <QProcess>
 #include <QPushButton>
 #include <QSlider>
 #include <QSpinBox>
 #include <QStackedWidget>
+#include <QTimer>
 
 namespace {
 QCheckBox *check(const QString &text, bool &field)
@@ -93,8 +98,8 @@ QWidget *toolbarEditor()
 {
     struct Info { const char *name, *glyph; };
     static const QHash<QString, Info> info = {
-        {"back", {"Atrás", "back"}}, {"forward", {"Adelante", "forward"}}, {"up", {"Carpeta superior", "up"}},
-        {"path", {"Barra de ruta", "crumbs"}}, {"search", {"Buscar", "search"}}, {"menu", {"Menú", "menu"}},
+        {"back", {I18N_NOOP("Atrás"), "back"}}, {"forward", {I18N_NOOP("Adelante"), "forward"}}, {"up", {I18N_NOOP("Carpeta superior"), "up"}},
+        {"path", {I18N_NOOP("Barra de ruta"), "crumbs"}}, {"search", {I18N_NOOP("Buscar"), "search"}}, {"menu", {I18N_NOOP("Menú"), "menu"}},
     };
     auto *w = new QWidget;
     auto *h = new QHBoxLayout(w);
@@ -108,12 +113,12 @@ QWidget *toolbarEditor()
     h->addLayout(buttons);
 
     auto separator = [] {
-        auto *it = new QListWidgetItem(QString::fromUtf8("────  nuevo grupo  ────"));
+        auto *it = new QListWidgetItem(i18n("────  nuevo grupo  ────"));
         it->setData(Qt::UserRole, QStringLiteral("|"));
         it->setTextAlignment(Qt::AlignCenter);
         it->setForeground(Theme::get().fgDim);
         it->setFlags(it->flags() & ~Qt::ItemIsUserCheckable);   // checkable by default
-        it->setToolTip(QString::fromUtf8("Lo que hay debajo va en otro grupo"));
+        it->setToolTip(i18n("Lo que hay debajo va en otro grupo"));
         return it;
     };
     auto fill = [=](const QStringList &layout) {
@@ -126,11 +131,11 @@ QWidget *toolbarEditor()
             }
             const QString name = t.startsWith('-') ? t.mid(1) : t;
             const Info i = info.value(name);
-            auto *it = new QListWidgetItem(Icons::get().ui(i.glyph), QString::fromUtf8(i.name));
+            auto *it = new QListWidgetItem(Icons::get().ui(i.glyph), i18n(i.name));
             it->setData(Qt::UserRole, name);
             if (name == "path" || name == "menu") {
                 it->setFlags(it->flags() & ~Qt::ItemIsUserCheckable);
-                it->setToolTip(QString::fromUtf8("Siempre visible; se puede mover"));
+                it->setToolTip(i18n("Siempre visible; se puede mover"));
             } else {
                 it->setFlags(it->flags() | Qt::ItemIsUserCheckable);
                 it->setCheckState(t.startsWith('-') ? Qt::Unchecked : Qt::Checked);
@@ -178,10 +183,10 @@ QWidget *toolbarEditor()
         }
         save();
     };
-    button(QString::fromUtf8("Subir"), [=] { shift(-1); });
-    button(QString::fromUtf8("Bajar"), [=] { shift(1); });
+    button(i18n("Subir"), [=] { shift(-1); });
+    button(i18n("Bajar"), [=] { shift(1); });
     buttons->addSpacing(10);
-    button(QString::fromUtf8("Separar grupo"), [=] {
+    button(i18n("Separar grupo"), [=] {
         const int r = list->currentRow();
         {
             const QSignalBlocker b(list);
@@ -189,14 +194,14 @@ QWidget *toolbarEditor()
         }
         save();
     });
-    button(QString::fromUtf8("Quitar separación"), [=] {
+    button(i18n("Quitar separación"), [=] {
         QListWidgetItem *it = list->currentItem();
         if (!it || it->data(Qt::UserRole).toString() != "|") return;
         delete it;
         save();
     });
     buttons->addSpacing(10);
-    button("Restablecer", [=] {
+    button(i18n("Restablecer"), [=] {
         fill(Settings::normalizeToolbar({"back", "forward", "up", "|", "path", "|", "search", "menu"}));
         save();
     });
@@ -207,7 +212,7 @@ QWidget *toolbarEditor()
 
 SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
 {
-    setWindowTitle("Ajustes de Luna");
+    setWindowTitle(i18n("Ajustes de Luna"));
     resize(780, 620);
     auto *h = new QHBoxLayout(this);
     m_nav = new QListWidget;
@@ -221,59 +226,82 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     Settings &s = Settings::get();
 
     // ---- Vista
-    QFormLayout *f = page("Vista", "icons");
+    QFormLayout *f = page(i18n("Vista"), "icons");
     auto *mode = new QComboBox;
-    mode->addItems({"Iconos", "Compacta", "Lista", "Lista detallada", QString::fromUtf8("Árbol"), "Columnas"});
+    mode->addItems({i18n("Iconos"), i18n("Compacta"), i18n("Lista"), i18n("Lista detallada"), i18n("Árbol"), i18n("Columnas")});
     mode->setCurrentIndex(int(s.viewMode));
     connect(mode, &QComboBox::currentIndexChanged, this, [](int i) {
         Settings::get().viewMode = ViewMode(i);
         Settings::get().changed();
     });
-    f->addRow("Vista predeterminada:", mode);
-    f->addRow(QString::fromUtf8("Tamaño de los iconos:"), combo({"32 px", "48 px", "64 px", "96 px", "128 px", "192 px"}, s.iconZoom));
-    f->addRow(QString::fromUtf8("Tamaño en listas:"), combo({"Muy pequeño", QString::fromUtf8("Pequeño"), "Mediano", "Grande"}, s.listZoom));
-    f->addRow("Ordenar por:", combo({"Nombre", QString::fromUtf8("Tamaño"), "Tipo", QString::fromUtf8("Fecha de modificación"), "Permisos", "Propietario"}, s.sortColumn));
-    f->addRow("", check("Orden descendente", s.sortDescending));
-    f->addRow("", check("Carpetas antes que archivos", s.foldersFirst));
-    f->addRow("", check("Mostrar archivos ocultos", s.showHidden));
-    f->addRow("Fechas:", combo({"Relativas (hoy, ayer…)", "Fecha y hora", "ISO (2026-10-19 15:30)"}, s.dateFormat));
+    f->addRow(i18n("Vista predeterminada:"), mode);
+    f->addRow(i18n("Tamaño de los iconos:"), combo({"32 px", "48 px", "64 px", "96 px", "128 px", "192 px"}, s.iconZoom));
+    f->addRow(i18n("Tamaño en listas:"), combo({i18n("Muy pequeño"), i18n("Pequeño"), i18n("Mediano"), i18n("Grande")}, s.listZoom));
+    f->addRow(i18n("Ordenar por:"), combo({i18n("Nombre"), i18n("Tamaño"), i18n("Tipo"), i18n("Fecha de modificación"), i18n("Permisos"), i18n("Propietario")}, s.sortColumn));
+    f->addRow("", check(i18n("Orden descendente"), s.sortDescending));
+    f->addRow("", check(i18n("Carpetas antes que archivos"), s.foldersFirst));
+    f->addRow("", check(i18n("Mostrar archivos ocultos"), s.showHidden));
+    f->addRow(i18n("Fechas:"), combo({i18n("Relativas (hoy, ayer…)"), i18n("Fecha y hora"), "ISO (2026-10-19 15:30)"}, s.dateFormat));
     auto *units = new QComboBox;
-    units->addItems({QString::fromUtf8("Decimales (kB, MB, GB)"), QString::fromUtf8("Binarias (KiB, MiB, GiB)")});
+    units->addItems({i18n("Decimales (kB, MB, GB)"), i18n("Binarias (KiB, MiB, GiB)")});
     units->setCurrentIndex(s.sizeIEC ? 1 : 0);
     connect(units, &QComboBox::currentIndexChanged, this, [](int i) {
         Settings::get().sizeIEC = i == 1;
         Settings::get().changed();
     });
-    f->addRow(QString::fromUtf8("Unidades de tamaño:"), units);
-    f->addRow("", check(QString::fromUtf8("Mostrar cuántos elementos tiene cada carpeta"), s.showItemCounts));
+    f->addRow(i18n("Unidades de tamaño:"), units);
+    f->addRow("", check(i18n("Mostrar cuántos elementos tiene cada carpeta"), s.showItemCounts));
 
     // ---- Apariencia
-    f = page("Apariencia", "star");
+    f = page(i18n("Apariencia"), "star");
+    auto *lang = new QComboBox;
+    lang->addItem(i18n("Del sistema (%1)").arg(I18n::nativeName(I18n::systemLanguage())), QString());
+    for (const QString &code : I18n::available()) lang->addItem(I18n::nativeName(code), code);
+    lang->setCurrentIndex(std::max(0, lang->findData(s.language)));
+    auto *restartRow = new QWidget;
+    auto *rh = new QHBoxLayout(restartRow);
+    rh->setContentsMargins(0, 0, 0, 0);
+    rh->addWidget(note(i18n("El idioma cambia al reiniciar Luna.")), 1);
+    auto *restart = new QPushButton(i18n("Reiniciar ahora"));
+    rh->addWidget(restart);
+    f->addRow(i18n("Idioma:"), lang);
+    f->addRow("", restartRow);
+    auto showRestart = [f, restartRow] {   // only once the row is in the form: no stray window
+        const QString want = Settings::get().language;
+        f->setRowVisible(restartRow, (I18n::available().contains(want) ? want : I18n::systemLanguage()) != I18n::current());
+    };
+    showRestart();
+    connect(lang, &QComboBox::currentIndexChanged, this, [lang, showRestart](int) {
+        Settings::get().language = lang->currentData().toString();
+        Settings::get().changed();
+        showRestart();
+    });
+    connect(restart, &QPushButton::clicked, this, [this] { restartLuna(); });
     auto *style = new QComboBox;
-    style->addItems({QString::fromUtf8("Iconos del tema GTK"), QString::fromUtf8("Glifos de Omarchy (Nerd Font, colores del tema)")});
+    style->addItems({i18n("Iconos del tema GTK"), i18n("Glifos de Omarchy (Nerd Font, colores del tema)")});
     style->setCurrentIndex(s.iconStyle);
     connect(style, &QComboBox::currentIndexChanged, this, [](int i) {
         Settings::get().iconStyle = i;
         Settings::get().changed();
     });
-    f->addRow("Estilo de iconos:", style);
+    f->addRow(i18n("Estilo de iconos:"), style);
     auto *theme = new QComboBox;
-    theme->addItem(QString::fromUtf8("Seguir al sistema (%1)").arg(Icons::get().gtkTheme()), QString());
+    theme->addItem(i18n("Seguir al sistema (%1)").arg(Icons::get().gtkTheme()), QString());
     for (const QString &t : Icons::installedThemes()) theme->addItem(t, t);
     theme->setCurrentIndex(std::max(0, theme->findData(s.iconTheme)));
     connect(theme, &QComboBox::currentIndexChanged, this, [theme](int) {
         Settings::get().iconTheme = theme->currentData().toString();
         Settings::get().changed();
     });
-    f->addRow("Tema de iconos GTK:", theme);
+    f->addRow(i18n("Tema de iconos GTK:"), theme);
     auto *accentRow = new QWidget;
     auto *ah = new QHBoxLayout(accentRow);
     ah->setContentsMargins(0, 0, 0, 0);
     auto *pick = new QPushButton;
-    auto *reset = new QPushButton(QString::fromUtf8("Usar el del tema"));
+    auto *reset = new QPushButton(i18n("Usar el del tema"));
     auto showAccent = [pick, reset] {
         const QColor c = Theme::get().accent;
-        pick->setText(Settings::get().accentColor.isEmpty() ? QString::fromUtf8("Del tema (%1)").arg(c.name()) : c.name());
+        pick->setText(Settings::get().accentColor.isEmpty() ? i18n("Del tema (%1)").arg(c.name()) : c.name());
         QPixmap swatch(16, 16);
         swatch.fill(c);
         pick->setIcon(QIcon(swatch));
@@ -281,7 +309,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     };
     showAccent();
     connect(pick, &QPushButton::clicked, this, [this, showAccent] {
-        const QColor c = QColorDialog::getColor(Theme::get().accent, this, QString::fromUtf8("Color de acento"));
+        const QColor c = QColorDialog::getColor(Theme::get().accent, this, i18n("Color de acento"));
         if (!c.isValid()) return;
         Settings::get().accentColor = c.name();
         Settings::get().changed();
@@ -294,32 +322,32 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     });
     ah->addWidget(pick, 1);
     ah->addWidget(reset);
-    f->addRow("Color de acento:", accentRow);
-    f->addRow(QString::fromUtf8("Texto de las vistas:"), pointSize(s.viewFontPt, QString::fromUtf8("Como el sistema")));
-    f->addRow("", note(QString::fromUtf8("«Seguir al sistema» usa el tema que pone Omarchy al cambiar de tema (gsettings). "
+    f->addRow(i18n("Color de acento:"), accentRow);
+    f->addRow(i18n("Texto de las vistas:"), pointSize(s.viewFontPt, i18n("Como el sistema")));
+    f->addRow("", note(i18n("«Seguir al sistema» usa el tema que pone Omarchy al cambiar de tema (gsettings). "
                                          "Los demás colores de la ventana salen del tema activo de Omarchy.")));
 
     // ---- Barra superior
-    f = page("Barra superior", "menu");
-    f->addRow("Estilo:", combo({"Solo iconos", "Iconos y texto", "Iconos juntos (agrupados)"}, s.toolbarStyle));
-    f->addRow(QString::fromUtf8("Tamaño de los iconos:"), combo({QString::fromUtf8("Pequeños"), "Medianos", "Grandes"}, s.toolbarIconSize));
+    f = page(i18n("Barra superior"), "menu");
+    f->addRow(i18n("Estilo:"), combo({i18n("Solo iconos"), i18n("Iconos y texto"), i18n("Iconos juntos (agrupados)")}, s.toolbarStyle));
+    f->addRow(i18n("Tamaño de los iconos:"), combo({i18n("Pequeños"), i18n("Medianos"), i18n("Grandes")}, s.toolbarIconSize));
     f->addRow(toolbarEditor());
-    f->addRow(note(QString::fromUtf8("De arriba abajo = de izquierda a derecha. Arrastra para mover, marca para mostrar y usa las "
+    f->addRow(note(i18n("De arriba abajo = de izquierda a derecha. Arrastra para mover, marca para mostrar y usa las "
                                      "separaciones para formar grupos (con el estilo «Iconos juntos» cada grupo va unido). "
                                      "Clic derecho sobre la barra para cambios rápidos.")));
 
     // ---- Barra lateral
-    f = page("Barra lateral", "sidebar");
+    f = page(i18n("Barra lateral"), "sidebar");
     auto *side = new QComboBox;
-    side->addItems({"Izquierda", "Derecha"});
+    side->addItems({i18n("Izquierda"), i18n("Derecha")});
     side->setCurrentIndex(s.sidebarRight ? 1 : 0);
     connect(side, &QComboBox::currentIndexChanged, this, [](int i) {
         Settings::get().sidebarRight = i == 1;
         Settings::get().changed();
     });
-    f->addRow(QString::fromUtf8("Posición:"), side);
-    f->addRow("", check("Mostrar la barra lateral (F9)", s.sidebarVisible));
-    f->addRow(QString::fromUtf8("Tamaño del texto:"), pointSize(s.sidebarFontPt, QString::fromUtf8("Automático (algo menor)")));
+    f->addRow(i18n("Posición:"), side);
+    f->addRow("", check(i18n("Mostrar la barra lateral (F9)"), s.sidebarVisible));
+    f->addRow(i18n("Tamaño del texto:"), pointSize(s.sidebarFontPt, i18n("Automático (algo menor)")));
     static const int iconSizes[] = {12, 14, 16, 18, 20, 24, 32};
     auto *sideIcons = new QComboBox;
     for (int px : iconSizes) sideIcons->addItem(QString("%1 px").arg(px), px);
@@ -328,33 +356,33 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
         Settings::get().sidebarIconSize = sideIcons->currentData().toInt();
         Settings::get().changed();
     });
-    f->addRow(QString::fromUtf8("Tamaño de los iconos:"), sideIcons);
-    f->addRow("Espaciado:", combo({"Compacto", "Normal", "Amplio"}, s.sidebarSpacing));
-    f->addRow("", check("Lugares", s.showPlaces));
-    f->addRow("", check("Marcadores", s.showBookmarks));
-    f->addRow("", check("Dispositivos", s.showDevices));
-    f->addRow("", note(QString::fromUtf8("Los marcadores son los de GTK (~/.config/gtk-3.0/bookmarks): los mismos que ve Nautilus y la barra. "
+    f->addRow(i18n("Tamaño de los iconos:"), sideIcons);
+    f->addRow(i18n("Espaciado:"), combo({i18n("Compacto"), i18n("Normal"), i18n("Amplio")}, s.sidebarSpacing));
+    f->addRow("", check(i18n("Lugares"), s.showPlaces));
+    f->addRow("", check(i18n("Marcadores"), s.showBookmarks));
+    f->addRow("", check(i18n("Dispositivos"), s.showDevices));
+    f->addRow("", note(i18n("Los marcadores son los de GTK (~/.config/gtk-3.0/bookmarks): los mismos que ve Nautilus y la barra. "
                                          "Arrastra carpetas a la barra para añadirlas y arrástralos para reordenarlos.")));
 
     // ---- Comportamiento
-    f = page("Comportamiento", "settings");
-    f->addRow("", check("Abrir con un solo clic", s.singleClick));
-    f->addRow("", check(QString::fromUtf8("Clic central abre carpetas en pestaña nueva"), s.middleClickNewTab));
-    f->addRow("", check(QString::fromUtf8("Desplazamiento suave con la rueda del ratón"), s.smoothScroll));
-    f->addRow(QString::fromUtf8("Velocidad de la rueda:"), speed(s.wheelSpeed));
-    f->addRow("Velocidad del touchpad:", speed(s.touchSpeed));
-    f->addRow("", check(QString::fromUtf8("Escribir filtra la carpeta (si no, salta al nombre)"), s.typeToSearch));
-    f->addRow("", check(QString::fromUtf8("Al buscar, incluir subcarpetas por defecto"), s.searchRecursiveDefault));
-    f->addRow("", check(QString::fromUtf8("Preguntar antes de mover a la papelera"), s.confirmTrash));
-    f->addRow("", check(QString::fromUtf8("Preguntar antes de eliminar definitivamente"), s.confirmDelete));
-    f->addRow("", check(QString::fromUtf8("Recordar las pestañas al cerrar"), s.restoreSession));
-    f->addRow("Programas y scripts:", combo({QString::fromUtf8("Preguntar qué hacer"), "Abrirlos como texto", "Ejecutarlos"}, s.executableText));
+    f = page(i18n("Comportamiento"), "settings");
+    f->addRow("", check(i18n("Abrir con un solo clic"), s.singleClick));
+    f->addRow("", check(i18n("Clic central abre carpetas en pestaña nueva"), s.middleClickNewTab));
+    f->addRow("", check(i18n("Desplazamiento suave con la rueda del ratón"), s.smoothScroll));
+    f->addRow(i18n("Velocidad de la rueda:"), speed(s.wheelSpeed));
+    f->addRow(i18n("Velocidad del touchpad:"), speed(s.touchSpeed));
+    f->addRow("", check(i18n("Escribir filtra la carpeta (si no, salta al nombre)"), s.typeToSearch));
+    f->addRow("", check(i18n("Al buscar, incluir subcarpetas por defecto"), s.searchRecursiveDefault));
+    f->addRow("", check(i18n("Preguntar antes de mover a la papelera"), s.confirmTrash));
+    f->addRow("", check(i18n("Preguntar antes de eliminar definitivamente"), s.confirmDelete));
+    f->addRow("", check(i18n("Recordar las pestañas al cerrar"), s.restoreSession));
+    f->addRow(i18n("Programas y scripts:"), combo({i18n("Preguntar qué hacer"), i18n("Abrirlos como texto"), i18n("Ejecutarlos")}, s.executableText));
 
     // ---- Miniaturas
-    f = page("Miniaturas", "icons");
-    f->addRow("", check(QString::fromUtf8("Mostrar miniaturas"), s.thumbnails));
-    f->addRow("", check(QString::fromUtf8("De vídeos y carátulas de música (ffmpegthumbnailer)"), s.thumbVideos));
-    f->addRow("", check("De documentos PDF", s.thumbPdf));
+    f = page(i18n("Miniaturas"), "icons");
+    f->addRow("", check(i18n("Mostrar miniaturas"), s.thumbnails));
+    f->addRow("", check(i18n("De vídeos y carátulas de música (ffmpegthumbnailer)"), s.thumbVideos));
+    f->addRow("", check(i18n("De documentos PDF"), s.thumbPdf));
     auto *mb = new QSpinBox;
     mb->setRange(1, 2000);
     mb->setSuffix(" MB");
@@ -363,8 +391,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
         Settings::get().thumbMaxMB = v;
         Settings::get().changed();
     });
-    f->addRow(QString::fromUtf8("Tamaño máximo de imagen:"), mb);
-    f->addRow("", note(QString::fromUtf8("Las miniaturas se guardan en ~/.cache/thumbnails (compartidas con Nautilus) y se generan con "
+    f->addRow(i18n("Tamaño máximo de imagen:"), mb);
+    f->addRow("", note(i18n("Las miniaturas se guardan en ~/.cache/thumbnails (compartidas con Nautilus) y se generan con "
                                          "dos hilos como máximo para no cargar la CPU.")));
 
     // ---- Terminal
@@ -374,12 +402,29 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
         Settings::get().terminal = term->text().trimmed();
         Settings::get().changed();
     });
-    f->addRow("Orden:", term);
-    f->addRow("", note(QString::fromUtf8("Terminal aparte, en la carpeta actual (Mayús+F4). Por defecto xdg-terminal-exec, la terminal de Omarchy.")));
-    f->addRow("", check(QString::fromUtf8("Con el terminal integrado abierto (F4), un clic en un archivo escribe su nombre"), s.terminalClickInserts));
-    f->addRow("", note(QString::fromUtf8("Solo mientras el terminal espera órdenes. Arrastrar archivos al terminal escribe sus rutas completas.")));
+    f->addRow(i18n("Orden:"), term);
+    f->addRow("", note(i18n("Terminal aparte, en la carpeta actual (Mayús+F4). Por defecto xdg-terminal-exec, la terminal de Omarchy.")));
+    f->addRow("", check(i18n("Con el terminal integrado abierto (F4), un clic en un archivo escribe su nombre"), s.terminalClickInserts));
+    f->addRow("", note(i18n("Solo mientras el terminal espera órdenes. Arrastrar archivos al terminal escribe sus rutas completas.")));
 
     m_nav->setCurrentRow(0);
+}
+
+// Starts a new Luna on the same folders and closes this one: the texts are
+// built once, so a new language needs a fresh process.
+void SettingsDialog::restartLuna()
+{
+    QStringList args;
+    if (!Settings::get().restoreSession)   // otherwise closing the windows saves the session (split view included)
+        if (auto *mw = qobject_cast<MainWindow *>(parentWidget() ? parentWidget()->window() : nullptr)) args = mw->tabPaths();
+    accept();
+    // after exec() has returned: the window that opened this dialog goes away
+    QTimer::singleShot(0, qApp, [args] {
+        for (QWidget *w : QApplication::topLevelWidgets())
+            if (qobject_cast<MainWindow *>(w)) w->close();
+        Settings::get().save();
+        if (QProcess::startDetached(QCoreApplication::applicationFilePath(), args)) qApp->quit();
+    });
 }
 
 void SettingsDialog::showPage(const QString &title)

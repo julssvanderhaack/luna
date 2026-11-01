@@ -1,4 +1,5 @@
 #include "apps.h"
+#include "i18n.h"
 #include "icons.h"
 #include "settings.h"
 #include <QCheckBox>
@@ -37,7 +38,9 @@ bool parseDesktop(const QString &file, AppInfo &a)
     if (!f.open(QIODevice::ReadOnly)) return false;
     QTextStream in(&f);
     bool inEntry = false;
-    QString name, nameEs, nameEsEs, comment, commentEs, type;
+    // Name[en_US] beats Name[en] beats Name, for the language Luna speaks
+    static const QString full = I18n::current(), base = full.section('_', 0, 0);
+    QString name, nameBase, nameFull, comment, commentBase, commentFull, type;
     bool noDisplay = false;
     while (!in.atEnd()) {
         QString line = in.readLine().trimmed();
@@ -51,10 +54,16 @@ bool parseDesktop(const QString &file, AppInfo &a)
         if (eq < 0) continue;
         QString k = line.left(eq).trimmed(), v = line.mid(eq + 1).trimmed();
         if (k == "Name") name = v;
-        else if (k == "Name[es]") nameEs = v;
-        else if (k == "Name[es_ES]") nameEsEs = v;
-        else if (k == "Comment") comment = v;
-        else if (k == "Comment[es]") commentEs = v;
+        else if (k.startsWith("Name[")) {
+            const QString l = k.mid(5, k.size() - 6);
+            if (l == full) nameFull = v;
+            else if (l == base) nameBase = v;
+        } else if (k == "Comment") comment = v;
+        else if (k.startsWith("Comment[")) {
+            const QString l = k.mid(8, k.size() - 9);
+            if (l == full) commentFull = v;
+            else if (l == base) commentBase = v;
+        }
         else if (k == "Exec") a.exec = v;
         else if (k == "Icon") a.icon = v;
         else if (k == "Type") type = v;
@@ -64,8 +73,8 @@ bool parseDesktop(const QString &file, AppInfo &a)
         else if (k == "MimeType") a.mimes = v.split(';', Qt::SkipEmptyParts);
     }
     if (type != "Application" || a.exec.isEmpty()) return false;
-    a.name = !nameEsEs.isEmpty() ? nameEsEs : !nameEs.isEmpty() ? nameEs : name;
-    a.comment = !commentEs.isEmpty() ? commentEs : comment;
+    a.name = !nameFull.isEmpty() ? nameFull : !nameBase.isEmpty() ? nameBase : name;
+    a.comment = !commentFull.isEmpty() ? commentFull : !commentBase.isEmpty() ? commentBase : comment;
     if (noDisplay && a.mimes.isEmpty()) a.hidden = true;
     a.path = file;
     return true;
@@ -281,25 +290,25 @@ void Apps::runTerminal(const QString &dir)
 // ----------------------------------------------------------- OpenWithDialog
 OpenWithDialog::OpenWithDialog(const QStringList &paths, QWidget *parent) : QDialog(parent), m_paths(paths)
 {
-    setWindowTitle(QString::fromUtf8("Abrir con…"));
+    setWindowTitle(i18n("Abrir con…"));
     resize(440, 520);
     m_mime = QMimeDatabase().mimeTypeForFile(paths.value(0)).name();
     auto *v = new QVBoxLayout(this);
-    auto *title = new QLabel(paths.size() == 1 ? QString::fromUtf8("Elige la aplicación para abrir «%1»").arg(QFileInfo(paths[0]).fileName())
-                                               : QString::fromUtf8("Elige la aplicación para abrir %1 archivos").arg(paths.size()));
+    auto *title = new QLabel(paths.size() == 1 ? i18n("Elige la aplicación para abrir «%1»").arg(QFileInfo(paths[0]).fileName())
+                                               : i18n("Elige la aplicación para abrir %1 archivos").arg(paths.size()));
     title->setWordWrap(true);
     v->addWidget(title);
     m_search = new QLineEdit;
-    m_search->setPlaceholderText(QString::fromUtf8("Buscar aplicación…"));
+    m_search->setPlaceholderText(i18n("Buscar aplicación…"));
     v->addWidget(m_search);
     m_list = new QListWidget;
     m_list->setIconSize(QSize(28, 28));
     v->addWidget(m_list, 1);
-    m_default = new QCheckBox(QString::fromUtf8("Usar siempre para «%1»").arg(QMimeDatabase().mimeTypeForName(m_mime).comment()));
+    m_default = new QCheckBox(i18n("Usar siempre para «%1»").arg(QMimeDatabase().mimeTypeForName(m_mime).comment()));
     v->addWidget(m_default);
     auto *bb = new QDialogButtonBox(QDialogButtonBox::Open | QDialogButtonBox::Cancel);
-    bb->button(QDialogButtonBox::Open)->setText("Abrir");
-    bb->button(QDialogButtonBox::Cancel)->setText("Cancelar");
+    bb->button(QDialogButtonBox::Open)->setText(i18n("Abrir"));
+    bb->button(QDialogButtonBox::Cancel)->setText(i18n("Cancelar"));
     v->addWidget(bb);
     connect(bb, &QDialogButtonBox::rejected, this, &QDialog::reject);
     connect(bb, &QDialogButtonBox::accepted, this, [this] {
@@ -335,17 +344,17 @@ void OpenWithDialog::fill(const QString &filter)
     QSet<QString> shown;
     auto add = [&](const AppInfo *a) {
         if (!filter.isEmpty() && !a->name.contains(filter, Qt::CaseInsensitive) && !a->id.contains(filter, Qt::CaseInsensitive)) return;
-        auto *it = new QListWidgetItem(Icons::get().app(a->icon), a->id == def ? a->name + QString::fromUtf8("  (predeterminada)") : a->name);
+        auto *it = new QListWidgetItem(Icons::get().app(a->icon), a->id == def ? a->name + i18n("  (predeterminada)") : a->name);
         it->setData(Qt::UserRole, a->id);
         it->setToolTip(a->comment);
         m_list->addItem(it);
         shown.insert(a->id);
     };
     if (!rec.isEmpty()) {
-        addHeader(QString::fromUtf8("Recomendadas"));
+        addHeader(i18n("Recomendadas"));
         for (auto *a : rec) add(a);
     }
-    addHeader(QString::fromUtf8("Todas las aplicaciones"));
+    addHeader(i18n("Todas las aplicaciones"));
     for (auto *a : apps.all())
         if (!shown.contains(a->id)) add(a);
     for (int i = 0; i < m_list->count(); ++i)
