@@ -35,6 +35,8 @@
 #include <QWheelEvent>
 #include <QScrollBar>
 #include <QColumnView>
+#include <QMimeData>
+#include <QDragEnterEvent>
 
 namespace {
 // Fusion without the stock icons on dialog buttons (red/green blobs).
@@ -263,6 +265,79 @@ int main(int argc, char **argv)
         QTimer::singleShot(5500, w, [=] { grabMenu("menu-archivo-lista"); clickAt(true); });
         QTimer::singleShot(6500, w, [=] { grabMenu("menu-fondo-lista"); clickAt(false); });
         QTimer::singleShot(8000, w, [=] { qApp->quit(); });
+    }
+    // Split drag & drop check: LUNA_DNDTEST=<dirB> luna <dirA>. In every view
+    // mode drags the first file of pane A and drops it on pane B, once on empty
+    // space and once on top of a file; prints where the file ended up.
+    if (qEnvironmentVariableIsSet("LUNA_DNDTEST")) {
+        const QString dirB = qEnvironmentVariable("LUNA_DNDTEST");
+        auto viewOf = [](Pane *p) {
+            auto *v = qobject_cast<QAbstractItemView *>(p->findChild<QStackedWidget *>()->currentWidget());
+            if (auto *cv = qobject_cast<QColumnView *>(v))
+                for (auto *c : cv->findChildren<QAbstractItemView *>()) if (c->isVisible()) v = c;
+            return v;
+        };
+        auto drop = [=](QAbstractItemView *from, QAbstractItemView *to, QPoint at) {
+            QModelIndex src;
+            for (int r = 0; r < from->model()->rowCount(from->rootIndex()); ++r) {
+                QModelIndex i = from->model()->index(r, 0, from->rootIndex());
+                if (!i.data(FsModel::IsDirRole).toBool()) { src = i; break; }
+            }
+            if (!src.isValid()) return QString("sin fichero en A");
+            const QString name = src.data().toString();
+            QMimeData *md = from->model()->mimeData({src});
+            QWidget *vp = to->viewport();
+            QDragEnterEvent en(at, Qt::CopyAction | Qt::MoveAction | Qt::LinkAction, md, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(vp, &en);
+            QDragMoveEvent mv(at, Qt::CopyAction | Qt::MoveAction | Qt::LinkAction, md, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(vp, &mv);
+            QString r = name + QString(" enter=%1 move=%2(%3)").arg(en.isAccepted()).arg(mv.isAccepted()).arg(int(mv.dropAction()));
+            if (mv.isAccepted()) {
+                QDropEvent dr(at, Qt::CopyAction | Qt::MoveAction | Qt::LinkAction, md, Qt::LeftButton, Qt::NoModifier);
+                QApplication::sendEvent(vp, &dr);
+            }
+            delete md;
+            return r;
+        };
+        QTimer::singleShot(500, w, [=] {
+            w->page()->setSplit(true);
+            Pane *b = w->page()->active(), *a = w->page()->other();
+            b->setPath(dirB);
+            auto run = std::make_shared<std::function<void(int)>>();
+            *run = [=](int mode) {
+                if (mode > int(ViewMode::Columns)) { qApp->quit(); return; }
+                a->setViewMode(ViewMode(mode));
+                b->setViewMode(ViewMode(mode));
+                QTimer::singleShot(700, w, [=] {
+                    QAbstractItemView *va = viewOf(a), *vb = viewOf(b);
+                    const QPoint empty(vb->viewport()->width() - 5, vb->viewport()->height() - 5);
+                    fprintf(stderr, "modo %d hueco: %s\n", mode, qPrintable(drop(va, vb, empty)));
+                    QTimer::singleShot(700, w, [=] {
+                        QModelIndex f;
+                        for (int r = 0; r < vb->model()->rowCount(vb->rootIndex()); ++r) {
+                            QModelIndex i = vb->model()->index(r, 0, vb->rootIndex());
+                            if (!i.data(FsModel::IsDirRole).toBool()) { f = i; break; }
+                        }
+                        const QPoint on = f.isValid() ? vb->visualRect(f).center() : empty;
+                        fprintf(stderr, "modo %d encima de %s: %s\n", mode, f.isValid() ? qPrintable(f.data().toString()) : "-",
+                                qPrintable(drop(va, vb, on)));
+                        QTimer::singleShot(700, w, [=] {
+                            // same pane: first file of B onto its folder "sub"
+                            QModelIndex dir;
+                            for (int r = 0; r < vb->model()->rowCount(vb->rootIndex()); ++r) {
+                                QModelIndex i = vb->model()->index(r, 0, vb->rootIndex());
+                                if (i.data(FsModel::IsDirRole).toBool()) { dir = i; break; }
+                            }
+                            if (dir.isValid() && mode != int(ViewMode::Columns))
+                                fprintf(stderr, "modo %d mismo panel sobre %s: %s\n", mode, qPrintable(dir.data().toString()),
+                                        qPrintable(drop(vb, vb, vb->visualRect(dir).center())));
+                            QTimer::singleShot(700, w, [=] { (*run)(mode + 1); });
+                        });
+                    });
+                });
+            };
+            (*run)(0);
+        });
     }
     // Wheel animation check: LUNA_SCROLLTEST=1 luna <big folder> prints the
     // scroll bar every ~20 ms after one notch, a quick burst of 4 and a

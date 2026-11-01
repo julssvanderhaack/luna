@@ -419,6 +419,10 @@ void Pane::setupView(QAbstractItemView *v)
     v->setEditTriggers(QAbstractItemView::EditKeyPressed);
     v->setDragEnabled(true);
     v->setAcceptDrops(true);
+    // QListView::setMovement(Static) (icon view) switches drops off on the
+    // viewport, which is what actually receives them: drags from the other
+    // split pane were refused there.
+    v->viewport()->setAcceptDrops(true);
     v->setDropIndicatorShown(true);
     v->setDragDropMode(QAbstractItemView::DragDrop);
     v->setDefaultDropAction(Qt::MoveAction);
@@ -1822,6 +1826,17 @@ bool Pane::eventFilter(QObject *o, QEvent *e)
             }
         }
         break;
+    }
+    case QEvent::DragMove:
+    case QEvent::Drop: {
+        // Within one view only a folder is a target: elsewhere the files are
+        // already here, and the icon view would just shift them on its grid.
+        auto *de = static_cast<QDropEvent *>(e);
+        if (!vp || de->source() != v) break;
+        const QModelIndex ix = v->indexAt(de->position().toPoint());
+        if (ix.isValid() && ix.data(FsModel::IsDirRole).toBool() && !m_selection->isSelected(ix)) break;
+        de->ignore();
+        return true;
     }
     case QEvent::Wheel: {
         auto *we = static_cast<QWheelEvent *>(e);
