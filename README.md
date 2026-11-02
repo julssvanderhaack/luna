@@ -42,7 +42,8 @@ inventados) y el tema Cobalt2 de Omarchy.*
 - **Vista previa** con la barra espaciadora: fotos, páginas de PDF, texto,
   Markdown con formato, documentos de Word/Excel/PowerPoint/LibreOffice desde
   la portada (LibreOffice, guardado en caché), un fotograma o la carátula de
-  vídeos y canciones con sus datos; ← / → recorren la carpeta. Los comprimidos
+  vídeos y canciones con sus datos (de las canciones suenan 30 segundos de la
+  mitad, con P para pausar); ← / → recorren la carpeta. Los comprimidos
   se ven como árbol con todas sus carpetas, y un doble clic abre un archivo de
   dentro sin extraer el resto.
 - **Ir a una carpeta** (Ctrl + P) escribiendo trozos de su ruta, con las carpetas
@@ -112,7 +113,8 @@ Necesitas un compilador con C++17, CMake ≥ 3.20, Qt 6 (Widgets, Svg),
 libmediainfo, exiv2, poppler-qt6 y libarchive.
 
 ```sh
-# Arch: sudo pacman -S --needed base-devel cmake qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libarchive libvterm   # libvterm: terminal integrado (opcional)
+# Arch: sudo pacman -S --needed base-devel cmake qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libarchive libvterm ffmpeg libpipewire
+# opcionales: libvterm (terminal integrado), ffmpeg y libpipewire (escuchar canciones en la vista previa)
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j"$(nproc)"
 cmake --install build --prefix ~/.local

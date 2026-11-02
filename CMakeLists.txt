@@ -48,6 +48,7 @@ add_executable(luna
   src/office.h src/office.cpp
   src/crypto.h src/crypto.cpp
   src/gitmenu.h src/gitmenu.cpp
+  src/clip.h src/clip.cpp
   data/luna.qrc
 )
 pkg_check_modules(LIBARCHIVE REQUIRED IMPORTED_TARGET libarchive)
@@ -64,6 +65,18 @@ if(VTERM_FOUND)
   target_link_libraries(luna PRIVATE PkgConfig::VTERM util)
 else()
   message(STATUS "libvterm not found: building without the docked terminal")
+endif()
+
+# 30 s of a song in the preview: optional, with FFmpeg and PipeWire.
+option(LUNA_WITH_AUDIO "Play a fragment of songs in the preview (needs FFmpeg and PipeWire)" ON)
+if(LUNA_WITH_AUDIO)
+  pkg_check_modules(AUDIO IMPORTED_TARGET libavformat libavcodec libavutil libswresample libpipewire-0.3)
+endif()
+if(AUDIO_FOUND)
+  target_compile_definitions(luna PRIVATE LUNA_AUDIO)
+  target_link_libraries(luna PRIVATE PkgConfig::AUDIO)
+else()
+  message(STATUS "FFmpeg/PipeWire not found: building without song fragments in the preview")
 endif()
 
 install(TARGETS luna RUNTIME DESTINATION bin)

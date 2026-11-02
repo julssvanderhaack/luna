@@ -56,6 +56,7 @@ public:
     int thumbMaxMB = 50;
     bool thumbVideos = true;
     bool thumbPdf = true;
+    bool previewAudio = true;     // Space on a song plays 30 s from its middle
     // Barra superior
     int toolbarStyle = 0;          // 0 solo iconos, 1 iconos y texto, 2 iconos juntos
     int toolbarIconSize = 1;       // 0 pequeño, 1 mediano, 2 grande

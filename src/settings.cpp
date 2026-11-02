@@ -106,6 +106,7 @@ void Settings::load()
     thumbMaxMB = q.value("thumbs/maxMB", thumbMaxMB).toInt();
     thumbVideos = q.value("thumbs/videos", thumbVideos).toBool();
     thumbPdf = q.value("thumbs/pdf", thumbPdf).toBool();
+    previewAudio = q.value("behavior/previewAudio", previewAudio).toBool();
     terminal = q.value("terminal/command", terminal).toString();
     terminalHeight = q.value("terminal/height", terminalHeight).toInt();
     terminalClickInserts = q.value("terminal/clickInserts", terminalClickInserts).toBool();
@@ -169,6 +170,7 @@ void Settings::save() const
     q.setValue("thumbs/maxMB", thumbMaxMB);
     q.setValue("thumbs/videos", thumbVideos);
     q.setValue("thumbs/pdf", thumbPdf);
+    q.setValue("behavior/previewAudio", previewAudio);
     q.setValue("terminal/command", terminal);
     q.setValue("terminal/height", terminalHeight);
     q.setValue("terminal/clickInserts", terminalClickInserts);

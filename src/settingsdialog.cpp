@@ -1,4 +1,5 @@
 #include "settingsdialog.h"
+#include "clip.h"
 #include "i18n.h"
 #include "icons.h"
 #include "mainwindow.h"
@@ -376,6 +377,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     f->addRow("", check(i18n("Preguntar antes de mover a la papelera"), s.confirmTrash));
     f->addRow("", check(i18n("Preguntar antes de eliminar definitivamente"), s.confirmDelete));
     f->addRow("", check(i18n("Recordar las pestañas al cerrar"), s.restoreSession));
+    if (AudioClip::available())
+        f->addRow("", check(i18n("En la vista previa de una canción, escuchar 30 segundos de la mitad"), s.previewAudio));
     f->addRow(i18n("Programas y scripts:"), combo({i18n("Preguntar qué hacer"), i18n("Abrirlos como texto"), i18n("Ejecutarlos")}, s.executableText));
 
     // ---- Miniaturas

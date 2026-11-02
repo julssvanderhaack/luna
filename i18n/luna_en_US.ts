@@ -64,6 +64,16 @@
       <translation>It's not in the archive.</translation>
     </message>
     <message>
+      <location filename="../src/clip.cpp" line="90" />
+      <source>No tiene audio</source>
+      <translation>It has no audio</translation>
+    </message>
+    <message>
+      <location filename="../src/clip.cpp" line="107" />
+      <source>Formato de audio desconocido</source>
+      <translation>Unknown audio format</translation>
+    </message>
+    <message>
       <location filename="../src/crypto.cpp" line="84" />
       <source>La contraseña no es correcta.</source>
       <translation>The password is wrong.</translation>
@@ -896,14 +906,19 @@ and you can sign yours. The password protects the private key.</translation>
       <translation>No matches</translation>
     </message>
     <message>
-      <location filename="../src/main.cpp" line="551" />
+      <location filename="../src/main.cpp" line="555" />
       <source>Comportamiento</source>
       <translation>Behavior</translation>
     </message>
     <message>
-      <location filename="../src/main.cpp" line="553" />
+      <location filename="../src/main.cpp" line="557" />
       <source>Apariencia</source>
       <translation>Appearance</translation>
+    </message>
+    <message>
+      <location filename="../src/main.cpp" line="656" />
+      <source>Terminal (F4)</source>
+      <translation>Terminal (F4)</translation>
     </message>
     <message>
       <location filename="../src/mainwindow.cpp" line="118" />
@@ -1059,11 +1074,6 @@ and you can sign yours. The password protects the private key.</translation>
       <location filename="../src/mainwindow.cpp" line="223" />
       <source>Acerca de Luna</source>
       <translation>About Luna</translation>
-    </message>
-    <message>
-      <location filename="../src/mainwindow.cpp" line="275" />
-      <source>Terminal (F4)</source>
-      <translation>Terminal (F4)</translation>
     </message>
     <message>
       <location filename="../src/mainwindow.cpp" line="382" />
@@ -2196,42 +2206,72 @@ Delete them permanently?</translation>
       <translation>Type the path (Ctrl+L)</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="103" />
+      <location filename="../src/preview.cpp" line="109" />
       <source>Vista previa</source>
       <translation>Preview</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="156" />
+      <location filename="../src/preview.cpp" line="186" />
       <source>←/→ anterior y siguiente  ·  Intro abrir  ·  Espacio o Esc cerrar</source>
       <translation>←/→ previous and next  ·  Enter open  ·  Space or Esc close</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="196" />
+      <location filename="../src/preview.cpp" line="216" />
+      <source>Pausa (P)</source>
+      <translation>Pause (P)</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="217" />
+      <source>Fragmento de %1 a %2</source>
+      <translation>Fragment from %1 to %2</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="219" />
+      <source>P pausa  ·  ←/→ anterior y siguiente  ·  Intro abrir  ·  Espacio o Esc cerrar</source>
+      <translation>P pause  ·  ←/→ previous and next  ·  Enter open  ·  Space or Esc close</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="238" />
+      <source>Escuchar otra vez (P)</source>
+      <translation>Listen again (P)</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="239" />
+      <source>Seguir (P)</source>
+      <translation>Resume (P)</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="244" />
+      <source>%1 · fragmento %2–%3</source>
+      <translation>%1 · fragment %2–%3</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="280" />
       <source>modificado </source>
       <translation>modified </translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="262" />
+      <location filename="../src/preview.cpp" line="347" />
       <source>Instala LibreOffice para ver las páginas</source>
       <translation>Install LibreOffice to see the pages</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="265" />
+      <location filename="../src/preview.cpp" line="350" />
       <source>Preparando las páginas con LibreOffice…</source>
       <translation>Preparing the pages with LibreOffice…</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="276" />
+      <location filename="../src/preview.cpp" line="361" />
       <source>LibreOffice no pudo abrirlo</source>
       <translation>LibreOffice couldn't open it</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="287" />
+      <location filename="../src/preview.cpp" line="372" />
       <source>Leyendo el contenido…</source>
       <translation>Reading the contents…</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="307" />
+      <location filename="../src/preview.cpp" line="392" />
       <source>
 
 … (solo los primeros 512 KB)</source>
@@ -2240,77 +2280,77 @@ Delete them permanently?</translation>
 … (first 512 KB only)</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="355" />
+      <location filename="../src/preview.cpp" line="440" />
       <source>No se puede mostrar (¿protegido?)</source>
       <translation>Can't display it (protected?)</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="359" />
+      <location filename="../src/preview.cpp" line="444" />
       <source>Página %1 de %2  ·  RePág/AvPág para pasar</source>
       <translation>Page %1 of %2  ·  PgUp/PgDn to turn</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="366" />
+      <location filename="../src/preview.cpp" line="451" />
       <source>Comprimido cifrado: hace falta la contraseña para ver su contenido</source>
       <translation>Encrypted archive: the password is needed to see its contents</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="367" />
+      <location filename="../src/preview.cpp" line="452" />
       <source>No se puede leer el contenido.</source>
       <translation>Can't read the contents.</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="425" />
+      <location filename="../src/preview.cpp" line="510" />
       <source>1 archivo</source>
       <translation>1 file</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="425" />
+      <location filename="../src/preview.cpp" line="510" />
       <source>%1 archivos</source>
       <translation>%1 files</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="426" />
+      <location filename="../src/preview.cpp" line="511" />
       <source>1 carpeta</source>
       <translation>1 folder</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="426" />
+      <location filename="../src/preview.cpp" line="511" />
       <source>%1 carpetas</source>
       <translation>%1 folders</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="427" />
+      <location filename="../src/preview.cpp" line="512" />
       <source>%1 sin comprimir</source>
       <translation>%1 uncompressed</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="428" />
+      <location filename="../src/preview.cpp" line="513" />
       <source>solo los primeros %1</source>
       <translation>only the first %1</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="429" />
+      <location filename="../src/preview.cpp" line="514" />
       <source>🔒 con contraseña</source>
       <translation>🔒 password-protected</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="430" />
+      <location filename="../src/preview.cpp" line="515" />
       <source>Doble clic abre un archivo sin extraer el resto</source>
       <translation>Double-click opens a file without extracting the rest</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="441" />
+      <location filename="../src/preview.cpp" line="526" />
       <source>Extrayendo «%1»…</source>
       <translation>Extracting “%1”…</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="453" />
+      <location filename="../src/preview.cpp" line="538" />
       <source>No se pudo extraer: %1</source>
       <translation>Couldn't extract: %1</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="456" />
+      <location filename="../src/preview.cpp" line="541" />
       <source>Abierto «%1» (copia temporal)</source>
       <translation>Opened “%1” (temporary copy)</translation>
     </message>
@@ -2983,417 +3023,422 @@ Delete them permanently?</translation>
       <translation>&lt;b&gt;Recent&lt;/b&gt;</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="102" />
+      <location filename="../src/settingsdialog.cpp" line="103" />
       <source>Barra de ruta</source>
       <translation>Path Bar</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="116" />
+      <location filename="../src/settingsdialog.cpp" line="117" />
       <source>────  nuevo grupo  ────</source>
       <translation>────  new group  ────</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="121" />
+      <location filename="../src/settingsdialog.cpp" line="122" />
       <source>Lo que hay debajo va en otro grupo</source>
       <translation>What's below goes in another group</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="138" />
+      <location filename="../src/settingsdialog.cpp" line="139" />
       <source>Siempre visible; se puede mover</source>
       <translation>Always visible; can be moved</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="187" />
+      <location filename="../src/settingsdialog.cpp" line="188" />
       <source>Bajar</source>
       <translation>Move Down</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="189" />
+      <location filename="../src/settingsdialog.cpp" line="190" />
       <source>Separar grupo</source>
       <translation>Split Group</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="197" />
+      <location filename="../src/settingsdialog.cpp" line="198" />
       <source>Quitar separación</source>
       <translation>Remove Separator</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="204" />
+      <location filename="../src/settingsdialog.cpp" line="205" />
       <source>Restablecer</source>
       <translation>Reset</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="215" />
+      <location filename="../src/settingsdialog.cpp" line="216" />
       <source>Ajustes de Luna</source>
       <translation>Luna Settings</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="237" />
+      <location filename="../src/settingsdialog.cpp" line="238" />
       <source>Vista predeterminada:</source>
       <translation>Default view:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="238" />
+      <location filename="../src/settingsdialog.cpp" line="239" />
       <source>Tamaño de los iconos:</source>
       <translation>Icon size:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="239" />
+      <location filename="../src/settingsdialog.cpp" line="240" />
       <source>Tamaño en listas:</source>
       <translation>Size in lists:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="239" />
+      <location filename="../src/settingsdialog.cpp" line="240" />
       <source>Muy pequeño</source>
       <translation>Very small</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="239" />
+      <location filename="../src/settingsdialog.cpp" line="240" />
       <source>Pequeño</source>
       <translation>Small</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="239" />
+      <location filename="../src/settingsdialog.cpp" line="240" />
       <source>Mediano</source>
       <translation>Medium</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="239" />
+      <location filename="../src/settingsdialog.cpp" line="240" />
       <source>Grande</source>
       <translation>Large</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="240" />
+      <location filename="../src/settingsdialog.cpp" line="241" />
       <source>Ordenar por:</source>
       <translation>Sort by:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="241" />
+      <location filename="../src/settingsdialog.cpp" line="242" />
       <source>Orden descendente</source>
       <translation>Descending order</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="242" />
+      <location filename="../src/settingsdialog.cpp" line="243" />
       <source>Carpetas antes que archivos</source>
       <translation>Folders before files</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="244" />
+      <location filename="../src/settingsdialog.cpp" line="245" />
       <source>Fechas:</source>
       <translation>Dates:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="244" />
+      <location filename="../src/settingsdialog.cpp" line="245" />
       <source>Relativas (hoy, ayer…)</source>
       <translation>Relative (today, yesterday…)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="244" />
+      <location filename="../src/settingsdialog.cpp" line="245" />
       <source>Fecha y hora</source>
       <translation>Date and time</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="246" />
+      <location filename="../src/settingsdialog.cpp" line="247" />
       <source>Decimales (kB, MB, GB)</source>
       <translation>Decimal (kB, MB, GB)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="246" />
+      <location filename="../src/settingsdialog.cpp" line="247" />
       <source>Binarias (KiB, MiB, GiB)</source>
       <translation>Binary (KiB, MiB, GiB)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="252" />
+      <location filename="../src/settingsdialog.cpp" line="253" />
       <source>Unidades de tamaño:</source>
       <translation>Size units:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="253" />
+      <location filename="../src/settingsdialog.cpp" line="254" />
       <source>Mostrar cuántos elementos tiene cada carpeta</source>
       <translation>Show how many items each folder has</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="258" />
+      <location filename="../src/settingsdialog.cpp" line="259" />
       <source>Del sistema (%1)</source>
       <translation>System (%1)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="264" />
+      <location filename="../src/settingsdialog.cpp" line="265" />
       <source>El idioma cambia al reiniciar Luna.</source>
       <translation>The language changes when Luna restarts.</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="265" />
+      <location filename="../src/settingsdialog.cpp" line="266" />
       <source>Reiniciar ahora</source>
       <translation>Restart Now</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="267" />
+      <location filename="../src/settingsdialog.cpp" line="268" />
       <source>Idioma:</source>
       <translation>Language:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="281" />
+      <location filename="../src/settingsdialog.cpp" line="282" />
       <source>Iconos del tema GTK</source>
       <translation>GTK theme icons</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="281" />
+      <location filename="../src/settingsdialog.cpp" line="282" />
       <source>Glifos de Omarchy (Nerd Font, colores del tema)</source>
       <translation>Omarchy glyphs (Nerd Font, theme colors)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="287" />
+      <location filename="../src/settingsdialog.cpp" line="288" />
       <source>Estilo de iconos:</source>
       <translation>Icon style:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="289" />
+      <location filename="../src/settingsdialog.cpp" line="290" />
       <source>Seguir al sistema (%1)</source>
       <translation>Follow the system (%1)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="296" />
+      <location filename="../src/settingsdialog.cpp" line="297" />
       <source>Tema de iconos GTK:</source>
       <translation>GTK icon theme:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="301" />
+      <location filename="../src/settingsdialog.cpp" line="302" />
       <source>Usar el del tema</source>
       <translation>Use the theme's</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="304" />
+      <location filename="../src/settingsdialog.cpp" line="305" />
       <source>Del tema (%1)</source>
       <translation>From the theme (%1)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="312" />
+      <location filename="../src/settingsdialog.cpp" line="313" />
       <source>Color de acento</source>
       <translation>Accent Color</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="325" />
+      <location filename="../src/settingsdialog.cpp" line="326" />
       <source>Color de acento:</source>
       <translation>Accent color:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="326" />
+      <location filename="../src/settingsdialog.cpp" line="327" />
       <source>Texto de las vistas:</source>
       <translation>View text:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="326" />
+      <location filename="../src/settingsdialog.cpp" line="327" />
       <source>Como el sistema</source>
       <translation>Like the system</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="327" />
+      <location filename="../src/settingsdialog.cpp" line="328" />
       <source>«Seguir al sistema» usa el tema que pone Omarchy al cambiar de tema (gsettings). Los demás colores de la ventana salen del tema activo de Omarchy.</source>
       <translation>“Follow the system” uses the theme Omarchy sets when you change themes (gsettings). The other window colors come from the active Omarchy theme.</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="332" />
+      <location filename="../src/settingsdialog.cpp" line="333" />
       <source>Estilo:</source>
       <translation>Style:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="332" />
+      <location filename="../src/settingsdialog.cpp" line="333" />
       <source>Iconos juntos (agrupados)</source>
       <translation>Grouped icons</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="335" />
+      <location filename="../src/settingsdialog.cpp" line="336" />
       <source>De arriba abajo = de izquierda a derecha. Arrastra para mover, marca para mostrar y usa las separaciones para formar grupos (con el estilo «Iconos juntos» cada grupo va unido). Clic derecho sobre la barra para cambios rápidos.</source>
       <translation>Top to bottom = left to right. Drag to move, tick to show and use separators to form groups (with the “Grouped icons” style each group is joined). Right-click the bar for quick changes.</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="342" />
+      <location filename="../src/settingsdialog.cpp" line="343" />
       <source>Izquierda</source>
       <translation>Left</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="342" />
+      <location filename="../src/settingsdialog.cpp" line="343" />
       <source>Derecha</source>
       <translation>Right</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="348" />
+      <location filename="../src/settingsdialog.cpp" line="349" />
       <source>Posición:</source>
       <translation>Position:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="349" />
+      <location filename="../src/settingsdialog.cpp" line="350" />
       <source>Mostrar la barra lateral (F9)</source>
       <translation>Show the sidebar (F9)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="350" />
+      <location filename="../src/settingsdialog.cpp" line="351" />
       <source>Tamaño del texto:</source>
       <translation>Text size:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="350" />
+      <location filename="../src/settingsdialog.cpp" line="351" />
       <source>Automático (algo menor)</source>
       <translation>Automatic (a bit smaller)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="360" />
+      <location filename="../src/settingsdialog.cpp" line="361" />
       <source>Espaciado:</source>
       <translation>Spacing:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="360" />
+      <location filename="../src/settingsdialog.cpp" line="361" />
       <source>Compacto</source>
       <translation>Compact</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="360" />
+      <location filename="../src/settingsdialog.cpp" line="361" />
       <source>Normal</source>
       <translation>Normal</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="360" />
+      <location filename="../src/settingsdialog.cpp" line="361" />
       <source>Amplio</source>
       <translation>Roomy</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="361" />
+      <location filename="../src/settingsdialog.cpp" line="362" />
       <source>Lugares</source>
       <translation>Places</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="362" />
+      <location filename="../src/settingsdialog.cpp" line="363" />
       <source>Marcadores</source>
       <translation>Bookmarks</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="363" />
+      <location filename="../src/settingsdialog.cpp" line="364" />
       <source>Dispositivos</source>
       <translation>Devices</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="364" />
+      <location filename="../src/settingsdialog.cpp" line="365" />
       <source>Los marcadores son los de GTK (~/.config/gtk-3.0/bookmarks): los mismos que ve Nautilus y la barra. Arrastra carpetas a la barra para añadirlas y arrástralos para reordenarlos.</source>
       <translation>Bookmarks are GTK's (~/.config/gtk-3.0/bookmarks): the same ones Nautilus and the bar show. Drag folders onto the sidebar to add them and drag them to reorder.</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="369" />
+      <location filename="../src/settingsdialog.cpp" line="370" />
       <source>Abrir con un solo clic</source>
       <translation>Open with a single click</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="370" />
+      <location filename="../src/settingsdialog.cpp" line="371" />
       <source>Clic central abre carpetas en pestaña nueva</source>
       <translation>Middle click opens folders in a new tab</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="371" />
+      <location filename="../src/settingsdialog.cpp" line="372" />
       <source>Desplazamiento suave con la rueda del ratón</source>
       <translation>Smooth mouse wheel scrolling</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="372" />
+      <location filename="../src/settingsdialog.cpp" line="373" />
       <source>Velocidad de la rueda:</source>
       <translation>Wheel speed:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="373" />
+      <location filename="../src/settingsdialog.cpp" line="374" />
       <source>Velocidad del touchpad:</source>
       <translation>Touchpad speed:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="374" />
+      <location filename="../src/settingsdialog.cpp" line="375" />
       <source>Escribir filtra la carpeta (si no, salta al nombre)</source>
       <translation>Typing filters the folder (otherwise jumps to the name)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="375" />
+      <location filename="../src/settingsdialog.cpp" line="376" />
       <source>Al buscar, incluir subcarpetas por defecto</source>
       <translation>When searching, include subfolders by default</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="376" />
+      <location filename="../src/settingsdialog.cpp" line="377" />
       <source>Preguntar antes de mover a la papelera</source>
       <translation>Ask before moving to the trash</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="377" />
+      <location filename="../src/settingsdialog.cpp" line="378" />
       <source>Preguntar antes de eliminar definitivamente</source>
       <translation>Ask before deleting permanently</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="378" />
+      <location filename="../src/settingsdialog.cpp" line="379" />
       <source>Recordar las pestañas al cerrar</source>
       <translation>Remember tabs on close</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="379" />
+      <location filename="../src/settingsdialog.cpp" line="381" />
+      <source>En la vista previa de una canción, escuchar 30 segundos de la mitad</source>
+      <translation>In a song's preview, play 30 seconds from its middle</translation>
+    </message>
+    <message>
+      <location filename="../src/settingsdialog.cpp" line="382" />
       <source>Programas y scripts:</source>
       <translation>Programs and scripts:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="379" />
+      <location filename="../src/settingsdialog.cpp" line="382" />
       <source>Preguntar qué hacer</source>
       <translation>Ask what to do</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="379" />
+      <location filename="../src/settingsdialog.cpp" line="382" />
       <source>Abrirlos como texto</source>
       <translation>Open them as text</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="379" />
+      <location filename="../src/settingsdialog.cpp" line="382" />
       <source>Ejecutarlos</source>
       <translation>Run them</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="382" />
+      <location filename="../src/settingsdialog.cpp" line="385" />
       <source>Miniaturas</source>
       <translation>Thumbnails</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="383" />
+      <location filename="../src/settingsdialog.cpp" line="386" />
       <source>Mostrar miniaturas</source>
       <translation>Show thumbnails</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="384" />
+      <location filename="../src/settingsdialog.cpp" line="387" />
       <source>De vídeos y carátulas de música (ffmpegthumbnailer)</source>
       <translation>For videos and music covers (ffmpegthumbnailer)</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="385" />
+      <location filename="../src/settingsdialog.cpp" line="388" />
       <source>De documentos PDF</source>
       <translation>For PDF documents</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="394" />
+      <location filename="../src/settingsdialog.cpp" line="397" />
       <source>Tamaño máximo de imagen:</source>
       <translation>Maximum image size:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="395" />
+      <location filename="../src/settingsdialog.cpp" line="398" />
       <source>Las miniaturas se guardan en ~/.cache/thumbnails (compartidas con Nautilus) y se generan con dos hilos como máximo para no cargar la CPU.</source>
       <translation>Thumbnails are stored in ~/.cache/thumbnails (shared with Nautilus) and made with at most two threads so the CPU isn't loaded.</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="405" />
+      <location filename="../src/settingsdialog.cpp" line="408" />
       <source>Orden:</source>
       <translation>Command:</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="406" />
+      <location filename="../src/settingsdialog.cpp" line="409" />
       <source>Terminal aparte, en la carpeta actual (Mayús+F4). Por defecto xdg-terminal-exec, la terminal de Omarchy.</source>
       <translation>Separate terminal, in the current folder (Shift+F4). Default is xdg-terminal-exec, Omarchy's terminal.</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="407" />
+      <location filename="../src/settingsdialog.cpp" line="410" />
       <source>Con el terminal integrado abierto (F4), un clic en un archivo escribe su nombre</source>
       <translation>With the docked terminal open (F4), clicking a file types its name</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="408" />
+      <location filename="../src/settingsdialog.cpp" line="411" />
       <source>Solo mientras el terminal espera órdenes. Arrastrar archivos al terminal escribe sus rutas completas.</source>
       <translation>Only while the terminal waits for commands. Dragging files onto the terminal types their full paths.</translation>
     </message>

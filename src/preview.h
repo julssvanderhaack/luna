@@ -6,8 +6,13 @@
 #include <QDialog>
 #include <QImage>
 #include <functional>
+#include <memory>
 
+class AudioClip;
 class QLabel;
+class QProgressBar;
+class QTimer;
+class QToolButton;
 class QPlainTextEdit;
 class QStackedWidget;
 class QTreeWidget;
@@ -36,6 +41,8 @@ private:
     void showArchive(const Archive::Listing &l);
     void openArchiveMember(QTreeWidgetItem *item);
     QSize imageTarget() const;
+    void playClip();          // 30 s from the middle of a song (or play/pause it)
+    void updatePlayer();
 
     std::function<QString(int)> m_step;
     QString m_path, m_mime;
@@ -48,4 +55,10 @@ private:
     class QTextBrowser *m_rich;
     QTreeWidget *m_tree;   // inside an archive
     QStackedWidget *m_stack;
+    std::unique_ptr<AudioClip> m_clip;
+    QWidget *m_player;   // ▶/⏸, progress and times of the fragment
+    QToolButton *m_playBtn;
+    QProgressBar *m_playBar;
+    QLabel *m_playTime;
+    QTimer *m_playTick;
 };

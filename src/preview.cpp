@@ -1,11 +1,13 @@
 #include "preview.h"
 #include "i18n.h"
 #include "apps.h"
+#include "clip.h"
 #include "archives.h"
 #include "fsmodel.h"
 #include "icons.h"
 #include "office.h"
 #include "properties.h"
+#include "settings.h"
 #include "theme.h"
 #include <QApplication>
 #include <QDateTime>
@@ -19,6 +21,10 @@
 #include <QMimeDatabase>
 #include <QPlainTextEdit>
 #include <QPointer>
+#include <QProgressBar>
+#include <QHBoxLayout>
+#include <QTimer>
+#include <QToolButton>
 #include <QProcess>
 #include <QScrollBar>
 #include <QStackedWidget>
@@ -151,6 +157,30 @@ Preview::Preview(const QString &path, std::function<QString(int)> step, QWidget 
     connect(m_tree, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *it) { openArchiveMember(it); });
     m_stack->addWidget(m_tree);
     v->addWidget(m_stack, 1);
+
+    m_player = new QWidget;
+    auto *pl = new QHBoxLayout(m_player);
+    pl->setContentsMargins(0, 4, 0, 0);
+    m_playBtn = new QToolButton;
+    m_playBtn->setAutoRaise(true);
+    m_playBtn->setIconSize(QSize(26, 26));   // the Nerd Font glyph fills about half of it
+    m_playBtn->setFixedSize(32, 32);
+    m_playBtn->setFocusPolicy(Qt::NoFocus);   // Space still closes, the arrows still walk
+    connect(m_playBtn, &QToolButton::clicked, this, &Preview::playClip);
+    m_playBar = new QProgressBar;
+    m_playBar->setTextVisible(false);
+    m_playBar->setFixedHeight(4);
+    m_playBar->setRange(0, 1000);
+    m_playTime = new QLabel;
+    m_playTime->setProperty("role", "dim");
+    pl->addWidget(m_playBtn);
+    pl->addWidget(m_playBar, 1);
+    pl->addWidget(m_playTime);
+    m_player->hide();
+    m_playTick = new QTimer(this);
+    m_playTick->setInterval(250);   // only while a fragment plays
+    connect(m_playTick, &QTimer::timeout, this, &Preview::updatePlayer);
+    v->addWidget(m_player);
     v->addWidget(m_facts);
 
     m_hint = new QLabel(i18n("←/→ anterior y siguiente  ·  Intro abrir  ·  Espacio o Esc cerrar"));
@@ -162,6 +192,56 @@ Preview::Preview(const QString &path, std::function<QString(int)> step, QWidget 
     const QSize host = parent ? parent->window()->size() : QSize(1000, 700);
     resize(std::max(520, host.width() * 7 / 10), std::max(400, host.height() * 8 / 10));
     load(path);
+}
+
+namespace {
+QString clock(double s)
+{
+    const int t = int(s + 0.5);
+    return QString("%1:%2").arg(t / 60).arg(t % 60, 2, 10, QChar('0'));
+}
+}
+
+void Preview::playClip()
+{
+    if (m_clip && m_clip->playing()) {
+        m_clip->setPaused(!m_clip->paused());
+        updatePlayer();
+        return;
+    }
+    m_clip = std::make_unique<AudioClip>(m_path, 30);
+    AudioClip *c = m_clip.get();
+    connect(c, &AudioClip::started, this, [this](double start, double length) {
+        m_playBar->setValue(0);
+        m_playBtn->setToolTip(i18n("Pausa (P)"));
+        m_player->setToolTip(i18n("Fragmento de %1 a %2").arg(clock(start), clock(start + length)));
+        m_player->show();
+        m_hint->setText(i18n("P pausa  ·  ←/→ anterior y siguiente  ·  Intro abrir  ·  Espacio o Esc cerrar"));
+        m_playTick->start();
+        updatePlayer();
+    });
+    connect(c, &AudioClip::finished, this, [this] {
+        m_playTick->stop();
+        updatePlayer();
+    });
+    connect(c, &AudioClip::failed, this, [this] {
+        m_playTick->stop();
+        m_player->hide();
+    });
+}
+
+void Preview::updatePlayer()
+{
+    if (!m_clip) return;
+    const bool on = m_clip->playing() && !m_clip->paused();
+    m_playBtn->setIcon(Icons::get().ui(on ? "pause" : "play"));
+    if (!m_clip->playing()) m_playBtn->setToolTip(i18n("Escuchar otra vez (P)"));
+    else m_playBtn->setToolTip(on ? i18n("Pausa (P)") : i18n("Seguir (P)"));
+    const double len = std::max(0.1, m_clip->length());
+    const double pos = m_clip->playing() ? m_clip->position() : len;
+    m_playBar->setValue(int(1000 * pos / len));
+    // where in the song: "1:47 · fragmento 1:32–2:02"
+    m_playTime->setText(i18n("%1 · fragmento %2–%3").arg(clock(m_clip->start() + pos), clock(m_clip->start()), clock(m_clip->start() + len)));
 }
 
 Preview::~Preview()
@@ -186,6 +266,10 @@ void Preview::load(const QString &path)
     m_facts->clear();
     m_text->clear();
     m_page = m_pages = 0;
+    m_clip.reset();
+    m_playTick->stop();
+    m_player->hide();
+    m_hint->setText(i18n("←/→ anterior y siguiente  ·  Intro abrir  ·  Espacio o Esc cerrar"));
     const QFileInfo fi(path);
     const QMimeType type = QMimeDatabase().mimeTypeForFile(fi);
     m_mime = type.name();
@@ -244,6 +328,7 @@ void Preview::load(const QString &path)
         });
         offThread<QList<QPair<QString, QString>>>(this, &m_request, [path] { return mediaSummary(path); },
                                                    [this](const QList<QPair<QString, QString>> &f) { showFacts(f); });
+        if (m_mime.startsWith("audio/") && AudioClip::available() && Settings::get().previewAudio) playClip();
         return;
     }
     if (fi.isFile() && Office::isOffice(m_mime)) {
@@ -499,8 +584,12 @@ void Preview::keyPressEvent(QKeyEvent *e)
             bar->triggerAction(e->key() == Qt::Key_PageDown ? QAbstractSlider::SliderPageStepAdd : QAbstractSlider::SliderPageStepSub);
         }
         return;
+    case Qt::Key_P:
+        if (m_player->isVisible()) playClip();
+        return;
     case Qt::Key_Return:
     case Qt::Key_Enter:
+        m_clip.reset();   // the app it opens in takes over
         Apps::get().openDefault({m_path});
         close();
         return;
