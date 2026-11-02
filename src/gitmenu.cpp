@@ -312,7 +312,7 @@ void add(QMenu *menu, QWidget *parent, const QString &root, const QString &dir, 
                 showText(parent, i18n("Cambios en %1").arg(what), gitNow(root, QStringList{"diff", "HEAD", "--"} + rel));
             });
         if (untracked || worktree || conflict)
-            g->addAction(ic.ui("newfolder"), i18n("Añadir al índice (git add)"), parent,
+            g->addAction(ic.ui("plus"), i18n("Añadir al índice (git add)"), parent,
                          [=] { act(parent, root, QStringList{"add", "-A", "--"} + rel, i18n("Añadido al índice: %1").arg(what), status); });
         if (staged)
             g->addAction(ic.ui("back"), i18n("Quitar del índice"), parent,
@@ -339,7 +339,7 @@ void add(QMenu *menu, QWidget *parent, const QString &root, const QString &dir, 
             });
         }
         if (tracked) {
-            g->addAction(ic.ui("recent"), i18n("Historial…"), parent, [=] { historyDialog(parent, root, rel, status); });
+            g->addAction(ic.ui("history"), i18n("Historial…"), parent, [=] { historyDialog(parent, root, rel, status); });
             if (rel.size() == 1 && QFileInfo(paths[0]).isFile())
                 g->addAction(ic.ui("info"), i18n("Quién cambió cada línea (blame)"), parent, [=] {
                     showText(parent, i18n("Autoría de «%1»").arg(rel[0]), gitNow(root, {"blame", "--date=short", "--", rel[0]}));
@@ -364,7 +364,7 @@ void add(QMenu *menu, QWidget *parent, const QString &root, const QString &dir, 
 
     // the repository
     const QString branch = gitNow(root, {"branch", "--show-current"}).trimmed();
-    g->addAction(ic.ui("star"), i18n("Confirmar cambios (commit)…"), parent, [=] { commitDialog(parent, root, status); });
+    g->addAction(ic.ui("check"), i18n("Confirmar cambios (commit)…"), parent, [=] { commitDialog(parent, root, status); });
     if (!gitNow(root, {"remote"}).trimmed().isEmpty()) {   // nothing to pull from or push to otherwise
         g->addAction(ic.ui("back"), i18n("Traer cambios (pull)"), parent, [=] { act(parent, root, {"pull", "--ff-only"}, i18n("Traídos los cambios"), status); });
         g->addAction(ic.ui("forward"), i18n("Enviar cambios (push)"), parent, [=] {
@@ -386,7 +386,7 @@ void add(QMenu *menu, QWidget *parent, const QString &root, const QString &dir, 
         g->addAction(ic.ui("refresh"), i18n("Actualizar remotos (fetch)"), parent, [=] { act(parent, root, {"fetch", "--all", "--prune"}, i18n("Remotos actualizados"), status); });
     }
 
-    QMenu *branches = g->addMenu(ic.ui("split"), branch.isEmpty() ? i18n("Rama") : i18n("Rama: %1").arg(branch));
+    QMenu *branches = g->addMenu(ic.ui("branch"), branch.isEmpty() ? i18n("Rama") : i18n("Rama: %1").arg(branch));
     for (const QString &b : gitNow(root, {"branch", "--format=%(refname:short)"}).split('\n', Qt::SkipEmptyParts)) {
         QAction *a = branches->addAction(b, parent, [=] { act(parent, root, {"switch", b}, i18n("Ahora en la rama «%1»").arg(b), status); });
         a->setCheckable(true);
@@ -404,7 +404,7 @@ void add(QMenu *menu, QWidget *parent, const QString &root, const QString &dir, 
     if (!gitNow(root, {"stash", "list", "-n", "1"}).trimmed().isEmpty())
         g->addAction(i18n("Recuperar lo guardado (stash pop)"), parent, [=] { act(parent, root, {"stash", "pop"}, i18n("Cambios recuperados"), status); });
     g->addSeparator();
-    g->addAction(ic.ui("recent"), i18n("Historial del repositorio…"), parent, [=] { historyDialog(parent, root, {}, status); });
+    g->addAction(ic.ui("history"), i18n("Historial del repositorio…"), parent, [=] { historyDialog(parent, root, {}, status); });
     static const bool lazygit = !QStandardPaths::findExecutable("lazygit").isEmpty();
     if (lazygit) g->addAction(ic.ui("terminal"), i18n("Abrir lazygit"), parent, [dir] { openLazygit(dir); });
 }

@@ -348,6 +348,7 @@ QIcon Icons::ui(const QString &name)
         {"trash", 0xF1F8}, {"info", 0xF05A}, {"open", 0xF07C}, {"lock", 0xF023}, {"star", 0xF005},
         {"restore", 0xF0E2}, {"network", 0xF0E8}, {"crumbs", 0xF0C1}, {"chevron", 0xF078}, {"hidden", 0xF070}, {"zoomin", 0xF00E}, {"zoomout", 0xF010}, {"cancel", 0xF05E},
         {"play", 0xF04B}, {"disk", 0xF0A0}, {"image", 0xF03E}, {"phone", 0xF10B}, {"git", 0xF1D3}, {"archive", 0xF187},
+        {"history", 0xF1DA}, {"plus", 0xF067}, {"check", 0xF00C}, {"unlock", 0xF09C}, {"branch", 0xF126},
     };
     QIcon icon = glyph(g.value(name, 0xF128), QColor());   // follows the theme when painted
     m_cache.insert(key, icon);

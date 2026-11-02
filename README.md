@@ -12,14 +12,19 @@ escritorio. Lleva el nombre de Luna, una gata siamesa, que es también su icono.
 | Lista detallada | Vista dividida |
 |---|---|
 | ![Lista detallada con tamaño, tipo, fecha, permisos y propietario](docs/capturas/detallada.png) | ![Dos paneles en la misma ventana](docs/capturas/dividida.png) |
-| **Columnas** | **Conectar a un servidor** |
-| ![Vista de columnas](docs/capturas/columnas.png) | ![Diálogo de conexión SSH/SFTP, FTP, SMB y NFS](docs/capturas/conectar.png) |
+| **Vista previa: la portada de un Word** | **Un comprimido como árbol, sin extraerlo** |
+| ![Vista previa con la primera página de un documento de Word](docs/capturas/vista-previa.png) | ![Vista previa de un zip con sus carpetas en árbol](docs/capturas/comprimido.png) |
+| **Menú Git en un repositorio** | **Comprimir y cifrar, como Kleopatra** |
+| ![Botón derecho sobre un archivo modificado con el submenú Git](docs/capturas/git.png) | ![Diálogo de cifrar con contraseña o para claves públicas](docs/capturas/cifrar.png) |
+| **Terminal integrado (F4)** | **Columnas** |
+| ![Terminal abajo que sigue la carpeta, con git log](docs/capturas/terminal.png) | ![Vista de columnas](docs/capturas/columnas.png) |
 | **Metadatos de una foto (EXIF y GPS)** | **Permisos** |
 | ![Pestaña de metadatos en Propiedades](docs/capturas/metadatos.png) | ![Pestaña de permisos con casillas y valor octal](docs/capturas/permisos.png) |
+| **Conectar a un servidor** | **Ajustes** |
+| ![Diálogo de conexión SSH/SFTP, FTP, SMB y NFS](docs/capturas/conectar.png) | ![Ajustes](docs/capturas/ajustes.png) |
 
-![Ajustes](docs/capturas/ajustes.png)
-
-*Las capturas usan una carpeta personal de ejemplo y el tema Cobalt2 de Omarchy.*
+*Las capturas usan una carpeta personal de ejemplo (archivos, claves y repositorio
+inventados) y el tema Cobalt2 de Omarchy.*
 
 ## Qué hace
 

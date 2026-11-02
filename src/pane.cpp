@@ -1732,8 +1732,8 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             if (Crypto::haveGpg()) {
                 bool anyEncrypted = false;
                 for (const QString &x : sel) anyEncrypted |= Crypto::isEncrypted(x);
-                if (anyEncrypted) m.addAction(ic.ui("open"), i18n("Descifrar aquí"), this, &Pane::decryptSelection);
-                m.addAction(ic.ui("hidden"), i18n("Comprimir y cifrar…"), this, &Pane::encryptSelection);
+                if (anyEncrypted) m.addAction(ic.ui("unlock"), i18n("Descifrar aquí"), this, &Pane::decryptSelection);
+                m.addAction(ic.ui("lock"), i18n("Comprimir y cifrar…"), this, &Pane::encryptSelection);
             }
             m.addAction(ic.ui("star"), i18n("Crear enlace"), this, &Pane::createLink);
         }

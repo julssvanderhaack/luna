@@ -2,6 +2,9 @@
 #include "fsmodel.h"
 #include "gitmenu.h"
 #include <QMenu>
+#include <QToolButton>
+#include <QRadioButton>
+#include <QKeyEvent>
 #include "i18n.h"
 #include "icons.h"
 #include "thumbs.h"
@@ -155,7 +158,8 @@ int main(int argc, char **argv)
     };
     app.installEventFilter(new SmoothScroll(&app));   // before any object filter (Ctrl+wheel zoom passes through)
     if (qEnvironmentVariableIsSet("LUNA_DEBUG_META")) app.installEventFilter(new MetaCallLogger);
-    auto *w = new MainWindow(paths);
+    // LUNA_SHOTS takes a photo for Propiedades as second argument: not a tab
+    auto *w = new MainWindow(qEnvironmentVariableIsSet("LUNA_SHOTS") ? paths.mid(0, 1) : paths);
     w->setAttribute(Qt::WA_DeleteOnClose);
     w->show();
     for (const QString &uri : remotes) QTimer::singleShot(0, w, [w, uri] { w->connectServer(uri); });
@@ -558,6 +562,120 @@ int main(int argc, char **argv)
                 QTimer::singleShot(400, c, [=] { shot(c, "10-conectar"); c->close(); qApp->quit(); });
             });
         });
+    }
+    // README screenshots of the newer features: LUNA_TOUR=<dir> with
+    // LUNA_TOUR_DOC (Office file), LUNA_TOUR_ZIP (archive), LUNA_TOUR_GIT (a
+    // changed file in a repository), LUNA_TOUR_CRYPT (what to encrypt) and
+    // LUNA_TOUR_TERM (a command for the docked terminal). Saves the windows
+    // and geom.txt (name x y w h) so they can be put over the main window.
+    if (qEnvironmentVariableIsSet("LUNA_TOUR")) {
+        const QString dir = qEnvironmentVariable("LUNA_TOUR");
+        auto geom = std::make_shared<QFile>(dir + "/geom.txt");
+        if (!geom->open(QIODevice::WriteOnly | QIODevice::Text)) qWarning("LUNA_TOUR: cannot write %s", qPrintable(geom->fileName()));
+        auto shot = [dir, geom](QWidget *x, const QString &n) {
+            x->grab().save(dir + "/" + n + ".png");
+            const QRect g = x->isWindow() ? x->geometry() : QRect(x->mapTo(x->window(), QPoint()), x->size());
+            geom->write(QString("%1 %2 %3 %4 %5\n").arg(n).arg(g.x()).arg(g.y()).arg(g.width()).arg(g.height()).toUtf8());
+            geom->flush();
+        };
+        auto steps = std::make_shared<QList<std::function<void(std::function<void()>)>>>();
+        auto preview = [=](const QString &file, const QString &name, int wait) {
+            steps->append([=](std::function<void()> next) {
+                if (file.isEmpty()) return next();
+                w->pane()->setPath(QFileInfo(file).absolutePath(), true, {file});
+                QTimer::singleShot(1500, w, [=] {
+                    shot(w, name + "-fondo");
+                    auto *pv = new Preview(file, {}, w);
+                    pv->show();
+                    QTimer::singleShot(wait, w, [=] {
+                        shot(pv, name);
+                        pv->close();
+                        next();
+                    });
+                });
+            });
+        };
+        preview(qEnvironmentVariable("LUNA_TOUR_DOC"), "word", 9000);
+        preview(qEnvironmentVariable("LUNA_TOUR_ZIP"), "zip", 2000);
+        const QString gitFile = qEnvironmentVariable("LUNA_TOUR_GIT");
+        if (!gitFile.isEmpty())
+            steps->append([=](std::function<void()> next) {
+                w->pane()->setPath(QFileInfo(gitFile).absolutePath(), true, {gitFile});
+                QTimer::singleShot(2000, w, [=] {
+                    QAbstractItemView *v = nullptr;
+                    for (auto *x : w->pane()->findChildren<QAbstractItemView *>())
+                        if (x->isVisible()) v = x;
+                    if (!v) return next();
+                    QModelIndex at;
+                    for (int r = 0; r < v->model()->rowCount(v->rootIndex()); ++r) {
+                        const QModelIndex ix = v->model()->index(r, 0, v->rootIndex());
+                        if (ix.data().toString() == QFileInfo(gitFile).fileName()) at = ix;
+                    }
+                    const QPoint pos = v->visualRect(at).center() + QPoint(40, 0);
+                    QTimer::singleShot(500, w, [=] {
+                        auto *menu = qobject_cast<QMenu *>(QApplication::activePopupWidget());
+                        if (!menu) return;
+                        for (QAction *a : menu->actions())
+                            if (a->text() == "Git") menu->setActiveAction(a);
+                        QTimer::singleShot(600, w, [=] {
+                            shot(w, "git-fondo");
+                            shot(menu, "menu");
+                            if (QAction *a = menu->activeAction(); a && a->menu()) shot(a->menu(), "git");
+                            menu->close();
+                            QTimer::singleShot(300, w, next);
+                        });
+                    });
+                    emit v->customContextMenuRequested(pos);
+                });
+            });
+        const QString crypt = qEnvironmentVariable("LUNA_TOUR_CRYPT");
+        if (!crypt.isEmpty())
+            steps->append([=](std::function<void()> next) {
+                w->pane()->setPath(QFileInfo(crypt).absolutePath(), true, {crypt});
+                QTimer::singleShot(1200, w, [=] {
+                    shot(w, "cifrar-fondo");
+                    QTimer::singleShot(800, w, [=] {
+                        auto *d = qobject_cast<QDialog *>(QApplication::activeModalWidget());
+                        if (!d) return;
+                        for (auto *r : d->findChildren<QRadioButton *>())   // the keys are listed when this is picked
+                            if (r->text() == i18n("Para estas personas (con sus claves públicas)")) r->click();
+                        QTimer::singleShot(1500, d, [=] {
+                            shot(d, "cifrar");
+                            d->reject();
+                        });
+                    });
+                    Crypto::encryptDialog(w, {crypt}, QFileInfo(crypt).absolutePath(), [](bool, const QString &, const QString &) {});
+                    QTimer::singleShot(300, w, next);
+                });
+            });
+        const QString term = qEnvironmentVariable("LUNA_TOUR_TERM");
+        if (!term.isEmpty())
+            steps->append([=](std::function<void()> next) {
+                if (!gitFile.isEmpty()) w->pane()->setPath(QFileInfo(gitFile).absolutePath());
+                for (auto *b : w->findChildren<QToolButton *>())
+                    if (b->toolTip() == i18n("Terminal (F4)") && !b->isChecked()) b->click();
+                QTimer::singleShot(2500, w, [=] {
+                    for (auto *t : w->findChildren<QWidget *>())
+                        if (t->inherits("Terminal")) {
+                            for (const QChar c : term) {
+                                QKeyEvent k(QEvent::KeyPress, 0, Qt::NoModifier, QString(c));
+                                QCoreApplication::sendEvent(t, &k);
+                            }
+                            QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier, "\r");
+                            QCoreApplication::sendEvent(t, &enter);
+                        }
+                    QTimer::singleShot(2000, w, [=] {
+                        shot(w, "terminal");
+                        next();
+                    });
+                });
+            });
+        auto run = std::make_shared<std::function<void(int)>>();
+        *run = [steps, run](int i) {
+            if (i >= steps->size()) return qApp->quit();
+            (*steps)[i]([run, i] { QTimer::singleShot(0, qApp, [run, i] { (*run)(i + 1); }); });
+        };
+        QTimer::singleShot(1500, w, [run] { (*run)(0); });
     }
     const int rc = app.exec();
     FsModel::shutdown();
