@@ -31,15 +31,24 @@ escritorio. Lleva el nombre de Luna, una gata siamesa, que es también su icono.
 - **Archivos:** abrir con (respeta `mimeapps.list`), mover a / copiar a, copiar y
   mover con progreso y gestión de conflictos, papelera estándar, renombrar en lote,
   comprimir y extraer, enlaces, deshacer y rehacer.
+- **Cifrar** como Kleopatra (GnuPG): «Comprimir y cifrar…» con una contraseña
+  (AES-256) o para las claves públicas de otras personas, firmando con la tuya;
+  `archivo.gpg`, `carpeta.tar.gpg`. Doble clic o «Descifrar aquí» lo abre.
 - **Vista previa** con la barra espaciadora: fotos, páginas de PDF, texto,
-  Markdown con formato, lo que hay dentro de zip/tar/7z/rar, un fotograma o la
-  carátula de vídeos y canciones con sus datos; ← / → recorren la carpeta.
+  Markdown con formato, documentos de Word/Excel/PowerPoint/LibreOffice desde
+  la portada (LibreOffice, guardado en caché), un fotograma o la carátula de
+  vídeos y canciones con sus datos; ← / → recorren la carpeta. Los comprimidos
+  se ven como árbol con todas sus carpetas, y un doble clic abre un archivo de
+  dentro sin extraer el resto.
 - **Ir a una carpeta** (Ctrl + P) escribiendo trozos de su ruta, con las carpetas
   frecuentes de zoxide y tus marcadores; Luna le cuenta a zoxide dónde vas.
 - **Buscar** por nombre o dentro de los archivos (ripgrep, a prioridad mínima),
   y filtrar por fecha de modificación y tamaño.
 - **git:** en un repositorio, los nombres se colorean (modificado, nuevo,
-  conflicto) y la barra de abajo muestra la rama y los cambios.
+  conflicto) y la barra de abajo muestra la rama y los cambios. El botón derecho
+  tiene un menú «Git» según el estado: ver cambios, añadir o quitar del índice,
+  restaurar, historial (y volver a una versión), blame, ignorar, confirmar,
+  pull/push, ramas y stash.
 - **Imágenes:** girar, reducir tamaño y convertir a JPG/PNG/WebP (ImageMagick).
 - **Terminal integrado** abajo (F4) que sigue la carpeta; un clic en un archivo
   escribe su nombre y arrastrar archivos escribe sus rutas.
@@ -71,10 +80,11 @@ compiló (**Qt 6.12**, exiv2 0.28, poppler 26): en la práctica, Omarchy o cualq
 distribución basada en Arch al día.
 
 ```sh
-sudo pacman -S --needed qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libvterm
-# opcionales: miniaturas de vídeo, servidores remotos y comprimir/extraer,
-# buscar dentro de archivos, imágenes, servidores de la red y Ctrl + P
-sudo pacman -S --needed ffmpegthumbnailer gvfs gvfs-smb libarchive 7zip ripgrep imagemagick avahi zoxide
+sudo pacman -S --needed qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libarchive libvterm
+# opcionales: miniaturas de vídeo, servidores remotos, comprimir/extraer,
+# buscar dentro de archivos, imágenes, servidores de la red, Ctrl + P,
+# portadas de documentos de Office, cifrar y git
+sudo pacman -S --needed ffmpegthumbnailer gvfs gvfs-smb 7zip ripgrep imagemagick avahi zoxide libreoffice-fresh gnupg git
 unzip luna-1.1.0-linux-x86_64.zip
 cd luna-1.1.0-linux-x86_64
 ./install.sh            # en ~/.local (sin sudo)
@@ -94,10 +104,10 @@ En otras distribuciones, o si el ejecutable se queja de alguna biblioteca, comp�
 ## Compilar
 
 Necesitas un compilador con C++17, CMake ≥ 3.20, Qt 6 (Widgets, Svg),
-libmediainfo, exiv2 y poppler-qt6.
+libmediainfo, exiv2, poppler-qt6 y libarchive.
 
 ```sh
-# Arch: sudo pacman -S --needed base-devel cmake qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libvterm   # libvterm: terminal integrado (opcional)
+# Arch: sudo pacman -S --needed base-devel cmake qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libarchive libvterm   # libvterm: terminal integrado (opcional)
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j"$(nproc)"
 cmake --install build --prefix ~/.local

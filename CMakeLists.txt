@@ -44,9 +44,14 @@ add_executable(luna
   src/discovery.h src/discovery.cpp
   src/mainwindow.h src/mainwindow.cpp
   src/i18n.h src/i18n.cpp
+  src/archives.h src/archives.cpp
+  src/office.h src/office.cpp
+  src/crypto.h src/crypto.cpp
+  src/gitmenu.h src/gitmenu.cpp
   data/luna.qrc
 )
-target_link_libraries(luna PRIVATE Qt6::Widgets Qt6::Svg PkgConfig::MEDIA)
+pkg_check_modules(LIBARCHIVE REQUIRED IMPORTED_TARGET libarchive)
+target_link_libraries(luna PRIVATE Qt6::Widgets Qt6::Svg PkgConfig::MEDIA PkgConfig::LIBARCHIVE)
 
 # Docked terminal (F4): optional, only with libvterm (Arch: libvterm).
 option(LUNA_WITH_TERMINAL "Docked terminal (needs libvterm)" ON)

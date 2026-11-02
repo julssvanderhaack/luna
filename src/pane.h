@@ -72,6 +72,8 @@ public:
     void copyPath();
     void compressSelection();
     void extractSelection();
+    void encryptSelection();   // Kleopatra-style .gpg / .tar.gpg
+    void decryptSelection();
     void createLink();
 
 signals:

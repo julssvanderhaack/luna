@@ -1,4 +1,5 @@
 #include "thumbs.h"
+#include "office.h"
 #include "settings.h"
 #include <QCoreApplication>
 #include <QCryptographicHash>
@@ -123,6 +124,14 @@ QImage generate(const QString &path, const QString &mime)
         double dpi = 72.0 * kSize / std::max(pt.width(), pt.height());
         return fit(page->renderToImage(dpi, dpi));
     }
+    if (Office::isOffice(mime)) {
+        // never LibreOffice here (a folder of documents would take minutes):
+        // the picture the file carries, or the PDF a preview already made
+        QImage img = Office::embeddedThumbnail(path);
+        if (!img.isNull()) return fit(img.width() > kSize || img.height() > kSize ? img.scaled(kSize, kSize, Qt::KeepAspectRatio, Qt::SmoothTransformation) : img);
+        const QString pdf = Office::cachedPdf(path);
+        return pdf.isEmpty() ? QImage() : generate(pdf, "application/pdf");
+    }
     if (mime.startsWith("video/") || mime.startsWith("audio/")) {
         QTemporaryFile tmp(QDir::tempPath() + "/luna-thumb-XXXXXX.png");
         if (!tmp.open()) return {};
@@ -158,6 +167,7 @@ bool Thumbs::canThumb(const QString &mime, qint64 size)
     const Settings &s = Settings::get();
     if (mime.startsWith("image/")) return size <= qint64(s.thumbMaxMB) * 1024 * 1024 && mime != "image/x-xcf";
     if (mime == "application/pdf") return s.thumbPdf && size <= qint64(s.thumbMaxMB) * 1024 * 1024;
+    if (Office::isOffice(mime)) return s.thumbPdf && size <= qint64(s.thumbMaxMB) * 1024 * 1024;
     if (mime.startsWith("video/")) return s.thumbVideos;
     if (mime == "audio/mpeg" || mime == "audio/flac" || mime == "audio/mp4" || mime == "audio/x-m4a") return s.thumbVideos;
     return false;

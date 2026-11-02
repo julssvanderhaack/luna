@@ -1,4 +1,6 @@
 #include "pane.h"
+#include "crypto.h"
+#include "gitmenu.h"
 #include "i18n.h"
 #include "apps.h"
 #include "fileops.h"
@@ -901,7 +903,20 @@ void Pane::openFiles(const QStringList &paths)
     }
     if (toOpen.isEmpty()) return;
     Recent::add(toOpen);
-    const QStringList none = Apps::get().openDefault(toOpen);
+    QStringList none = Apps::get().openDefault(toOpen);
+    if (!isVirtual() && Crypto::haveGpg())
+        for (const QString &p : QStringList(none))
+            if (Crypto::isEncrypted(p)) {
+                none.removeAll(p);
+                Crypto::decryptDialog(this, p, QFileInfo(p).absolutePath(), [this](bool ok, const QString &msg, const QString &made) {
+                    if (!ok) QMessageBox::warning(this, i18n("Descifrar"), msg);
+                    emit status(msg);
+                    if (ok) {
+                        m_pendingSelect = {made};
+                        m_model->refresh();
+                    }
+                });
+            }
     if (!none.isEmpty()) {
         OpenWithDialog d(none, this);
         if (d.exec() == QDialog::Accepted) {
@@ -1472,6 +1487,37 @@ void Pane::extractSelection()
     }
 }
 
+void Pane::encryptSelection()
+{
+    const QStringList sel = selectedPaths();
+    if (sel.isEmpty() || isVirtual()) return;
+    Crypto::encryptDialog(this, sel, m_path, [this](bool ok, const QString &msg, const QString &made) {
+        if (!ok) QMessageBox::warning(this, i18n("Comprimir y cifrar"), msg);
+        emit status(msg);
+        if (ok) {
+            m_pendingSelect = {made};
+            m_model->refresh();
+        }
+    });
+    emit status(i18n("Cifrando…"));
+}
+
+void Pane::decryptSelection()
+{
+    if (isVirtual()) return;
+    for (const QString &p : selectedPaths()) {
+        if (!Crypto::isEncrypted(p)) continue;
+        Crypto::decryptDialog(this, p, m_path, [this](bool ok, const QString &msg, const QString &made) {
+            if (!ok) QMessageBox::warning(this, i18n("Descifrar"), msg);
+            emit status(msg);
+            if (ok) {
+                m_pendingSelect = {made};
+                m_model->refresh();
+            }
+        });
+    }
+}
+
 void Pane::handleDrop(const QList<QUrl> &urls, const QString &dest)
 {
     QStringList srcs;
@@ -1683,9 +1729,19 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
         if (!isVirtual()) {   // these create things in the current folder
             if (archive) m.addAction(ic.ui("open"), i18n("Extraer aquí"), this, &Pane::extractSelection);
             m.addAction(ic.ui("copy"), i18n("Comprimir…"), this, &Pane::compressSelection);
+            if (Crypto::haveGpg()) {
+                bool anyEncrypted = false;
+                for (const QString &x : sel) anyEncrypted |= Crypto::isEncrypted(x);
+                if (anyEncrypted) m.addAction(ic.ui("open"), i18n("Descifrar aquí"), this, &Pane::decryptSelection);
+                m.addAction(ic.ui("hidden"), i18n("Comprimir y cifrar…"), this, &Pane::encryptSelection);
+            }
             m.addAction(ic.ui("star"), i18n("Crear enlace"), this, &Pane::createLink);
         }
         if (sel.size() == 1 && allDirs) m.addAction(ic.ui("star"), i18n("Añadir a marcadores"), this, [this, sel] { emit bookmarkRequested(sel[0]); });
+        if (!isVirtual() && !m_gitRoot.isEmpty()) {
+            m.addSeparator();
+            GitMenu::add(&m, this, m_gitRoot, m_path, sel, [this](const QString &s) { emit status(s); });
+        }
         m.addSeparator();
         m.addAction(ic.ui("info"), i18n("Propiedades"), QKeySequence("Alt+Return"), this, [this, sel] { emit propertiesRequested(sel); });
     } else {
@@ -1707,6 +1763,12 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             m.addAction(ic.ui("copy"), i18n("Copiar ruta de la carpeta"), this, &Pane::copyPath);
             if (haveSonata()) m.addAction(ic.ui("play"), i18n("Reproducir la carpeta en Sonata"), this, [this] { playInSonata({m_path}); });
             if (haveDiskPanel()) m.addAction(ic.ui("disk"), i18n("Ver qué ocupa espacio"), this, [this] { showDiskUsage(m_path); });
+            if (!m_gitRoot.isEmpty()) GitMenu::add(&m, this, m_gitRoot, m_path, {}, [this](const QString &s) { emit status(s); });
+            else
+                GitMenu::addInit(&m, this, m_path, [this](const QString &s) {
+                    emit status(s);
+                    refreshGit();
+                });
         }
         m.addAction(i18n("Seleccionar todo"), QKeySequence::SelectAll, this, &Pane::selectAll);
         m.addSeparator();

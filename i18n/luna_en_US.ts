@@ -4,54 +4,296 @@
   <context>
     <name>Luna</name>
     <message>
-      <location filename="../src/apps.cpp" line="285" />
+      <location filename="../src/apps.cpp" line="293" />
       <source>Abrir con…</source>
       <translation>Open With…</translation>
     </message>
     <message>
-      <location filename="../src/apps.cpp" line="289" />
+      <location filename="../src/apps.cpp" line="297" />
       <source>Elige la aplicación para abrir «%1»</source>
       <translation>Choose the application to open “%1”</translation>
     </message>
     <message>
-      <location filename="../src/apps.cpp" line="290" />
+      <location filename="../src/apps.cpp" line="298" />
       <source>Elige la aplicación para abrir %1 archivos</source>
       <translation>Choose the application to open %1 files</translation>
     </message>
     <message>
-      <location filename="../src/apps.cpp" line="294" />
+      <location filename="../src/apps.cpp" line="302" />
       <source>Buscar aplicación…</source>
       <translation>Search applications…</translation>
     </message>
     <message>
-      <location filename="../src/apps.cpp" line="299" />
+      <location filename="../src/apps.cpp" line="307" />
       <source>Usar siempre para «%1»</source>
       <translation>Always use for “%1”</translation>
     </message>
     <message>
-      <location filename="../src/apps.cpp" line="302" />
+      <location filename="../src/apps.cpp" line="310" />
       <source>Abrir</source>
       <translation>Open</translation>
     </message>
     <message>
-      <location filename="../src/apps.cpp" line="303" />
+      <location filename="../src/apps.cpp" line="311" />
       <source>Cancelar</source>
       <translation>Cancel</translation>
     </message>
     <message>
-      <location filename="../src/apps.cpp" line="339" />
+      <location filename="../src/apps.cpp" line="347" />
       <source>  (predeterminada)</source>
       <translation>  (default)</translation>
     </message>
     <message>
-      <location filename="../src/apps.cpp" line="346" />
+      <location filename="../src/apps.cpp" line="354" />
       <source>Recomendadas</source>
       <translation>Recommended</translation>
     </message>
     <message>
-      <location filename="../src/apps.cpp" line="349" />
+      <location filename="../src/apps.cpp" line="357" />
       <source>Todas las aplicaciones</source>
       <translation>All Applications</translation>
+    </message>
+    <message>
+      <location filename="../src/archives.cpp" line="90" />
+      <source>Está cifrado: hace falta la contraseña.</source>
+      <translation>It's encrypted: the password is needed.</translation>
+    </message>
+    <message>
+      <location filename="../src/archives.cpp" line="96" />
+      <source>No está en el comprimido.</source>
+      <translation>It's not in the archive.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="84" />
+      <source>La contraseña no es correcta.</source>
+      <translation>The password is wrong.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="85" />
+      <source>No tienes la clave privada con la que se cifró.</source>
+      <translation>You don't have the private key it was encrypted for.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="86" />
+      <source>Cancelado.</source>
+      <translation>Canceled.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="87" />
+      <source>No es un archivo cifrado con GPG.</source>
+      <translation>It's not a GPG-encrypted file.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="95" />
+      <source>Firma válida de %1</source>
+      <translation>Valid signature from %1</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="96" />
+      <source>⚠ ¡La firma NO es válida: el archivo se ha modificado!</source>
+      <translation>⚠ The signature is NOT valid: the file has been tampered with!</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="97" />
+      <source>Firmado con una clave que no tienes</source>
+      <translation>Signed with a key you don't have</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="217" />
+      <source>Cifrado en «%1»</source>
+      <translation>Encrypted into “%1”</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="217" />
+      <source>No se pudo cifrar: %1</source>
+      <translation>Couldn't encrypt: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="272" />
+      <source>No se pudo descifrar: %1</source>
+      <translation>Couldn't decrypt: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="287" />
+      <source>Descifrado en «%1»</source>
+      <translation>Decrypted into “%1”</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="305" />
+      <source>Creado el par de claves de %1</source>
+      <translation>Created the key pair for %1</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="305" />
+      <source>No se pudo crear la clave: %1</source>
+      <translation>Couldn't create the key: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="321" />
+      <source>Claves importadas: %1</source>
+      <translation>Keys imported: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="321" />
+      <source>No se pudo importar: %1</source>
+      <translation>Couldn't import: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="332" />
+      <source>Crear mi par de claves</source>
+      <translation>Create my key pair</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="334" />
+      <source>Con tu par de claves otros pueden cifrarte archivos que solo tú abres,
+y tú puedes firmar los tuyos. La contraseña protege la clave privada.</source>
+      <translation>With your key pair others can encrypt files only you can open,
+and you can sign yours. The password protects the private key.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="342" />
+      <source>Nombre:</source>
+      <translation>Name:</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="343" />
+      <source>Correo:</source>
+      <translation>Email:</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="344" />
+      <source>Contraseña:</source>
+      <translation>Password:</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="345" />
+      <source>Repítela:</source>
+      <translation>Repeat it:</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="347" />
+      <source>Crear</source>
+      <translation>Create</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="353" />
+      <source>Las contraseñas no coinciden o están vacías.</source>
+      <translation>The passwords don't match or are empty.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="371" />
+      <source>Cifrar</source>
+      <translation>Encrypt</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="371" />
+      <source>Hace falta GnuPG (gpg) para cifrar.</source>
+      <translation>GnuPG (gpg) is needed to encrypt.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="377" />
+      <source>archivo</source>
+      <translation>archive</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="380" />
+      <source>Comprimir y cifrar</source>
+      <translation>Compress and encrypt</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="383" />
+      <source>Cifrar «%1»</source>
+      <translation>Encrypt “%1”</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="383" />
+      <source>Cifrar %1 elementos</source>
+      <translation>Encrypt %1 items</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="386" />
+      <source>Guardar como:</source>
+      <translation>Save as:</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="389" />
+      <source>Con una contraseña</source>
+      <translation>With a password</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="390" />
+      <source>Para estas personas (con sus claves públicas)</source>
+      <translation>For these people (with their public keys)</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="400" />
+      <source>Mostrar</source>
+      <translation>Show</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="408" />
+      <source>Cifrado AES-256. Quien tenga la contraseña podrá abrirlo (también con Kleopatra o gpg).</source>
+      <translation>AES-256 encryption. Anyone with the password can open it (also with Kleopatra or gpg).</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="418" />
+      <source>Firmar con mi clave:</source>
+      <translation>Sign with my key:</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="424" />
+      <source>Importar clave…</source>
+      <translation>Import key…</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="425" />
+      <source>Crear mi par de claves…</source>
+      <translation>Create my key pair…</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="443" />
+      <source>  · tú</source>
+      <translation>  · you</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="444" />
+      <source>  · sin verificar</source>
+      <translation>  · unverified</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="452" />
+      <source>Aún no hay claves: crea la tuya o importa la de quien vaya a abrirlo.</source>
+      <translation>No keys yet: create yours or import the one of whoever will open it.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="470" />
+      <source>Importar clave pública</source>
+      <translation>Import public key</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="470" />
+      <source>Claves (*.asc *.gpg *.pgp *.key);;Todo (*)</source>
+      <translation>Keys (*.asc *.gpg *.pgp *.key);;All (*)</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="494" />
+      <source>Marca al menos una persona.</source>
+      <translation>Tick at least one person.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="516" />
+      <source>Descifrar</source>
+      <translation>Decrypt</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="516" />
+      <source>Hace falta GnuPG (gpg) para descifrar.</source>
+      <translation>GnuPG (gpg) is needed to decrypt.</translation>
+    </message>
+    <message>
+      <location filename="../src/crypto.cpp" line="522" />
+      <source>Contraseña de «%1»:</source>
+      <translation>Password for “%1”:</translation>
     </message>
     <message>
       <location filename="../src/fileops.cpp" line="30" />
@@ -117,11 +359,6 @@
       <location filename="../src/fileops.cpp" line="176" />
       <source>No se pudo restaurar «%1»: %2</source>
       <translation>Couldn't restore “%1”: %2</translation>
-    </message>
-    <message>
-      <location filename="../src/fileops.cpp" line="184" />
-      <source>Cancelado.</source>
-      <translation>Canceled.</translation>
     </message>
     <message>
       <location filename="../src/fileops.cpp" line="227" />
@@ -279,6 +516,361 @@
       <translation>Owner</translation>
     </message>
     <message>
+      <location filename="../src/gitmenu.cpp" line="80" />
+      <source>git %1…</source>
+      <translation>git %1…</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="86" />
+      <source>git %1 falló</source>
+      <translation>git %1 failed</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="117" />
+      <source>No hay cambios.</source>
+      <translation>No changes.</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="136" />
+      <source>Historial del repositorio</source>
+      <translation>Repository history</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="136" />
+      <source>Historial de %1</source>
+      <translation>History of %1</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="141" />
+      <source>Versión</source>
+      <translation>Version</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="141" />
+      <source>Fecha</source>
+      <translation>Date</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="141" />
+      <source>Autor</source>
+      <translation>Author</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="141" />
+      <source>Descripción</source>
+      <translation>Description</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="156" />
+      <source>Restaurar esta versión…</source>
+      <translation>Restore this version…</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="175" />
+      <source>Restaurar esta versión</source>
+      <translation>Restore this version</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="176" />
+      <source>¿Volver «%1» a como estaba en %2 («%3»)? Los cambios sin confirmar del archivo se pierden.</source>
+      <translation>Bring “%1” back to how it was in %2 (“%3”)? The file's uncommitted changes are lost.</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="179" />
+      <source>«%1» restaurado a %2</source>
+      <translation>“%1” restored to %2</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="205" />
+      <source>Confirmar cambios</source>
+      <translation>Commit changes</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="208" />
+      <source>No hay nada que confirmar.</source>
+      <translation>Nothing to commit.</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="208" />
+      <source>Archivos que entran en la confirmación:</source>
+      <translation>Files going into the commit:</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="211" />
+      <source>nuevo</source>
+      <translation>new</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="211" />
+      <source>borrado</source>
+      <translation>deleted</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="211" />
+      <source>renombrado</source>
+      <translation>renamed</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="212" />
+      <source>modificado</source>
+      <translation>modified</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="219" />
+      <source>Mensaje:</source>
+      <translation>Message:</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="223" />
+      <source>Corregir la última confirmación (amend)</source>
+      <translation>Amend the last commit</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="229" />
+      <source>Confirmar</source>
+      <translation>Commit</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="234" />
+      <source>Escribe un mensaje que explique los cambios.</source>
+      <translation>Write a message explaining the changes.</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="253" />
+      <source>Cambios confirmados</source>
+      <translation>Changes committed</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="311" />
+      <source>Ver cambios</source>
+      <translation>Show changes</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="312" />
+      <source>Cambios en %1</source>
+      <translation>Changes in %1</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="315" />
+      <source>Añadir al índice (git add)</source>
+      <translation>Stage (git add)</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="316" />
+      <source>Añadido al índice: %1</source>
+      <translation>Staged: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="318" />
+      <source>Quitar del índice</source>
+      <translation>Unstage</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="319" />
+      <source>Quitado del índice: %1</source>
+      <translation>Unstaged: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="321" />
+      <source>Descartar cambios (restaurar)…</source>
+      <translation>Discard changes (restore)…</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="322" />
+      <source>Descartar cambios</source>
+      <translation>Discard changes</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="323" />
+      <source>¿Volver %1 a la última versión confirmada? Los cambios sin confirmar se pierden.</source>
+      <translation>Bring %1 back to the last committed version? Uncommitted changes are lost.</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="325" />
+      <source>Restaurado: %1</source>
+      <translation>Restored: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="328" />
+      <source>Resolver con mi versión</source>
+      <translation>Resolve using mine</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="330" />
+      <source>Conflicto resuelto con tu versión</source>
+      <translation>Conflict resolved with your version</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="334" />
+      <source>Resolver con la versión de ellos</source>
+      <translation>Resolve using theirs</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="336" />
+      <source>Conflicto resuelto con su versión</source>
+      <translation>Conflict resolved with their version</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="342" />
+      <source>Historial…</source>
+      <translation>History…</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="344" />
+      <source>Quién cambió cada línea (blame)</source>
+      <translation>Who changed each line (blame)</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="345" />
+      <source>Autoría de «%1»</source>
+      <translation>Blame of “%1”</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="349" />
+      <source>Ignorar (añadir a .gitignore)</source>
+      <translation>Ignore (add to .gitignore)</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="356" />
+      <source>Añadido a .gitignore: %1</source>
+      <translation>Added to .gitignore: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="359" />
+      <source>Dejar de seguir (sin borrarlo)</source>
+      <translation>Stop tracking (keep the file)</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="360" />
+      <source>Ya no se sigue: %1</source>
+      <translation>No longer tracked: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="367" />
+      <source>Confirmar cambios (commit)…</source>
+      <translation>Commit changes…</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="369" />
+      <source>Traer cambios (pull)</source>
+      <translation>Pull</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="369" />
+      <source>Traídos los cambios</source>
+      <translation>Changes pulled</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="370" />
+      <source>Enviar cambios (push)</source>
+      <translation>Push</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="372" />
+      <source>git push…</source>
+      <translation>git push…</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="375" />
+      <source>Cambios enviados</source>
+      <translation>Changes pushed</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="379" />
+      <source>Rama «%1» enviada</source>
+      <translation>Branch “%1” pushed</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="382" />
+      <source>git push falló</source>
+      <translation>git push failed</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="386" />
+      <source>Actualizar remotos (fetch)</source>
+      <translation>Fetch remotes</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="386" />
+      <source>Remotos actualizados</source>
+      <translation>Remotes fetched</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="389" />
+      <source>Rama</source>
+      <translation>Branch</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="389" />
+      <source>Rama: %1</source>
+      <translation>Branch: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="391" />
+      <source>Ahora en la rama «%1»</source>
+      <translation>Now on branch “%1”</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="396" />
+      <source>Nueva rama…</source>
+      <translation>New branch…</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="398" />
+      <source>Nueva rama</source>
+      <translation>New branch</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="398" />
+      <source>Nombre de la rama:</source>
+      <translation>Branch name:</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="399" />
+      <source>Creada la rama «%1»</source>
+      <translation>Created branch “%1”</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="402" />
+      <source>Guardar cambios aparte (stash)</source>
+      <translation>Stash changes</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="403" />
+      <source>Cambios guardados aparte</source>
+      <translation>Changes stashed</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="405" />
+      <source>Recuperar lo guardado (stash pop)</source>
+      <translation>Pop stash</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="405" />
+      <source>Cambios recuperados</source>
+      <translation>Stash popped</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="407" />
+      <source>Historial del repositorio…</source>
+      <translation>Repository history…</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="409" />
+      <source>Abrir lazygit</source>
+      <translation>Open lazygit</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="415" />
+      <source>Crear repositorio git aquí</source>
+      <translation>Create git repository here</translation>
+    </message>
+    <message>
+      <location filename="../src/gitmenu.cpp" line="416" />
+      <source>Repositorio git creado</source>
+      <translation>Git repository created</translation>
+    </message>
+    <message>
       <location filename="../src/jump.cpp" line="53" />
       <source>Ir a una carpeta</source>
       <translation>Go to a Folder</translation>
@@ -304,9 +896,14 @@
       <translation>No matches</translation>
     </message>
     <message>
-      <location filename="../src/main.cpp" line="442" />
+      <location filename="../src/main.cpp" line="551" />
       <source>Comportamiento</source>
       <translation>Behavior</translation>
+    </message>
+    <message>
+      <location filename="../src/main.cpp" line="553" />
+      <source>Apariencia</source>
+      <translation>Appearance</translation>
     </message>
     <message>
       <location filename="../src/mainwindow.cpp" line="118" />
@@ -798,454 +1395,459 @@ Existing: %3, %4</translation>
       <translation>C++ and Qt 6 · metadata with libmediainfo and exiv2 · thumbnails with ffmpegthumbnailer and poppler</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="201" />
+      <location filename="../src/office.cpp" line="91" />
+      <source>LibreOffice tardó demasiado.</source>
+      <translation>LibreOffice took too long.</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="203" />
       <source>Papelera: los elementos se pueden restaurar a su ubicación original.</source>
       <translation>Trash: items can be restored to their original location.</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="204" />
+      <location filename="../src/pane.cpp" line="206" />
       <source>Vaciar papelera</source>
       <translation>Empty Trash</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="206" />
+      <location filename="../src/pane.cpp" line="208" />
       <source>¿Eliminar definitivamente todo lo que hay en la papelera?</source>
       <translation>Permanently delete everything in the trash?</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="302" />
+      <location filename="../src/pane.cpp" line="304" />
       <source>Filtrar por nombre (Intro busca en subcarpetas)</source>
       <translation>Filter by name (Enter searches subfolders)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="306" />
+      <location filename="../src/pane.cpp" line="308" />
       <source>Subcarpetas</source>
       <translation>Subfolders</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="309" />
+      <location filename="../src/pane.cpp" line="311" />
       <source>Buscar también dentro de las subcarpetas</source>
       <translation>Also search inside subfolders</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="312" />
+      <location filename="../src/pane.cpp" line="314" />
       <source>Contenido</source>
       <translation>Contents</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="314" />
+      <location filename="../src/pane.cpp" line="316" />
       <source>Buscar el texto dentro de los archivos (incluye subcarpetas)</source>
       <translation>Search for the text inside the files (includes subfolders)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="318" />
+      <location filename="../src/pane.cpp" line="320" />
       <source>Filtros</source>
       <translation>Filters</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="320" />
+      <location filename="../src/pane.cpp" line="322" />
       <source>Filtrar por fecha de modificación y tamaño</source>
       <translation>Filter by modification date and size</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="335" />
+      <location filename="../src/pane.cpp" line="337" />
       <source>En cualquier fecha</source>
       <translation>Any date</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="335" />
+      <location filename="../src/pane.cpp" line="337" />
       <source>Hoy</source>
       <translation>Today</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="335" />
+      <location filename="../src/pane.cpp" line="337" />
       <source>Últimos 7 días</source>
       <translation>Last 7 days</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="335" />
+      <location filename="../src/pane.cpp" line="337" />
       <source>Últimos 30 días</source>
       <translation>Last 30 days</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="335" />
+      <location filename="../src/pane.cpp" line="337" />
       <source>Este año</source>
       <translation>This year</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="336" />
+      <location filename="../src/pane.cpp" line="338" />
       <source>Cualquier tamaño</source>
       <translation>Any size</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="336" />
+      <location filename="../src/pane.cpp" line="338" />
       <source>Menos de 1 MB</source>
       <translation>Less than 1 MB</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="336" />
+      <location filename="../src/pane.cpp" line="338" />
       <source>Más de 1 MB</source>
       <translation>More than 1 MB</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="336" />
+      <location filename="../src/pane.cpp" line="338" />
       <source>Más de 100 MB</source>
       <translation>More than 100 MB</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="336" />
+      <location filename="../src/pane.cpp" line="338" />
       <source>Más de 1 GB</source>
       <translation>More than 1 GB</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="369" />
+      <location filename="../src/pane.cpp" line="371" />
       <source>Texto que contienen los archivos (aquí y en subcarpetas)</source>
       <translation>Text the files contain (here and in subfolders)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="396" />
+      <location filename="../src/pane.cpp" line="398" />
       <source>%1 resultados</source>
       <translation>%1 results</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="396" />
+      <location filename="../src/pane.cpp" line="398" />
       <source>Buscando… %1 resultados</source>
       <translation>Searching… %1 results</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="772" />
+      <location filename="../src/pane.cpp" line="774" />
       <source>sin rama</source>
       <translation>no branch</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="776" />
+      <location filename="../src/pane.cpp" line="778" />
       <source>sin cambios</source>
       <translation>no changes</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="777" />
+      <location filename="../src/pane.cpp" line="779" />
       <source>1 cambio</source>
       <translation>1 change</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="778" />
+      <location filename="../src/pane.cpp" line="780" />
       <source>%1 cambios</source>
       <translation>%1 changes</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="832" />
+      <location filename="../src/pane.cpp" line="834" />
       <source>/…/</source>
       <translation>/…/</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="881" />
+      <location filename="../src/pane.cpp" line="883" />
       <source>Archivo ejecutable</source>
       <translation>Executable File</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="882" />
+      <location filename="../src/pane.cpp" line="884" />
       <source>«%1» es un programa. ¿Qué quieres hacer?</source>
       <translation>“%1” is a program. What do you want to do?</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="883" />
+      <location filename="../src/pane.cpp" line="885" />
       <source>Ejecutar</source>
       <translation>Run</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="884" />
+      <location filename="../src/pane.cpp" line="886" />
       <source>Ejecutar en terminal</source>
       <translation>Run in Terminal</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="988" />
+      <location filename="../src/pane.cpp" line="1003" />
       <source>Imagen</source>
       <translation>Image</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1002" />
+      <location filename="../src/pane.cpp" line="1017" />
       <source>%1 (%2 con errores)</source>
       <translation>%1 (%2 with errors)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1019" />
+      <location filename="../src/pane.cpp" line="1034" />
       <source>Imagen girada</source>
       <translation>Image rotated</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1019" />
+      <location filename="../src/pane.cpp" line="1034" />
       <source>%1 imágenes giradas</source>
       <translation>%1 images rotated</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1021" />
+      <location filename="../src/pane.cpp" line="1036" />
       <source>Girar a la derecha</source>
       <translation>Rotate Right</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1022" />
+      <location filename="../src/pane.cpp" line="1037" />
       <source>Girar a la izquierda</source>
       <translation>Rotate Left</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1025" />
+      <location filename="../src/pane.cpp" line="1040" />
       <source>Reducir tamaño (copia)</source>
       <translation>Reduce Size (copy)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1027" />
+      <location filename="../src/pane.cpp" line="1042" />
       <source>Máximo 3840 px (4K)</source>
       <translation>Maximum 3840 px (4K)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1027" />
+      <location filename="../src/pane.cpp" line="1042" />
       <source>Máximo 1920 px</source>
       <translation>Maximum 1920 px</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1028" />
+      <location filename="../src/pane.cpp" line="1043" />
       <source>Máximo 1280 px</source>
       <translation>Maximum 1280 px</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1028" />
+      <location filename="../src/pane.cpp" line="1043" />
       <source>La mitad (50 %)</source>
       <translation>Half (50 %)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1036" />
+      <location filename="../src/pane.cpp" line="1051" />
       <source>Copia reducida creada</source>
       <translation>Reduced copy created</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1036" />
+      <location filename="../src/pane.cpp" line="1051" />
       <source>%1 copias reducidas creadas</source>
       <translation>%1 reduced copies created</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1039" />
+      <location filename="../src/pane.cpp" line="1054" />
       <source>Convertir a (copia)</source>
       <translation>Convert to (copy)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1050" />
+      <location filename="../src/pane.cpp" line="1065" />
       <source>Imagen convertida a %1</source>
       <translation>Image converted to %1</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1051" />
+      <location filename="../src/pane.cpp" line="1066" />
       <source>%1 imágenes convertidas a %2</source>
       <translation>%1 images converted to %2</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1061" />
+      <location filename="../src/pane.cpp" line="1076" />
       <source>Abrir en el escritorio</source>
       <translation>Open on Workspace</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1081" />
+      <location filename="../src/pane.cpp" line="1096" />
       <source>Escritorio %1  ·  %2</source>
       <translation>Workspace %1  ·  %2</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1081" />
+      <location filename="../src/pane.cpp" line="1096" />
       <source>1 ventana</source>
       <translation>1 window</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1081" />
+      <location filename="../src/pane.cpp" line="1096" />
       <source>%1 ventanas</source>
       <translation>%1 windows</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1086" />
+      <location filename="../src/pane.cpp" line="1101" />
       <source>Escritorio nuevo (%1)</source>
       <translation>New workspace (%1)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1093" />
+      <location filename="../src/pane.cpp" line="1108" />
       <source>Abrir con</source>
       <translation>Open With</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1106" />
+      <location filename="../src/pane.cpp" line="1121" />
       <source>Otra aplicación…</source>
       <translation>Other Application…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1113" />
+      <location filename="../src/pane.cpp" line="1128" />
       <source>Mover a</source>
       <translation>Move To</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1113" />
+      <location filename="../src/pane.cpp" line="1128" />
       <source>Copiar a</source>
       <translation>Copy To</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1125" />
+      <location filename="../src/pane.cpp" line="1140" />
       <source>Otro panel: %1</source>
       <translation>Other pane: %1</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1135" />
+      <location filename="../src/pane.cpp" line="1150" />
       <source>Carpeta personal</source>
       <translation>Home</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1137" />
+      <location filename="../src/pane.cpp" line="1152" />
       <source>Documentos</source>
       <translation>Documents</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1137" />
+      <location filename="../src/pane.cpp" line="1152" />
       <source>Descargas</source>
       <translation>Downloads</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1138" />
+      <location filename="../src/pane.cpp" line="1153" />
       <source>Música</source>
       <translation>Music</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1138" />
+      <location filename="../src/pane.cpp" line="1153" />
       <source>Imágenes</source>
       <translation>Pictures</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1139" />
+      <location filename="../src/pane.cpp" line="1154" />
       <source>Vídeos</source>
       <translation>Videos</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1139" />
+      <location filename="../src/pane.cpp" line="1154" />
       <source>Escritorio</source>
       <translation>Desktop</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1158" />
+      <location filename="../src/pane.cpp" line="1173" />
       <source>Elegir carpeta…</source>
       <translation>Choose Folder…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1168" />
+      <location filename="../src/pane.cpp" line="1183" />
       <source>Mover %1 elemento(s) a…</source>
       <translation>Move %1 item(s) to…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1168" />
+      <location filename="../src/pane.cpp" line="1183" />
       <source>Copiar %1 elemento(s) a…</source>
       <translation>Copy %1 item(s) to…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1172" />
+      <location filename="../src/pane.cpp" line="1187" />
       <source>Mover aquí</source>
       <translation>Move Here</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1172" />
+      <location filename="../src/pane.cpp" line="1187" />
       <source>Copiar aquí</source>
       <translation>Copy Here</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1174" />
+      <location filename="../src/pane.cpp" line="1189" />
       <source>Buscar en:</source>
       <translation>Look in:</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1175" />
+      <location filename="../src/pane.cpp" line="1190" />
       <source>Carpeta:</source>
       <translation>Folder:</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1184" />
+      <location filename="../src/pane.cpp" line="1199" />
       <source>Mover</source>
       <translation>Move</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1184" />
+      <location filename="../src/pane.cpp" line="1199" />
       <source>Copiar</source>
       <translation>Copy</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1184" />
+      <location filename="../src/pane.cpp" line="1199" />
       <source>No se puede meter «%1» dentro de sí misma.</source>
       <translation>Can't put “%1” inside itself.</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1194" />
+      <location filename="../src/pane.cpp" line="1209" />
       <source>%1 %2 elemento(s) a %3</source>
       <translation>%1 %2 item(s) to %3</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1194" />
+      <location filename="../src/pane.cpp" line="1209" />
       <source>Moviendo</source>
       <translation>Moving</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1194" />
+      <location filename="../src/pane.cpp" line="1209" />
       <source>Copiando</source>
       <translation>Copying</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1238" />
+      <location filename="../src/pane.cpp" line="1253" />
       <source>Nuevo nombre (# = número, se conserva la extensión):</source>
       <translation>New name (# = number, the extension is kept):</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1239" />
+      <location filename="../src/pane.cpp" line="1254" />
       <source>Archivo #</source>
       <translation>File #</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1257" />
+      <location filename="../src/pane.cpp" line="1272" />
       <source>Renombrar</source>
       <translation>Rename</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1257" />
+      <location filename="../src/pane.cpp" line="1272" />
       <source>No se pudieron renombrar:
 </source>
       <translation>Couldn't rename:
 </translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1266" />
+      <location filename="../src/pane.cpp" line="1281" />
       <source>No se pudo crear la carpeta (¿sin permisos?).</source>
       <translation>Couldn't create the folder (no permission?).</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1278" />
+      <location filename="../src/pane.cpp" line="1293" />
       <source>Archivo nuevo.txt</source>
       <translation>New file.txt</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1281" />
+      <location filename="../src/pane.cpp" line="1296" />
       <source>No se pudo crear el archivo (¿sin permisos?).</source>
       <translation>Couldn't create the file (no permission?).</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1296" />
+      <location filename="../src/pane.cpp" line="1311" />
       <source>%1 elemento(s) copiados al portapapeles</source>
       <translation>%1 item(s) copied to the clipboard</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1304" />
+      <location filename="../src/pane.cpp" line="1319" />
       <source>%1 elemento(s) cortados</source>
       <translation>%1 item(s) cut</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1331" />
+      <location filename="../src/pane.cpp" line="1346" />
       <source>Papelera</source>
       <translation>Trash</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1331" />
+      <location filename="../src/pane.cpp" line="1346" />
       <source>¿Mover %1 elemento(s) a la papelera?</source>
       <translation>Move %1 item(s) to the trash?</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1335" />
+      <location filename="../src/pane.cpp" line="1350" />
       <source>
 
 ¿Eliminarlos definitivamente?</source>
@@ -1254,312 +1856,322 @@ Existing: %3, %4</translation>
 Delete them permanently?</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1338" />
+      <location filename="../src/pane.cpp" line="1353" />
       <source>%1 elemento(s) movidos a la papelera</source>
       <translation>%1 item(s) moved to the trash</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1348" />
+      <location filename="../src/pane.cpp" line="1363" />
       <source>Eliminar definitivamente</source>
       <translation>Delete Permanently</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1349" />
+      <location filename="../src/pane.cpp" line="1364" />
       <source>¿Eliminar definitivamente «%1»? No se puede deshacer.</source>
       <translation>Permanently delete “%1”? This can't be undone.</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1350" />
+      <location filename="../src/pane.cpp" line="1365" />
       <source>¿Eliminar definitivamente %1 elementos? No se puede deshacer.</source>
       <translation>Permanently delete %1 items? This can't be undone.</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1412" />
+      <location filename="../src/pane.cpp" line="1427" />
       <source>Ruta copiada</source>
       <translation>Path copied</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1426" />
-      <source>archivo</source>
-      <translation>archive</translation>
-    </message>
-    <message>
-      <location filename="../src/pane.cpp" line="1429" />
+      <location filename="../src/pane.cpp" line="1444" />
       <source>Comprimir</source>
       <translation>Compress</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1429" />
+      <location filename="../src/pane.cpp" line="1444" />
       <source>Formato de «%1»:</source>
       <translation>Format for “%1”:</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1438" />
+      <location filename="../src/pane.cpp" line="1453" />
       <source>Creado «%1»</source>
       <translation>Created “%1”</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1438" />
+      <location filename="../src/pane.cpp" line="1453" />
       <source>Error al comprimir</source>
       <translation>Error compressing</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1444" />
+      <location filename="../src/pane.cpp" line="1459" />
       <source>Comprimiendo…</source>
       <translation>Compressing…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1465" />
+      <location filename="../src/pane.cpp" line="1480" />
       <source>Extraído en «%1»</source>
       <translation>Extracted to “%1”</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1465" />
+      <location filename="../src/pane.cpp" line="1480" />
       <source>Error al extraer</source>
       <translation>Error extracting</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1469" />
+      <location filename="../src/pane.cpp" line="1484" />
       <source>Extrayendo…</source>
       <translation>Extracting…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1506" />
+      <location filename="../src/pane.cpp" line="1502" />
+      <source>Cifrando…</source>
+      <translation>Encrypting…</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1552" />
       <source>hoy</source>
       <translation>today</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1506" />
+      <location filename="../src/pane.cpp" line="1552" />
       <source>7 días</source>
       <translation>7 days</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1506" />
+      <location filename="../src/pane.cpp" line="1552" />
       <source>30 días</source>
       <translation>30 days</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1506" />
+      <location filename="../src/pane.cpp" line="1552" />
       <source>este año</source>
       <translation>this year</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1511" />
+      <location filename="../src/pane.cpp" line="1557" />
       <source>Filtros: </source>
       <translation>Filters: </translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1555" />
+      <location filename="../src/pane.cpp" line="1601" />
       <source>Cargando…</source>
       <translation>Loading…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1567" />
+      <location filename="../src/pane.cpp" line="1613" />
       <source>«%1» seleccionado</source>
       <translation>“%1” selected</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1568" />
+      <location filename="../src/pane.cpp" line="1614" />
       <source>%1 de %2 seleccionados</source>
       <translation>%1 of %2 selected</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1578" />
+      <location filename="../src/pane.cpp" line="1624" />
       <source>  ·  modificado </source>
       <translation>  ·  modified </translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1582" />
+      <location filename="../src/pane.cpp" line="1628" />
       <source>  ·  %1 libres</source>
       <translation>  ·  %1 free</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1591" />
+      <location filename="../src/pane.cpp" line="1637" />
       <source>Sin resultados</source>
       <translation>No results</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1592" />
+      <location filename="../src/pane.cpp" line="1638" />
       <source>Nada coincide con «%1»</source>
       <translation>Nothing matches “%1”</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1593" />
+      <location filename="../src/pane.cpp" line="1639" />
       <source>Nada coincide con los filtros</source>
       <translation>Nothing matches the filters</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1594" />
+      <location filename="../src/pane.cpp" line="1640" />
       <source>No has abierto archivos últimamente</source>
       <translation>You haven't opened any files lately</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1595" />
+      <location filename="../src/pane.cpp" line="1641" />
       <source>Nada destacado todavía: clic derecho → Destacar</source>
       <translation>Nothing starred yet: right-click → Star</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1596" />
+      <location filename="../src/pane.cpp" line="1642" />
       <source>La papelera está vacía</source>
       <translation>The trash is empty</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1597" />
+      <location filename="../src/pane.cpp" line="1643" />
       <source>Carpeta vacía</source>
       <translation>Empty folder</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1628" />
+      <location filename="../src/pane.cpp" line="1674" />
       <source>Restaurar</source>
       <translation>Restore</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1637" />
+      <location filename="../src/pane.cpp" line="1683" />
       <source>Abrir en pestaña nueva</source>
       <translation>Open in New Tab</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1638" />
+      <location filename="../src/pane.cpp" line="1684" />
       <source>Abrir en el otro panel</source>
       <translation>Open in Other Pane</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1640" />
+      <location filename="../src/pane.cpp" line="1686" />
       <source>Abrir terminal aquí</source>
       <translation>Open Terminal Here</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1641" />
+      <location filename="../src/pane.cpp" line="1687" />
       <source>Reproducir en Sonata</source>
       <translation>Play in Sonata</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1643" />
+      <location filename="../src/pane.cpp" line="1689" />
       <source>Ver qué ocupa espacio</source>
       <translation>See What Takes Up Space</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1647" />
+      <location filename="../src/pane.cpp" line="1693" />
       <source>Abrir con %1</source>
       <translation>Open With %1</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1654" />
+      <location filename="../src/pane.cpp" line="1700" />
       <source>Cortar</source>
       <translation>Cut</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1657" />
+      <location filename="../src/pane.cpp" line="1703" />
       <source>Pegar dentro</source>
       <translation>Paste Into</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1664" />
+      <location filename="../src/pane.cpp" line="1710" />
       <source>Copiar ruta</source>
       <translation>Copy Path</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1667" />
+      <location filename="../src/pane.cpp" line="1713" />
       <source>Abrir la carpeta que lo contiene</source>
       <translation>Open Containing Folder</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1672" />
+      <location filename="../src/pane.cpp" line="1718" />
       <source>Quitar de destacados</source>
       <translation>Remove from Starred</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1673" />
+      <location filename="../src/pane.cpp" line="1719" />
       <source>Destacar</source>
       <translation>Star</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1678" />
+      <location filename="../src/pane.cpp" line="1724" />
       <source>Renombrar…</source>
       <translation>Rename…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1678" />
+      <location filename="../src/pane.cpp" line="1724" />
       <source>Renombrar en lote…</source>
       <translation>Batch Rename…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1680" />
+      <location filename="../src/pane.cpp" line="1726" />
       <source>Mover a la papelera</source>
       <translation>Move to Trash</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1684" />
+      <location filename="../src/pane.cpp" line="1730" />
       <source>Extraer aquí</source>
       <translation>Extract Here</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1685" />
+      <location filename="../src/pane.cpp" line="1731" />
       <source>Comprimir…</source>
       <translation>Compress…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1686" />
+      <location filename="../src/pane.cpp" line="1735" />
+      <source>Descifrar aquí</source>
+      <translation>Decrypt here</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1736" />
+      <source>Comprimir y cifrar…</source>
+      <translation>Compress and encrypt…</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1738" />
       <source>Crear enlace</source>
       <translation>Create Link</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1703" />
+      <location filename="../src/pane.cpp" line="1759" />
       <source>Nuevo archivo vacío</source>
       <translation>New Empty File</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1704" />
+      <location filename="../src/pane.cpp" line="1760" />
       <source>Pegar</source>
       <translation>Paste</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1707" />
+      <location filename="../src/pane.cpp" line="1763" />
       <source>Copiar ruta de la carpeta</source>
       <translation>Copy Folder Path</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1708" />
+      <location filename="../src/pane.cpp" line="1764" />
       <source>Reproducir la carpeta en Sonata</source>
       <translation>Play Folder in Sonata</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1711" />
+      <location filename="../src/pane.cpp" line="1773" />
       <source>Seleccionar todo</source>
       <translation>Select All</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1713" />
+      <location filename="../src/pane.cpp" line="1775" />
       <source>Vista</source>
       <translation>View</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1725" />
+      <location filename="../src/pane.cpp" line="1787" />
       <source>Ordenar por</source>
       <translation>Sort By</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1726" />
+      <location filename="../src/pane.cpp" line="1788" />
       <source>Fecha de modificación</source>
       <translation>Modification Date</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1736" />
+      <location filename="../src/pane.cpp" line="1798" />
       <source>Descendente</source>
       <translation>Descending</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1742" />
+      <location filename="../src/pane.cpp" line="1804" />
       <source>Carpetas primero</source>
       <translation>Folders First</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1756" />
+      <location filename="../src/pane.cpp" line="1818" />
       <source>Añadir carpeta a marcadores</source>
       <translation>Add Folder to Bookmarks</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1758" />
+      <location filename="../src/pane.cpp" line="1820" />
       <source>Propiedades de la carpeta</source>
       <translation>Folder Properties</translation>
     </message>
@@ -1584,55 +2196,42 @@ Delete them permanently?</translation>
       <translation>Type the path (Ctrl+L)</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="70" />
-      <source>No se puede leer el contenido.</source>
-      <translation>Can't read the contents.</translation>
-    </message>
-    <message>
-      <location filename="../src/preview.cpp" line="72" />
-      <source>1 elemento
-
-</source>
-      <translation>1 item
-
-</translation>
-    </message>
-    <message>
-      <location filename="../src/preview.cpp" line="72" />
-      <source>%1 elementos
-
-</source>
-      <translation>%1 items
-
-</translation>
-    </message>
-    <message>
-      <location filename="../src/preview.cpp" line="73" />
-      <source>… y %1 más</source>
-      <translation>… and %1 more</translation>
-    </message>
-    <message>
-      <location filename="../src/preview.cpp" line="99" />
+      <location filename="../src/preview.cpp" line="103" />
       <source>Vista previa</source>
       <translation>Preview</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="140" />
+      <location filename="../src/preview.cpp" line="156" />
       <source>←/→ anterior y siguiente  ·  Intro abrir  ·  Espacio o Esc cerrar</source>
       <translation>←/→ previous and next  ·  Enter open  ·  Space or Esc close</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="178" />
+      <location filename="../src/preview.cpp" line="196" />
       <source>modificado </source>
       <translation>modified </translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="234" />
+      <location filename="../src/preview.cpp" line="262" />
+      <source>Instala LibreOffice para ver las páginas</source>
+      <translation>Install LibreOffice to see the pages</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="265" />
+      <source>Preparando las páginas con LibreOffice…</source>
+      <translation>Preparing the pages with LibreOffice…</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="276" />
+      <source>LibreOffice no pudo abrirlo</source>
+      <translation>LibreOffice couldn't open it</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="287" />
       <source>Leyendo el contenido…</source>
       <translation>Reading the contents…</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="253" />
+      <location filename="../src/preview.cpp" line="307" />
       <source>
 
 … (solo los primeros 512 KB)</source>
@@ -1641,14 +2240,79 @@ Delete them permanently?</translation>
 … (first 512 KB only)</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="301" />
+      <location filename="../src/preview.cpp" line="355" />
       <source>No se puede mostrar (¿protegido?)</source>
       <translation>Can't display it (protected?)</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="305" />
+      <location filename="../src/preview.cpp" line="359" />
       <source>Página %1 de %2  ·  RePág/AvPág para pasar</source>
       <translation>Page %1 of %2  ·  PgUp/PgDn to turn</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="366" />
+      <source>Comprimido cifrado: hace falta la contraseña para ver su contenido</source>
+      <translation>Encrypted archive: the password is needed to see its contents</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="367" />
+      <source>No se puede leer el contenido.</source>
+      <translation>Can't read the contents.</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="425" />
+      <source>1 archivo</source>
+      <translation>1 file</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="425" />
+      <source>%1 archivos</source>
+      <translation>%1 files</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="426" />
+      <source>1 carpeta</source>
+      <translation>1 folder</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="426" />
+      <source>%1 carpetas</source>
+      <translation>%1 folders</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="427" />
+      <source>%1 sin comprimir</source>
+      <translation>%1 uncompressed</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="428" />
+      <source>solo los primeros %1</source>
+      <translation>only the first %1</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="429" />
+      <source>🔒 con contraseña</source>
+      <translation>🔒 password-protected</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="430" />
+      <source>Doble clic abre un archivo sin extraer el resto</source>
+      <translation>Double-click opens a file without extracting the rest</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="441" />
+      <source>Extrayendo «%1»…</source>
+      <translation>Extracting “%1”…</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="453" />
+      <source>No se pudo extraer: %1</source>
+      <translation>Couldn't extract: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="456" />
+      <source>Abierto «%1» (copia temporal)</source>
+      <translation>Opened “%1” (temporary copy)</translation>
     </message>
     <message>
       <location filename="../src/properties.cpp" line="76" />
@@ -2449,11 +3113,6 @@ Delete them permanently?</translation>
       <translation>Show how many items each folder has</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="256" />
-      <source>Apariencia</source>
-      <translation>Appearance</translation>
-    </message>
-    <message>
       <location filename="../src/settingsdialog.cpp" line="258" />
       <source>Del sistema (%1)</source>
       <translation>System (%1)</translation>
@@ -2469,7 +3128,7 @@ Delete them permanently?</translation>
       <translation>Restart Now</translation>
     </message>
     <message>
-      <location filename="../src/settingsdialog.cpp" line="278" />
+      <location filename="../src/settingsdialog.cpp" line="267" />
       <source>Idioma:</source>
       <translation>Language:</translation>
     </message>
@@ -2779,11 +3438,6 @@ Delete them permanently?</translation>
       <translation>Rename Bookmark</translation>
     </message>
     <message>
-      <location filename="../src/sidebar.cpp" line="415" />
-      <source>Nombre:</source>
-      <translation>Name:</translation>
-    </message>
-    <message>
       <location filename="../src/sidebar.cpp" line="423" />
       <source>Quitar marcador</source>
       <translation>Remove Bookmark</translation>
@@ -2887,6 +3541,26 @@ Delete them permanently?</translation>
       <location filename="../src/undo.cpp" line="194" />
       <source> (con errores: %1)</source>
       <translation> (with errors: %1)</translation>
+    </message>
+    <message>
+      <source>1 elemento
+
+</source>
+      <translation type="vanished">1 item
+
+</translation>
+    </message>
+    <message>
+      <source>%1 elementos
+
+</source>
+      <translation type="vanished">%1 items
+
+</translation>
+    </message>
+    <message>
+      <source>… y %1 más</source>
+      <translation type="vanished">… and %1 more</translation>
     </message>
   </context>
 </TS>

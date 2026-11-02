@@ -1,10 +1,14 @@
+#include "crypto.h"
 #include "fsmodel.h"
+#include "gitmenu.h"
+#include <QMenu>
 #include "i18n.h"
 #include "icons.h"
 #include "thumbs.h"
 #include <QThreadPool>
 #include "mainwindow.h"
 #include "pane.h"
+#include "preview.h"
 #include "properties.h"
 #include "remote.h"
 #include "settingsdialog.h"
@@ -393,6 +397,111 @@ int main(int argc, char **argv)
             });
         };
         QTimer::singleShot(1500, w, [=] { (*run)(0); });
+    }
+    // GnuPG check: GNUPGHOME=<empty dir> LUNA_GPGTEST=<work dir with a folder
+    // "proyecto"> luna — makes a key, encrypts and decrypts both ways.
+    if (qEnvironmentVariableIsSet("LUNA_GPGTEST")) {
+        const QString d = qEnvironmentVariable("LUNA_GPGTEST");
+        auto log = [](const char *step, bool ok, const QString &msg) { fprintf(stderr, "%s: %s  %s\n", step, ok ? "OK" : "FALLO", qPrintable(msg)); };
+        QTimer::singleShot(300, w, [=] {
+            Crypto::createKey("Prueba Luna", "prueba@luna.test", "", w, [=](bool ok, const QString &msg, const QString &) {
+                log("crear clave", ok, msg);
+                const QList<Crypto::Key> ks = Crypto::keys();
+                for (const auto &k : ks) fprintf(stderr, "  clave %s secret=%d valid=%d %s\n", qPrintable(k.uid), k.secret, k.valid, qPrintable(k.shortId));
+                Crypto::EncryptJob sym;
+                sym.paths = {d + "/proyecto"};
+                sym.out = d + "/proyecto.tar.gpg";
+                sym.passphrase = "secreto ñ";
+                Crypto::encrypt(sym, w, [=](bool ok, const QString &msg, const QString &) {
+                    log("cifrar carpeta con contraseña", ok, msg);
+                    fprintf(stderr, "  pide contraseña: %d\n", Crypto::needsPassphrase(sym.out));
+                    QDir().mkpath(d + "/out");
+                    Crypto::decrypt(sym.out, d + "/out", "mala", w, [=](bool ok, const QString &msg, const QString &) {
+                        log("descifrar con contraseña mala (debe fallar)", !ok, msg);
+                        Crypto::decrypt(sym.out, d + "/out", "secreto ñ", w, [=](bool ok, const QString &msg, const QString &made) {
+                            log("descifrar carpeta", ok, msg + " → " + made);
+                            Crypto::EncryptJob pub;
+                            pub.paths = {d + "/proyecto/LEEME.txt"};
+                            pub.out = d + "/LEEME.txt.gpg";
+                            pub.symmetric = false;
+                            for (const auto &k : ks) pub.recipients << k.fingerprint;
+                            if (!ks.isEmpty()) pub.signKey = ks[0].fingerprint;
+                            Crypto::encrypt(pub, w, [=](bool ok, const QString &msg, const QString &) {
+                                log("cifrar archivo para la clave y firmar", ok, msg);
+                                fprintf(stderr, "  pide contraseña: %d\n", Crypto::needsPassphrase(pub.out));
+                                Crypto::decrypt(pub.out, d + "/out", "", w, [=](bool ok, const QString &msg, const QString &made) {
+                                    log("descifrar archivo", ok, msg + " → " + made);
+                                    qApp->quit();
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    }
+    // Git menu check: LUNA_GITTEST=<repo> LUNA_GITFILES=a,b,… luna — prints the
+    // right-click "Git" submenu for each file (and the folder), then runs the
+    // action LUNA_GITDO=<file>|<text> and prints `git status`.
+    if (qEnvironmentVariableIsSet("LUNA_GITTEST")) {
+        const QString repo = qEnvironmentVariable("LUNA_GITTEST");
+        QTimer::singleShot(300, w, [=] {
+            auto status = [](const QString &s) { fprintf(stderr, "  [estado] %s\n", qPrintable(s)); };
+            std::function<void(QMenu *, int)> dump = [&](QMenu *m, int depth) {
+                for (QAction *a : m->actions()) {
+                    if (a->isSeparator()) continue;
+                    fprintf(stderr, "%*s%s%s\n", depth * 2, "", qPrintable(a->text()), a->isChecked() ? "  ✓" : "");
+                    if (a->menu()) dump(a->menu(), depth + 1);
+                }
+            };
+            for (const QString &f : qEnvironmentVariable("LUNA_GITFILES").split(',', Qt::SkipEmptyParts)) {
+                QMenu m;
+                GitMenu::add(&m, w, repo, repo, {repo + '/' + f}, status);
+                fprintf(stderr, "== %s\n", qPrintable(f));
+                dump(&m, 1);
+            }
+            QMenu folder;
+            GitMenu::add(&folder, w, repo, repo, {}, status);
+            fprintf(stderr, "== (carpeta)\n");
+            dump(&folder, 1);
+            const QStringList todo = qEnvironmentVariable("LUNA_GITDO").split('|');
+            if (todo.size() == 2) {
+                QMenu m;
+                GitMenu::add(&m, w, repo, repo, {repo + '/' + todo[0]}, status);
+                for (QAction *a : m.actions().first()->menu()->actions())
+                    if (a->text() == todo[1]) {
+                        fprintf(stderr, "== ejecuto «%s» en %s\n", qPrintable(todo[1]), qPrintable(todo[0]));
+                        a->trigger();
+                    }
+            }
+            QTimer::singleShot(1500, w, [] {
+                int n = 0;
+                if (qEnvironmentVariableIsSet("LUNA_GITSHOT"))
+                    for (QWidget *t : QApplication::topLevelWidgets())
+                        if (t->isVisible() && t->inherits("QDialog")) t->grab().save(qEnvironmentVariable("LUNA_GITSHOT") + QString("/git%1.png").arg(n++));
+                qApp->quit();
+            });
+        });
+    }
+    // Quick look check: LUNA_PREVIEWTEST=<dir> luna <folder> <file>… opens the
+    // Space preview of each file, waits LUNA_PREVIEWWAIT ms (default 4000)
+    // and saves <dir>/preview-<n>.png.
+    if (qEnvironmentVariableIsSet("LUNA_PREVIEWTEST")) {
+        const QString dir = qEnvironmentVariable("LUNA_PREVIEWTEST");
+        const int wait = qEnvironmentVariableIntValue("LUNA_PREVIEWWAIT") ? qEnvironmentVariableIntValue("LUNA_PREVIEWWAIT") : 4000;
+        const QStringList files = QCoreApplication::arguments().mid(2);
+        auto run = std::make_shared<std::function<void(int)>>();
+        *run = [=](int i) {
+            if (i >= files.size()) { qApp->quit(); return; }
+            auto *pv = new Preview(QFileInfo(files[i]).absoluteFilePath(), {}, w);
+            pv->show();
+            QTimer::singleShot(wait, w, [=] {
+                pv->grab().save(QString("%1/preview-%2.png").arg(dir).arg(i));
+                pv->close();
+                (*run)(i + 1);
+            });
+        };
+        QTimer::singleShot(500, w, [run] { (*run)(0); });
     }
     // Scripted screenshots for development: LUNA_SHOTS=<dir> luna <folder> [photo]
     if (qEnvironmentVariableIsSet("LUNA_SHOT_SIZE")) {

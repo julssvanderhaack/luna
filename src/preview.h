@@ -10,6 +10,9 @@
 class QLabel;
 class QPlainTextEdit;
 class QStackedWidget;
+class QTreeWidget;
+class QTreeWidgetItem;
+namespace Archive { struct Listing; }
 
 class Preview : public QDialog {
     Q_OBJECT
@@ -30,15 +33,19 @@ private:
     void showImage(const QImage &img);
     void renderPdfPage();
     void showFacts(const QList<QPair<QString, QString>> &facts);
+    void showArchive(const Archive::Listing &l);
+    void openArchiveMember(QTreeWidgetItem *item);
     QSize imageTarget() const;
 
     std::function<QString(int)> m_step;
     QString m_path, m_mime;
+    QString m_pdfPath;   // what renderPdfPage draws: the file, or an office document's PDF
     int m_request = 0;   // results of an older file are dropped
     int m_page = 0, m_pages = 0;
     QImage m_image;
     QLabel *m_title, *m_sub, *m_picture, *m_facts, *m_hint;
     QPlainTextEdit *m_text;
     class QTextBrowser *m_rich;
+    QTreeWidget *m_tree;   // inside an archive
     QStackedWidget *m_stack;
 };

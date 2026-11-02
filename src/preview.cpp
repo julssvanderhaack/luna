@@ -1,8 +1,10 @@
 #include "preview.h"
 #include "i18n.h"
 #include "apps.h"
+#include "archives.h"
 #include "fsmodel.h"
 #include "icons.h"
+#include "office.h"
 #include "properties.h"
 #include "theme.h"
 #include <QApplication>
@@ -10,6 +12,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QHeaderView>
 #include <QImageReader>
 #include <QKeyEvent>
 #include <QLabel>
@@ -22,8 +25,11 @@
 #include <QTextBrowser>
 #include <QTemporaryFile>
 #include <QThreadPool>
+#include <QTreeWidget>
 #include <QVBoxLayout>
 #include <poppler-qt6.h>
+#include <atomic>
+#include <functional>
 
 namespace {
 Preview *g_open = nullptr;
@@ -50,29 +56,27 @@ bool isArchive(const QMimeType &t)
     return false;
 }
 
-// What an archive holds, one path per line (bsdtar reads zip, tar, 7z, rar,
-// iso…; 7z is the fallback). Capped so a huge archive stays quick.
-QString archiveListing(const QString &path)
-{
-    constexpr int kMax = 5000;
-    QStringList names;
-    QProcess p;
-    p.start("bsdtar", {"-tf", path});
-    p.waitForFinished(20000);
-    if (p.exitCode() == 0) {
-        names = QString::fromUtf8(p.readAllStandardOutput()).split('\n', Qt::SkipEmptyParts);
-    } else {
-        p.start("7z", {"l", "-ba", "-slt", path});
-        p.waitForFinished(20000);
-        for (const QString &l : QString::fromUtf8(p.readAllStandardOutput()).split('\n'))
-            if (l.startsWith("Path = ")) names << l.mid(7);
+// Bumped on every file shown: an office conversion queued for a file the
+// preview has left is skipped.
+std::atomic<int> g_officeTicket{0};
+bool officeWanted(int ticket) { return ticket == g_officeTicket.load(); }
+
+// Folders first, then by the sort column, the way the panes sort.
+class ArchiveItem : public QTreeWidgetItem {
+public:
+    using QTreeWidgetItem::QTreeWidgetItem;
+    bool isDir = false;
+    qint64 bytes = 0;
+    bool operator<(const QTreeWidgetItem &o) const override
+    {
+        const auto &b = static_cast<const ArchiveItem &>(o);
+        if (isDir != b.isDir) return isDir;
+        const int col = treeWidget() ? treeWidget()->sortColumn() : 0;
+        if (col == 1 && bytes != b.bytes) return bytes < b.bytes;
+        if (col == 2) return data(2, Qt::UserRole).toLongLong() < b.data(2, Qt::UserRole).toLongLong();
+        return text(0).compare(b.text(0), Qt::CaseInsensitive) < 0;
     }
-    if (names.isEmpty()) return i18n("No se puede leer el contenido.");
-    const int total = int(names.size());
-    QString head = total == 1 ? i18n("1 elemento\n\n") : i18n("%1 elementos\n\n").arg(total);
-    if (total > kMax) names = names.mid(0, kMax) << i18n("… y %1 más").arg(total - kMax);
-    return head + names.join('\n');
-}
+};
 
 // Runs fn on a pool thread and hands its result to done() on the GUI thread,
 // unless the window is gone or has moved on to another file.
@@ -123,7 +127,6 @@ Preview::Preview(const QString &path, std::function<QString(int)> step, QWidget 
     m_facts->setProperty("role", "dim");
     m_facts->setWordWrap(true);
     pv->addWidget(m_picture, 1);
-    pv->addWidget(m_facts);
     m_text = new QPlainTextEdit;
     m_text->setReadOnly(true);
     m_text->setFocusPolicy(Qt::NoFocus);   // the keys walk the folder, the wheel scrolls
@@ -135,7 +138,20 @@ Preview::Preview(const QString &path, std::function<QString(int)> step, QWidget 
     m_stack->addWidget(picPage);
     m_stack->addWidget(m_text);
     m_stack->addWidget(m_rich);
+    m_tree = new QTreeWidget;   // the mouse opens folders; the keys still walk the folder outside
+    m_tree->setFocusPolicy(Qt::NoFocus);
+    m_tree->setColumnCount(3);
+    m_tree->setHeaderLabels({i18n("Nombre"), i18n("Tamaño"), i18n("Modificado")});
+    m_tree->setUniformRowHeights(true);
+    m_tree->setSortingEnabled(true);
+    m_tree->header()->setStretchLastSection(false);
+    m_tree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    m_tree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    m_tree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    connect(m_tree, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *it) { openArchiveMember(it); });
+    m_stack->addWidget(m_tree);
     v->addWidget(m_stack, 1);
+    v->addWidget(m_facts);
 
     m_hint = new QLabel(i18n("←/→ anterior y siguiente  ·  Intro abrir  ·  Espacio o Esc cerrar"));
     m_hint->setProperty("role", "dim");
@@ -162,7 +178,9 @@ QSize Preview::imageTarget() const
 void Preview::load(const QString &path)
 {
     ++m_request;
+    ++g_officeTicket;
     m_path = path;
+    m_pdfPath = path;
     m_image = QImage();
     m_picture->clear();
     m_facts->clear();
@@ -228,12 +246,48 @@ void Preview::load(const QString &path)
                                                    [this](const QList<QPair<QString, QString>> &f) { showFacts(f); });
         return;
     }
-    if (fi.isFile() && isArchive(type)) {
-        // the list of what is inside, without extracting anything
+    if (fi.isFile() && Office::isOffice(m_mime)) {
+        // the first page: the picture the document carries at once, then
+        // LibreOffice's PDF (cached), which also turns pages
         bigIcon(Icons::get().forMime(m_mime));
-        m_text->setPlainText(i18n("Leyendo el contenido…"));
-        m_stack->setCurrentIndex(1);
-        offThread<QString>(this, &m_request, [path] { return archiveListing(path); }, [this](const QString &t) { m_text->setPlainText(t); });
+        if (const QString pdf = Office::cachedPdf(path); !pdf.isEmpty()) {
+            m_pdfPath = pdf;
+            renderPdfPage();
+            return;
+        }
+        offThread<QImage>(this, &m_request, [path] { return Office::embeddedThumbnail(path); }, [this](const QImage &img) {
+            if (!img.isNull() && m_pdfPath == m_path) showImage(img);
+        });
+        if (!Office::haveLibreOffice()) {
+            m_facts->setText(i18n("Instala LibreOffice para ver las páginas"));
+            return;
+        }
+        m_facts->setText(i18n("Preparando las páginas con LibreOffice…"));
+        const int ticket = g_officeTicket.load();
+        struct Result {
+            QString pdf, error;
+        };
+        offThread<Result>(this, &m_request, [path, ticket] {
+            Result r;
+            r.pdf = Office::toPdf(path, &r.error, officeWanted, ticket);
+            return r;
+        }, [this](const Result &r) {
+            if (r.pdf.isEmpty()) {
+                m_facts->setText(r.error.isEmpty() ? i18n("LibreOffice no pudo abrirlo") : r.error.left(200));
+                return;
+            }
+            m_pdfPath = r.pdf;
+            renderPdfPage();
+        });
+        return;
+    }
+    if (fi.isFile() && isArchive(type)) {
+        // what is inside, as a tree, without extracting anything
+        m_tree->clear();
+        m_facts->setText(i18n("Leyendo el contenido…"));
+        bigIcon(Icons::get().forMime(m_mime));
+        offThread<Archive::Listing>(this, &m_request, [path] { return Archive::list(path, 50000); },
+                                    [this](const Archive::Listing &l) { showArchive(l); });
         return;
     }
     if (fi.isFile() && type.inherits("text/markdown") && fi.size() <= kTextBytes) {
@@ -274,7 +328,7 @@ void Preview::showImage(const QImage &img)
 void Preview::renderPdfPage()
 {
     ++m_request;
-    const QString path = m_path;
+    const QString path = m_pdfPath;
     const int page = m_page;
     const QSize target = imageTarget();
     struct Result {
@@ -303,6 +357,104 @@ void Preview::renderPdfPage()
         }
         showImage(r.img);
         m_facts->setText(m_pages > 1 ? i18n("Página %1 de %2  ·  RePág/AvPág para pasar").arg(m_page + 1).arg(m_pages) : QString());
+    });
+}
+
+void Preview::showArchive(const Archive::Listing &l)
+{
+    if (l.entries.isEmpty()) {
+        m_facts->setText(l.encrypted ? i18n("Comprimido cifrado: hace falta la contraseña para ver su contenido")
+                                     : i18n("No se puede leer el contenido.") + (l.error.isEmpty() ? QString() : "\n" + l.error));
+        return;
+    }
+    m_tree->setUpdatesEnabled(false);
+    m_tree->setSortingEnabled(false);
+    m_tree->clear();
+    QHash<QString, ArchiveItem *> dirs;
+    QMimeDatabase db;
+    Icons &ic = Icons::get();
+    // the item of folder `dir`, made with its parents if needed (zips often list no folders)
+    std::function<ArchiveItem *(const QString &)> folder = [&](const QString &dir) -> ArchiveItem * {
+        if (dir.isEmpty()) return nullptr;
+        if (auto *it = dirs.value(dir)) return it;
+        ArchiveItem *parent = folder(dir.contains('/') ? dir.section('/', 0, -2) : QString());
+        auto *it = parent ? new ArchiveItem(parent) : new ArchiveItem(m_tree);
+        it->isDir = true;
+        it->setText(0, dir.section('/', -1));
+        it->setIcon(0, ic.forFolder(dir));
+        it->setData(0, Qt::UserRole, dir);
+        dirs.insert(dir, it);
+        return it;
+    };
+    int files = 0;
+    qint64 total = 0;
+    for (const Archive::Entry &e : l.entries) {
+        if (e.isDir) {
+            if (ArchiveItem *it = folder(e.path); it && e.mtime) {
+                it->setText(2, FsModel::formatDate(e.mtime));
+                it->setData(2, Qt::UserRole, e.mtime);
+            }
+            continue;
+        }
+        ArchiveItem *parent = folder(e.path.contains('/') ? e.path.section('/', 0, -2) : QString());
+        auto *it = parent ? new ArchiveItem(parent) : new ArchiveItem(m_tree);
+        const QString name = e.path.section('/', -1);
+        it->setText(0, e.encrypted ? name + QString::fromUtf8("  🔒") : name);
+        it->setIcon(0, ic.forMime(db.mimeTypeForFile(name, QMimeDatabase::MatchExtension).name()));
+        it->setData(0, Qt::UserRole, e.path);
+        it->bytes = std::max<qint64>(0, e.size);
+        if (e.size >= 0) it->setText(1, FsModel::formatSize(e.size));
+        it->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
+        if (e.mtime) {
+            it->setText(2, FsModel::formatDate(e.mtime));
+            it->setData(2, Qt::UserRole, e.mtime);
+        }
+        for (auto *p = parent; p; p = static_cast<ArchiveItem *>(p->parent())) p->bytes += it->bytes;
+        total += it->bytes;
+        ++files;
+    }
+    for (ArchiveItem *d : std::as_const(dirs)) {
+        d->setText(1, FsModel::formatSize(d->bytes));
+        d->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
+    }
+    m_tree->setSortingEnabled(true);
+    m_tree->sortByColumn(0, Qt::AscendingOrder);
+    if (m_tree->topLevelItemCount() == 1) m_tree->topLevelItem(0)->setExpanded(true);   // the usual single top folder
+    m_tree->setUpdatesEnabled(true);
+    m_stack->setCurrentIndex(3);
+    QStringList facts{files == 1 ? i18n("1 archivo") : i18n("%1 archivos").arg(files),
+                      dirs.size() == 1 ? i18n("1 carpeta") : i18n("%1 carpetas").arg(dirs.size()),
+                      i18n("%1 sin comprimir").arg(FsModel::formatSize(total))};
+    if (l.truncated) facts << i18n("solo los primeros %1").arg(l.entries.size());
+    if (l.encrypted) facts << i18n("🔒 con contraseña");
+    m_facts->setText(facts.join(QString::fromUtf8("  ·  ")) + "\n" + i18n("Doble clic abre un archivo sin extraer el resto"));
+}
+
+// Pulls one file out to a temporary folder and opens it.
+void Preview::openArchiveMember(QTreeWidgetItem *item)
+{
+    auto *it = static_cast<ArchiveItem *>(item);
+    if (!it || it->isDir) return;
+    const QString archive = m_path, inner = it->data(0, Qt::UserRole).toString();
+    const QString dir = QDir::tempPath() + "/luna-" + qEnvironmentVariable("USER") + "/" + QString::number(QDateTime::currentMSecsSinceEpoch(), 36);
+    const QString dest = dir + '/' + inner.section('/', -1);
+    m_facts->setText(i18n("Extrayendo «%1»…").arg(inner.section('/', -1)));
+    struct Result {
+        bool ok = false;
+        QString error;
+    };
+    offThread<Result>(this, &m_request, [archive, inner, dir, dest] {
+        Result r;
+        QDir().mkpath(dir);
+        r.ok = Archive::extract(archive, inner, dest, &r.error);
+        return r;
+    }, [this, dest](const Result &r) {
+        if (!r.ok) {
+            m_facts->setText(i18n("No se pudo extraer: %1").arg(r.error));
+            return;
+        }
+        m_facts->setText(i18n("Abierto «%1» (copia temporal)").arg(QFileInfo(dest).fileName()));
+        Apps::get().openDefault({dest});
     });
 }
 
@@ -342,8 +494,9 @@ void Preview::keyPressEvent(QKeyEvent *e)
                 m_page = page;
                 renderPdfPage();
             }
-        } else if (m_stack->currentIndex() == 1) {
-            m_text->verticalScrollBar()->triggerAction(e->key() == Qt::Key_PageDown ? QAbstractSlider::SliderPageStepAdd : QAbstractSlider::SliderPageStepSub);
+        } else if (m_stack->currentIndex() == 1 || m_stack->currentIndex() == 3) {
+            QScrollBar *bar = m_stack->currentIndex() == 1 ? m_text->verticalScrollBar() : m_tree->verticalScrollBar();
+            bar->triggerAction(e->key() == Qt::Key_PageDown ? QAbstractSlider::SliderPageStepAdd : QAbstractSlider::SliderPageStepSub);
         }
         return;
     case Qt::Key_Return:
