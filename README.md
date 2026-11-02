@@ -3,7 +3,7 @@
 Explorador de archivos para Linux escrito en C++ con Qt 6: una alternativa ligera a
 Nautilus, pensada para el escritorio [Omarchy](https://omarchy.org) (usa los colores
 de su tema y lanza las aplicaciones como él), pero que funciona en cualquier
-escritorio. Lleva el nombre de Luna, una gata siamesa, que es también su icono.
+escritorio. Lleva el nombre de Luna, en honor a mi gata siamesa, que es también su icono.
 
 <img src="data/luna.svg" alt="Icono de Luna" width="96">
 
