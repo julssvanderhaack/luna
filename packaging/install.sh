@@ -36,7 +36,7 @@ missing=$(ldd "$here/luna" 2>/dev/null | awk '/not found/ {print $1}')
 if [ -n "$missing" ]; then
   echo "Faltan bibliotecas del sistema:" >&2
   echo "$missing" | sed 's/^/  /' >&2
-  echo "En Arch: sudo pacman -S --needed qt6-base qt6-svg libmediainfo exiv2 poppler-qt6" >&2
+  echo "En Arch: sudo pacman -S --needed qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libarchive libvterm ffmpeg libpipewire" >&2
   echo "Si ya las tienes, tu sistema es más antiguo que el de la compilación: compílalo (ver README.md)." >&2
   exit 1
 fi
