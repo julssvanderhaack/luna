@@ -17,12 +17,26 @@ else()
   set(CMAKE_CXX_FLAGS_RELEASE "-O2 -march=x86-64-v2 -mtune=generic")
 endif()
 
+# Development only:
+#   LUNA_TESTS       unit tests (ctest), see tests/
+#   LUNA_TEST_HOOKS  the LUNA_* screenshot/benchmark hooks (src/testhooks.cpp);
+#                    some act on real files or keyrings, so never in a release
+#   LUNA_SANITIZE    AddressSanitizer + UndefinedBehaviorSanitizer
+option(LUNA_TESTS "Build the unit tests" OFF)
+option(LUNA_TEST_HOOKS "Build the LUNA_* development hooks into the executable" OFF)
+option(LUNA_SANITIZE "Build with ASan and UBSan" OFF)
+if(LUNA_SANITIZE)
+  add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined)
+  add_link_options(-fsanitize=address,undefined)
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS Widgets Svg)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MEDIA REQUIRED IMPORTED_TARGET libmediainfo exiv2 poppler-qt6)
+pkg_check_modules(LIBARCHIVE REQUIRED IMPORTED_TARGET libarchive)
 
-add_executable(luna
-  src/main.cpp
+# Everything but main(): the executable and the tests link the same code.
+add_library(lunacore STATIC
   src/theme.h src/theme.cpp
   src/settings.h src/settings.cpp
   src/fsmodel.h src/fsmodel.cpp
@@ -49,10 +63,9 @@ add_executable(luna
   src/crypto.h src/crypto.cpp
   src/gitmenu.h src/gitmenu.cpp
   src/clip.h src/clip.cpp
-  data/luna.qrc
 )
-pkg_check_modules(LIBARCHIVE REQUIRED IMPORTED_TARGET libarchive)
-target_link_libraries(luna PRIVATE Qt6::Widgets Qt6::Svg PkgConfig::MEDIA PkgConfig::LIBARCHIVE)
+target_include_directories(lunacore PUBLIC src)
+target_link_libraries(lunacore PUBLIC Qt6::Widgets Qt6::Svg PkgConfig::MEDIA PkgConfig::LIBARCHIVE)
 
 # Docked terminal (F4): optional, only with libvterm (Arch: libvterm).
 option(LUNA_WITH_TERMINAL "Docked terminal (needs libvterm)" ON)
@@ -60,9 +73,9 @@ if(LUNA_WITH_TERMINAL)
   pkg_check_modules(VTERM IMPORTED_TARGET vterm)
 endif()
 if(VTERM_FOUND)
-  target_sources(luna PRIVATE src/terminal.h src/terminal.cpp)
-  target_compile_definitions(luna PRIVATE LUNA_TERMINAL)
-  target_link_libraries(luna PRIVATE PkgConfig::VTERM util)
+  target_sources(lunacore PRIVATE src/terminal.h src/terminal.cpp)
+  target_compile_definitions(lunacore PUBLIC LUNA_TERMINAL)
+  target_link_libraries(lunacore PUBLIC PkgConfig::VTERM util)
 else()
   message(STATUS "libvterm not found: building without the docked terminal")
 endif()
@@ -73,10 +86,23 @@ if(LUNA_WITH_AUDIO)
   pkg_check_modules(AUDIO IMPORTED_TARGET libavformat libavcodec libavutil libswresample libpipewire-0.3)
 endif()
 if(AUDIO_FOUND)
-  target_compile_definitions(luna PRIVATE LUNA_AUDIO)
-  target_link_libraries(luna PRIVATE PkgConfig::AUDIO)
+  target_compile_definitions(lunacore PUBLIC LUNA_AUDIO)
+  target_link_libraries(lunacore PUBLIC PkgConfig::AUDIO)
 else()
   message(STATUS "FFmpeg/PipeWire not found: building without song fragments in the preview")
+endif()
+
+add_executable(luna src/main.cpp data/luna.qrc)
+target_link_libraries(luna PRIVATE lunacore)
+if(LUNA_TEST_HOOKS)
+  target_sources(luna PRIVATE src/testhooks.h src/testhooks.cpp)
+  target_compile_definitions(luna PRIVATE LUNA_TEST_HOOKS)
+  target_compile_definitions(lunacore PUBLIC LUNA_TEST_HOOKS)   # LUNA_SEARCHTEST timing, LUNA_AUDIO_TARGET
+endif()
+
+if(LUNA_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
 endif()
 
 install(TARGETS luna RUNTIME DESTINATION bin)

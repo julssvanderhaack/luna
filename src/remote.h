@@ -25,6 +25,8 @@ public:
     // Starts gvfsd-fuse if it is not serving gvfsRoot(); true when it is.
     static bool ensureFuse();
     static QString describe(const QString &mountDir, QString *scheme = nullptr, QString *uri = nullptr);
+    // "sftp://ana:secreto@host/x" → "sftp://ana@host/x"; anything else unchanged.
+    static QString withoutPassword(const QString &uri);
     QList<Mount> mounts() const;
     // Mounts (if needed) and calls back with the local FUSE path, or empty on failure.
     void connectTo(const QString &uri, QWidget *parent, std::function<void(const QString &localPath)> done);

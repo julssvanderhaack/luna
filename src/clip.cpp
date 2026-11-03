@@ -301,8 +301,10 @@ struct AudioClip::Impl {
                                                  PW_KEY_APP_NAME, "Luna", PW_KEY_APP_ID, "luna", PW_KEY_APP_ICON_NAME, "luna",
                                                  PW_KEY_NODE_NAME, "luna-preview", PW_KEY_NODE_DESCRIPTION, "Luna",
                                                  PW_KEY_NODE_LATENCY, lat.constData(), nullptr);
+#ifdef LUNA_TEST_HOOKS
         if (const QByteArray t = qgetenv("LUNA_AUDIO_TARGET"); !t.isEmpty())   // tests: into a null sink
             pw_properties_set(props, PW_KEY_TARGET_OBJECT, t.constData());
+#endif
         static const pw_stream_events events = [] {
             pw_stream_events e{};
             e.version = PW_VERSION_STREAM_EVENTS;

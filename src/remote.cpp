@@ -124,15 +124,32 @@ QList<Remote::Mount> Remote::mounts() const
     return out;
 }
 
-QStringList Remote::recent() const { return QSettings("luna", "luna").value("remote/recent").toStringList(); }
+QString Remote::withoutPassword(const QString &uri)
+{
+    QUrl url(uri);
+    if (!url.isValid() || url.password().isEmpty()) return uri;
+    return url.adjusted(QUrl::RemovePassword).toString();
+}
+
+QStringList Remote::recent() const
+{
+    // Older versions kept a password typed in the address ("sftp://u:p@h"): drop it from the file too.
+    QSettings q("luna", "luna");
+    const QStringList stored = q.value("remote/recent").toStringList();
+    QStringList r;
+    for (const QString &u : stored)
+        if (const QString clean = withoutPassword(u); !r.contains(clean)) r << clean;
+    if (r != stored) q.setValue("remote/recent", r);
+    return r;
+}
 
 void Remote::addRecent(const QString &uri)
 {
-    QSettings q("luna", "luna");
-    QStringList r = q.value("remote/recent").toStringList();
-    r.removeAll(uri);
-    r.prepend(uri);
-    q.setValue("remote/recent", r.mid(0, 12));
+    const QString clean = withoutPassword(uri);
+    QStringList r = recent();
+    r.removeAll(clean);
+    r.prepend(clean);
+    QSettings("luna", "luna").setValue("remote/recent", r.mid(0, 12));
 }
 
 QString Remote::localPathFor(const QString &uri) const
@@ -154,8 +171,13 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
     QString uri = uri0.trimmed();
     if (!uri.contains("://")) uri = "sftp://" + uri;
     QUrl url(uri);
+    // A password typed in the address is kept in memory only, to answer
+    // gio's prompt: never in the command line (ps shows it) nor in recents.
+    const QString typedPassword = url.password();
+    url.setPassword({});
+    uri = url.toString();
     if (!url.isValid() || url.host().isEmpty()) {
-        QMessageBox::warning(parent, i18n("Conectar"), i18n("La dirección «%1» no es válida.").arg(uri0));
+        QMessageBox::warning(parent, i18n("Conectar"), i18n("La dirección «%1» no es válida.").arg(withoutPassword(uri0)));
         done({});
         return;
     }
@@ -180,6 +202,7 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
     proc->setProcessChannelMode(QProcess::MergedChannels);
     auto buffer = std::make_shared<QString>();
     auto question = std::make_shared<QString>();
+    auto pending = std::make_shared<QString>(typedPassword);   // used once; asked again if it was wrong
     QPointer<QWidget> owner(parent);
     connect(proc, &QProcess::readyRead, proc, [=] {
         *buffer += QString::fromUtf8(proc->readAll());
@@ -200,6 +223,11 @@ void Remote::connectTo(const QString &uri0, QWidget *parent, std::function<void(
             if (!ok) proc->kill();
             else answer(dmn);
         } else if (b.endsWith("Password:")) {
+            if (!pending->isEmpty()) {
+                answer(*pending);
+                pending->clear();
+                return;
+            }
             bool ok;
             QString pw = QInputDialog::getText(owner, i18n("Conectar"),
                                                i18n("Contraseña de %1:").arg(url.userName().isEmpty() ? url.host() : url.userName() + "@" + url.host()),

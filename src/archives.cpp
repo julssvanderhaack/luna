@@ -1,7 +1,11 @@
 #include "archives.h"
 #include "i18n.h"
+#include <QDateTime>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QStandardPaths>
+#include <QTemporaryDir>
 #include <archive.h>
 #include <archive_entry.h>
 #include <memory>
@@ -114,5 +118,27 @@ QByteArray read(const QString &path, const QString &inner, qint64 maxBytes)
         return n < 0 ? QByteArray() : out;
     }
     return {};
+}
+
+QString privateDir()
+{
+    const QString cache = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/luna";
+    const QString base = cache + "/members";
+    if (!QDir().mkpath(base)) return {};
+    for (const QString &d : {cache, base})   // the cache may be shared with other tools: keep ours private
+        QFile::setPermissions(d, QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
+    const QDateTime old = QDateTime::currentDateTime().addDays(-1);
+    for (const QFileInfo &fi : QDir(base).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks))
+        if (fi.lastModified() < old) QDir(fi.absoluteFilePath()).removeRecursively();
+    QTemporaryDir dir(base + "/XXXXXX");   // mkdtemp: random name, 0700
+    if (!dir.isValid()) return {};
+    dir.setAutoRemove(false);   // the app it opens in reads it after we return
+    return dir.path();
+}
+
+QString memberFileName(const QString &inner)
+{
+    const QString name = inner.section('/', -1);
+    return name.isEmpty() || name == "." || name == ".." ? QStringLiteral("archivo") : name;
 }
 }

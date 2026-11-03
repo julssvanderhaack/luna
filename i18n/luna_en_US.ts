@@ -54,12 +54,12 @@
       <translation>All Applications</translation>
     </message>
     <message>
-      <location filename="../src/archives.cpp" line="90" />
+      <location filename="../src/archives.cpp" line="94" />
       <source>Está cifrado: hace falta la contraseña.</source>
       <translation>It's encrypted: the password is needed.</translation>
     </message>
     <message>
-      <location filename="../src/archives.cpp" line="96" />
+      <location filename="../src/archives.cpp" line="100" />
       <source>No está en el comprimido.</source>
       <translation>It's not in the archive.</translation>
     </message>
@@ -376,47 +376,47 @@ and you can sign yours. The password protects the private key.</translation>
       <translation>Couldn't read “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="234" />
+      <location filename="../src/fileops.cpp" line="237" />
       <source>No se pudo escribir «%1»: %2</source>
       <translation>Couldn't write “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="269" />
+      <location filename="../src/fileops.cpp" line="272" />
       <source>Error copiando «%1»: %2</source>
       <translation>Error copying “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="294" />
+      <location filename="../src/fileops.cpp" line="297" />
       <source>«%1» ya no existe.</source>
       <translation>“%1” no longer exists.</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="302" />
+      <location filename="../src/fileops.cpp" line="305" />
       <source>No se pudo copiar el enlace «%1»: %2</source>
       <translation>Couldn't copy the link “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="308" />
+      <location filename="../src/fileops.cpp" line="311" />
       <source>No se pudo crear «%1»: %2</source>
       <translation>Couldn't create “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="345" />
+      <location filename="../src/fileops.cpp" line="348" />
       <source>No se pudo eliminar «%1»: %2</source>
       <translation>Couldn't delete “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="421" />
+      <location filename="../src/fileops.cpp" line="426" />
       <source>No se pudo mover a la papelera «%1»: %2</source>
       <translation>Couldn't move “%1” to the trash: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="442" />
+      <location filename="../src/fileops.cpp" line="447" />
       <source> (copia)</source>
       <translation> (copy)</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="442" />
+      <location filename="../src/fileops.cpp" line="447" />
       <source> (copia %1)</source>
       <translation> (copy %1)</translation>
     </message>
@@ -471,57 +471,57 @@ and you can sign yours. The password protects the private key.</translation>
       <translation>Folder</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1051" />
+      <location filename="../src/fsmodel.cpp" line="1053" />
       <source>1 elemento</source>
       <translation>1 item</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1125" />
+      <location filename="../src/fsmodel.cpp" line="1127" />
       <source>El nombre no puede contener «/».</source>
       <translation>The name can't contain “/”.</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1131" />
+      <location filename="../src/fsmodel.cpp" line="1133" />
       <source>Ya existe «%1».</source>
       <translation>“%1” already exists.</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1135" />
+      <location filename="../src/fsmodel.cpp" line="1137" />
       <source>No se pudo renombrar: %1</source>
       <translation>Couldn't rename: %1</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1157" />
+      <location filename="../src/fsmodel.cpp" line="1159" />
       <source>Nombre</source>
       <translation>Name</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1158" />
+      <location filename="../src/fsmodel.cpp" line="1160" />
       <source>Tamaño</source>
       <translation>Size</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1159" />
+      <location filename="../src/fsmodel.cpp" line="1161" />
       <source>Ubicación</source>
       <translation>Location</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1159" />
+      <location filename="../src/fsmodel.cpp" line="1161" />
       <source>Tipo</source>
       <translation>Type</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1160" />
+      <location filename="../src/fsmodel.cpp" line="1162" />
       <source>Modificado</source>
       <translation>Modified</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1161" />
+      <location filename="../src/fsmodel.cpp" line="1163" />
       <source>Permisos</source>
       <translation>Permissions</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1162" />
+      <location filename="../src/fsmodel.cpp" line="1164" />
       <source>Propietario</source>
       <translation>Owner</translation>
     </message>
@@ -906,21 +906,6 @@ and you can sign yours. The password protects the private key.</translation>
       <translation>No matches</translation>
     </message>
     <message>
-      <location filename="../src/main.cpp" line="555" />
-      <source>Comportamiento</source>
-      <translation>Behavior</translation>
-    </message>
-    <message>
-      <location filename="../src/main.cpp" line="557" />
-      <source>Apariencia</source>
-      <translation>Appearance</translation>
-    </message>
-    <message>
-      <location filename="../src/main.cpp" line="656" />
-      <source>Terminal (F4)</source>
-      <translation>Terminal (F4)</translation>
-    </message>
-    <message>
       <location filename="../src/mainwindow.cpp" line="118" />
       <source>Atrás (Alt+←)</source>
       <translation>Back (Alt+←)</translation>
@@ -1074,6 +1059,11 @@ and you can sign yours. The password protects the private key.</translation>
       <location filename="../src/mainwindow.cpp" line="223" />
       <source>Acerca de Luna</source>
       <translation>About Luna</translation>
+    </message>
+    <message>
+      <location filename="../src/mainwindow.cpp" line="275" />
+      <source>Terminal (F4)</source>
+      <translation>Terminal (F4)</translation>
     </message>
     <message>
       <location filename="../src/mainwindow.cpp" line="382" />
@@ -2341,16 +2331,21 @@ Delete them permanently?</translation>
     </message>
     <message>
       <location filename="../src/preview.cpp" line="526" />
-      <source>Extrayendo «%1»…</source>
-      <translation>Extracting “%1”…</translation>
-    </message>
-    <message>
-      <location filename="../src/preview.cpp" line="538" />
       <source>No se pudo extraer: %1</source>
       <translation>Couldn't extract: %1</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="541" />
+      <location filename="../src/preview.cpp" line="526" />
+      <source>no hay sitio para la copia temporal</source>
+      <translation>there is no room for the temporary copy</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="530" />
+      <source>Extrayendo «%1»…</source>
+      <translation>Extracting “%1”…</translation>
+    </message>
+    <message>
+      <location filename="../src/preview.cpp" line="544" />
       <source>Abierto «%1» (copia temporal)</source>
       <translation>Opened “%1” (temporary copy)</translation>
     </message>
@@ -2879,146 +2874,146 @@ Delete them permanently?</translation>
       <translation>Set as Default</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="158" />
+      <location filename="../src/remote.cpp" line="180" />
       <source>Conectar</source>
       <translation>Connect</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="158" />
+      <location filename="../src/remote.cpp" line="180" />
       <source>La dirección «%1» no es válida.</source>
       <translation>The address “%1” isn't valid.</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="164" />
+      <location filename="../src/remote.cpp" line="186" />
       <source>No se pudo poner en marcha gvfsd-fuse, el puente de GVFS que Luna usa para abrir carpetas remotas en %1.</source>
       <translation>Couldn't start gvfsd-fuse, the GVFS bridge Luna uses to open remote folders in %1.</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="193" />
+      <location filename="../src/remote.cpp" line="216" />
       <source>Usuario para %1:</source>
       <translation>User for %1:</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="199" />
+      <location filename="../src/remote.cpp" line="222" />
       <source>Dominio (grupo de trabajo):</source>
       <translation>Domain (workgroup):</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="205" />
+      <location filename="../src/remote.cpp" line="233" />
       <source>Contraseña de %1:</source>
       <translation>Password for %1:</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="222" />
+      <location filename="../src/remote.cpp" line="250" />
       <source>El servidor hace una pregunta:</source>
       <translation>The server asks a question:</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="226" />
+      <location filename="../src/remote.cpp" line="254" />
       <source>Conectar de todos modos</source>
       <translation>Connect Anyway</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="242" />
+      <location filename="../src/remote.cpp" line="270" />
       <source>No se pudo conectar.</source>
       <translation>Couldn't connect.</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="243" />
+      <location filename="../src/remote.cpp" line="271" />
       <source>No se pudo conectar con %1:
 %2</source>
       <translation>Couldn't connect to %1:
 %2</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="252" />
+      <location filename="../src/remote.cpp" line="280" />
       <source>Se ha conectado con %1, pero su carpeta no aparece en %2.</source>
       <translation>Connected to %1, but its folder doesn't appear in %2.</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="266" />
+      <location filename="../src/remote.cpp" line="294" />
       <source>Desconectar</source>
       <translation>Disconnect</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="266" />
+      <location filename="../src/remote.cpp" line="294" />
       <source>No se pudo desconectar:
 </source>
       <translation>Couldn't disconnect:
 </translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="275" />
+      <location filename="../src/remote.cpp" line="303" />
       <source>Conectar con un servidor</source>
       <translation>Connect to Server</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="282" />
+      <location filename="../src/remote.cpp" line="310" />
       <source>FTPS (FTP con TLS)</source>
       <translation>FTPS (FTP with TLS)</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="283" />
+      <location filename="../src/remote.cpp" line="311" />
       <source>Carpeta compartida de Windows (SMB)</source>
       <translation>Windows shared folder (SMB)</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="285" />
+      <location filename="../src/remote.cpp" line="313" />
       <source>Tipo:</source>
       <translation>Type:</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="287" />
+      <location filename="../src/remote.cpp" line="315" />
       <source>servidor.ejemplo.com o 192.168.1.10</source>
       <translation>server.example.com or 192.168.1.10</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="288" />
+      <location filename="../src/remote.cpp" line="316" />
       <source>Servidor:</source>
       <translation>Server:</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="291" />
+      <location filename="../src/remote.cpp" line="319" />
       <source>predeterminado</source>
       <translation>default</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="292" />
+      <location filename="../src/remote.cpp" line="320" />
       <source>Puerto:</source>
       <translation>Port:</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="294" />
+      <location filename="../src/remote.cpp" line="322" />
       <source>nombre del recurso compartido</source>
       <translation>share name</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="295" />
+      <location filename="../src/remote.cpp" line="323" />
       <source>Recurso:</source>
       <translation>Share:</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="298" />
+      <location filename="../src/remote.cpp" line="326" />
       <source>Usuario:</source>
       <translation>User:</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="299" />
+      <location filename="../src/remote.cpp" line="327" />
       <source>Acceso anónimo</source>
       <translation>Anonymous access</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="302" />
+      <location filename="../src/remote.cpp" line="330" />
       <source>/ (opcional)</source>
       <translation>/ (optional)</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="305" />
+      <location filename="../src/remote.cpp" line="333" />
       <source>La contraseña se pide al conectar. También puedes escribir la dirección directamente en la barra de ruta: sftp://usuario@servidor/carpeta</source>
       <translation>The password is asked for when connecting. You can also type the address straight into the path bar: sftp://user@server/folder</translation>
     </message>
     <message>
-      <location filename="../src/remote.cpp" line="310" />
+      <location filename="../src/remote.cpp" line="338" />
       <source>&lt;b&gt;Recientes&lt;/b&gt;</source>
       <translation>&lt;b&gt;Recent&lt;/b&gt;</translation>
     </message>
@@ -3151,6 +3146,11 @@ Delete them permanently?</translation>
       <location filename="../src/settingsdialog.cpp" line="254" />
       <source>Mostrar cuántos elementos tiene cada carpeta</source>
       <translation>Show how many items each folder has</translation>
+    </message>
+    <message>
+      <location filename="../src/settingsdialog.cpp" line="257" />
+      <source>Apariencia</source>
+      <translation>Appearance</translation>
     </message>
     <message>
       <location filename="../src/settingsdialog.cpp" line="259" />
@@ -3316,6 +3316,11 @@ Delete them permanently?</translation>
       <location filename="../src/settingsdialog.cpp" line="365" />
       <source>Los marcadores son los de GTK (~/.config/gtk-3.0/bookmarks): los mismos que ve Nautilus y la barra. Arrastra carpetas a la barra para añadirlas y arrástralos para reordenarlos.</source>
       <translation>Bookmarks are GTK's (~/.config/gtk-3.0/bookmarks): the same ones Nautilus and the bar show. Drag folders onto the sidebar to add them and drag them to reorder.</translation>
+    </message>
+    <message>
+      <location filename="../src/settingsdialog.cpp" line="369" />
+      <source>Comportamiento</source>
+      <translation>Behavior</translation>
     </message>
     <message>
       <location filename="../src/settingsdialog.cpp" line="370" />

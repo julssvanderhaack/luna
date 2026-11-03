@@ -27,4 +27,10 @@ Listing list(const QString &archive, int cap = 100000);
 bool extract(const QString &archive, const QString &inner, const QString &dest, QString *error = nullptr);
 // A small member read into memory (embedded thumbnails), up to maxBytes.
 QByteArray read(const QString &archive, const QString &inner, qint64 maxBytes = 8 << 20);
+// A new folder only the user can enter (0700, random name) under
+// ~/.cache/luna/members for a member opened from the preview; ones older than
+// a day are removed. Empty if it can't be made.
+QString privateDir();
+// The file name a member gets there: its last path part, never "", "." or "..".
+QString memberFileName(const QString &inner);
 }

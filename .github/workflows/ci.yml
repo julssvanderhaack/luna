@@ -1,0 +1,41 @@
+# Builds Luna on Arch (the system it is made for) and runs the tests twice:
+# a normal Release build, and a Debug one with AddressSanitizer and UBSan that
+# fails on any memory error, leak or undefined behaviour.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: release
+            flags: -DCMAKE_BUILD_TYPE=Release
+          - name: asan-ubsan
+            flags: -DCMAKE_BUILD_TYPE=Debug -DLUNA_SANITIZE=ON
+    name: ${{ matrix.name }}
+    steps:
+      - name: Dependencies
+        run: |
+          pacman -Syu --noconfirm --needed base-devel cmake qt6-base qt6-svg libmediainfo exiv2 \
+            poppler-qt6 libarchive libvterm ffmpeg libpipewire gnupg
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DLUNA_TESTS=ON ${{ matrix.flags }}
+      - name: Build
+        run: cmake --build build -j"$(nproc)"
+      - name: Test
+        env:
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ctest --test-dir build --output-on-failure
+      - name: The normal build has no test hooks
+        if: matrix.name == 'release'
+        run: "! strings build/luna | grep -E 'LUNA_(SHOTS|TOUR|DNDTEST|GITTEST|GPGTEST)'"

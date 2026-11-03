@@ -229,7 +229,10 @@ bool Job::copyFile(const QString &src, const QString &dst)
     }
     struct stat st;
     fstat(in, &st);
-    int out = ::open(enc(dst).constData(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, st.st_mode & 07777);
+    // resolve() has already moved anything at dst out of the way, so the copy
+    // must create it: O_EXCL | O_NOFOLLOW never write through a link that
+    // appeared meanwhile. Like cp, setuid/setgid are not copied.
+    int out = ::open(enc(dst).constData(), O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, FileOps::copiedMode(st.st_mode, false));
     if (out < 0) {
         m_errors << i18n("No se pudo escribir «%1»: %2").arg(dst, errText());
         ::close(in);
@@ -304,7 +307,7 @@ bool Job::copyTree(const QString &src, const QString &dst, bool move)
         }
         ++m_doneFiles;
     } else if (S_ISDIR(st.st_mode)) {
-        if (::mkdir(enc(dst).constData(), (st.st_mode & 07777) | S_IRWXU) != 0 && errno != EEXIST) {
+        if (::mkdir(enc(dst).constData(), FileOps::copiedMode(st.st_mode, true) | S_IRWXU) != 0 && errno != EEXIST) {
             m_errors << i18n("No se pudo crear «%1»: %2").arg(dst, errText());
             return false;
         }
@@ -319,7 +322,7 @@ bool Job::copyTree(const QString &src, const QString &dst, bool move)
             }
             ok &= copyTree(src + '/' + k, target, move);
         }
-        chmod(enc(dst).constData(), st.st_mode & 07777);
+        chmod(enc(dst).constData(), FileOps::copiedMode(st.st_mode, true));
         struct timespec times[2] = {st.st_atim, st.st_mtim};
         utimensat(AT_FDCWD, enc(dst).constData(), times, 0);
     } else {
@@ -416,6 +419,8 @@ QStringList FileOps::trash(const QStringList &paths, QList<QPair<QString, QStrin
 {
     QStringList errors;
     QList<QPair<QString, QString>> moved;
+    // Qt makes Trash/ but not its parent: a fresh account may have no ~/.local/share yet.
+    QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation));
     for (const QString &p : paths) {
         QFile f(p);
         if (!f.moveToTrash()) errors << i18n("No se pudo mover a la papelera «%1»: %2").arg(QFileInfo(p).fileName(), f.errorString());

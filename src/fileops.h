@@ -71,6 +71,8 @@ public:
     static void toClipboard(const QStringList &paths, bool cut);
     static QStringList fromClipboard(bool *cut);
     static bool sameDevice(const QString &a, const QString &b);
+    // Permissions a copy gets, like cp: setuid/setgid dropped; folders keep the sticky bit.
+    static unsigned copiedMode(unsigned mode, bool dir) { return mode & (dir ? 01777u : 0777u); }
 
 signals:
     void jobStarted(Job *job);

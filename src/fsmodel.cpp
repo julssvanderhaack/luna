@@ -893,6 +893,7 @@ void FsModel::searchWorker(QPointer<FsModel> self, std::shared_ptr<std::atomic<b
         close(fd);
     }
     if (!*cancel) flush(true);
+#ifdef LUNA_TEST_HOOKS
     if (qEnvironmentVariableIsSet("LUNA_SEARCHTEST")) {
         rusage ru;
         getrusage(RUSAGE_THREAD, &ru);
@@ -900,6 +901,7 @@ void FsModel::searchWorker(QPointer<FsModel> self, std::shared_ptr<std::atomic<b
                 qlonglong(ru.ru_utime.tv_sec * 1000 + ru.ru_utime.tv_usec / 1000 + ru.ru_stime.tv_sec * 1000 + ru.ru_stime.tv_usec / 1000),
                 long(ru.ru_utime.tv_sec * 1000 + ru.ru_utime.tv_usec / 1000), long(ru.ru_stime.tv_sec * 1000 + ru.ru_stime.tv_usec / 1000));
     }
+#endif
 }
 
 void FsModel::insertFlat(std::vector<std::pair<QString, FileEntry>> &items)

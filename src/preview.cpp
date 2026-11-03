@@ -521,8 +521,12 @@ void Preview::openArchiveMember(QTreeWidgetItem *item)
     auto *it = static_cast<ArchiveItem *>(item);
     if (!it || it->isDir) return;
     const QString archive = m_path, inner = it->data(0, Qt::UserRole).toString();
-    const QString dir = QDir::tempPath() + "/luna-" + qEnvironmentVariable("USER") + "/" + QString::number(QDateTime::currentMSecsSinceEpoch(), 36);
-    const QString dest = dir + '/' + inner.section('/', -1);
+    const QString dir = Archive::privateDir();
+    if (dir.isEmpty()) {
+        m_facts->setText(i18n("No se pudo extraer: %1").arg(i18n("no hay sitio para la copia temporal")));
+        return;
+    }
+    const QString dest = dir + '/' + Archive::memberFileName(inner);
     m_facts->setText(i18n("Extrayendo «%1»…").arg(inner.section('/', -1)));
     struct Result {
         bool ok = false;
@@ -530,7 +534,6 @@ void Preview::openArchiveMember(QTreeWidgetItem *item)
     };
     offThread<Result>(this, &m_request, [archive, inner, dir, dest] {
         Result r;
-        QDir().mkpath(dir);
         r.ok = Archive::extract(archive, inner, dest, &r.error);
         return r;
     }, [this, dest](const Result &r) {

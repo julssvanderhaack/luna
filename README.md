@@ -123,6 +123,30 @@ cmake --install build --prefix ~/.local
 Por defecto se optimiza para el procesador de la máquina que compila
 (`-march=native`); `-DLUNA_NATIVE=OFF` genera un ejecutable para cualquier x86-64.
 
+## Pruebas
+
+```sh
+cmake -S . -B build-test -DLUNA_TESTS=ON
+cmake --build build-test -j"$(nproc)"
+ctest --test-dir build-test --output-on-failure
+```
+
+Las pruebas (`tests/`, con QtTest) cubren copiar, mover, borrar y la papelera
+(enlaces que no se siguen, permisos setuid/setgid que no se copian), leer
+comprimidos, la carpeta privada de los archivos abiertos desde ellos, que las
+contraseñas no queden en las direcciones recientes, el listado de carpetas,
+cifrar y descifrar con gpg, el entrecomillado del terminal y que la traducción
+esté completa. Cada una corre con su propio `HOME` vacío dentro de la carpeta de
+compilación: no tocan tu configuración, tu papelera ni tus claves.
+
+`-DLUNA_SANITIZE=ON` compila con AddressSanitizer y UBSan. El
+[CI](.github/workflows/ci.yml) pasa las pruebas en Arch de las dos formas en
+cada `push`.
+
+`-DLUNA_TEST_HOOKS=ON` mete en el ejecutable los ganchos `LUNA_*` (capturas,
+recorrido de la interfaz, pruebas de arrastrar, git y gpg) que se usan para
+desarrollar; el ejecutable normal no los lleva.
+
 ## Traducir Luna
 
 Los textos se escriben en español en el código, marcados con `i18n("…")` (o
