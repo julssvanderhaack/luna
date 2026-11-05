@@ -1097,7 +1097,8 @@ QVariant FsModel::data(const QModelIndex &idx, int role) const
     case Qt::DecorationRole:
         if (idx.column() == Name) {
             const QString path = pathOf(n);
-            if (!e.isDir && Settings::get().thumbnails && Thumbs::canThumb(e.mime, e.size) && !Remote::isRemotePath(path) && !Admin::is(path)) {
+            // Not for files you may not read: an old cached thumbnail would hide the X.
+            if (!e.isDir && !e.unreadable && Settings::get().thumbnails && Thumbs::canThumb(e.mime, e.size) && !Remote::isRemotePath(path) && !Admin::is(path)) {
                 QPixmap px = Thumbs::get().thumbnail(path, e.mtime, e.mime);
                 if (!px.isNull()) return QIcon(px);
             }
