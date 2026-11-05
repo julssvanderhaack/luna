@@ -1,6 +1,9 @@
 // Listing a folder: hidden files, links (working and broken), odd names, and
 // the model noticing a file that appears later.
 #include "fsmodel.h"
+#include "icons.h"
+#include <QPainter>
+#include <sys/stat.h>
 #include <QApplication>
 #include <QDir>
 #include <QFile>
@@ -93,6 +96,56 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(names(m).contains("nuevo.txt"), 10000);
         QFile::remove(m_tmp.path() + "/nuevo.txt");
         QTRY_VERIFY_WITH_TIMEOUT(!names(m).contains("nuevo.txt"), 10000);
+    }
+
+    void mayRead()
+    {
+        if (geteuid() == 0) QSKIP("root reads everything");
+        const quint32 me = geteuid(), other = me + 12345, nogroup = 0xfffffff0;
+        QVERIFY(FsModel::mayRead(0644, me, nogroup, false));
+        QVERIFY(!FsModel::mayRead(0244, me, nogroup, false));    // owner bits decide, even if others may
+        QVERIFY(FsModel::mayRead(0604, other, nogroup, false));
+        QVERIFY(!FsModel::mayRead(0640, other, nogroup, false));
+        QVERIFY(FsModel::mayRead(0750, other, getegid(), true));   // my group
+        QVERIFY(!FsModel::mayRead(0740, other, getegid(), true));  // a folder also needs x
+        QVERIFY(!FsModel::mayRead(0700, other, nogroup, true));    // like /root
+    }
+
+    void unreadableGetsTheEmblem()
+    {
+        if (geteuid() == 0) QSKIP("root reads everything");
+        QTemporaryDir t;
+        QVERIFY(QDir().mkpath(t.path() + "/cerrada"));
+        QVERIFY(QDir().mkpath(t.path() + "/abierta"));
+        touch(t.path() + "/secreto.txt");
+        QCOMPARE(chmod(QFile::encodeName(t.path() + "/cerrada").constData(), 0), 0);
+        QCOMPARE(chmod(QFile::encodeName(t.path() + "/secreto.txt").constData(), 0200), 0);
+        std::vector<FileEntry> v;
+        QVERIFY(FsModel::listDirectory(t.path(), v, nullptr));
+        QVERIFY(find(v, "cerrada")->unreadable);
+        QVERIFY(find(v, "secreto.txt")->unreadable);
+        QVERIFY(!find(v, "abierta")->unreadable);
+
+        // The icon is the folder's with a red X at its lower right.
+        const QIcon plain = Icons::get().forEntry(*find(v, "abierta"), t.path() + "/abierta");
+        const QIcon locked = Icons::get().forEntry(*find(v, "cerrada"), t.path() + "/cerrada");
+        const QImage a = plain.pixmap(64, 64).toImage(), b = locked.pixmap(64, 64).toImage();
+        QCOMPARE(b.size(), QSize(64, 64));
+        QCOMPARE(qAlpha(a.pixel(32, 20)), qAlpha(b.pixel(32, 20)));   // the folder itself untouched
+        if (const QByteArray out = qgetenv("LUNA_EMBLEM_PNG"); !out.isEmpty()) {
+            QImage sheet(3 * 72, 72, QImage::Format_ARGB32);
+            sheet.fill(QColor("#1e1e2e"));
+            QPainter p(&sheet);
+            p.drawPixmap(4, 4, plain.pixmap(64, 64));
+            p.drawPixmap(76, 4, locked.pixmap(64, 64));
+            p.drawPixmap(148, 20, Icons::get().forEntry(*find(v, "secreto.txt"), {}).pixmap(32, 32));
+            p.drawPixmap(188, 28, locked.pixmap(16, 16));
+            p.end();
+            sheet.save(QString::fromLocal8Bit(out));
+        }
+        const QColor c = b.pixelColor(50, 40);   // on the disc, off the X
+        QVERIFY2(c.red() > 120 && c.red() > c.green() + 40, qPrintable(c.name()));
+        chmod(QFile::encodeName(t.path() + "/cerrada").constData(), 0755);
     }
 
     void permString()

@@ -436,107 +436,112 @@ and you can sign yours. The password protects the private key.</translation>
       <translation> (copy %1)</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="289" />
+      <location filename="../src/fsmodel.cpp" line="291" />
       <source>No tienes permiso para ver esta carpeta.</source>
       <translation>You don't have permission to view this folder.</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="290" />
+      <location filename="../src/fsmodel.cpp" line="292" />
       <source>No se puede abrir la carpeta: %1</source>
       <translation>Can't open the folder: %1</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="347" />
+      <location filename="../src/fsmodel.cpp" line="366" />
       <source>d MMM yyyy, HH:mm</source>
       <translation>MMM d, yyyy, h:mm AP</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="352" />
+      <location filename="../src/fsmodel.cpp" line="371" />
       <source>hoy, </source>
       <translation>today, </translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="352" />
+      <location filename="../src/fsmodel.cpp" line="371" />
       <source>HH:mm</source>
       <translation>h:mm AP</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="353" />
+      <location filename="../src/fsmodel.cpp" line="372" />
       <source>ayer, </source>
       <translation>yesterday, </translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="354" />
+      <location filename="../src/fsmodel.cpp" line="373" />
       <source>dddd, HH:mm</source>
       <translation>dddd, h:mm AP</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="355" />
+      <location filename="../src/fsmodel.cpp" line="374" />
       <source>d MMM</source>
       <translation>MMM d</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="356" />
+      <location filename="../src/fsmodel.cpp" line="375" />
       <source>d MMM yyyy</source>
       <translation>MMM d, yyyy</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="398" />
+      <location filename="../src/fsmodel.cpp" line="417" />
       <source>Carpeta</source>
       <translation>Folder</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1055" />
+      <location filename="../src/fsmodel.cpp" line="1075" />
       <source>1 elemento</source>
       <translation>1 item</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1129" />
+      <location filename="../src/fsmodel.cpp" line="1110" />
+      <source>No tienes permiso para leer este archivo.</source>
+      <translation>You do not have permission to read this file.</translation>
+    </message>
+    <message>
+      <location filename="../src/fsmodel.cpp" line="1150" />
       <source>El nombre no puede contener «/».</source>
       <translation>The name can't contain “/”.</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1142" />
+      <location filename="../src/fsmodel.cpp" line="1163" />
       <source>No se pudo renombrar: %1</source>
       <translation>Couldn't rename: %1</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1150" />
+      <location filename="../src/fsmodel.cpp" line="1171" />
       <source>Ya existe «%1».</source>
       <translation>“%1” already exists.</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1176" />
+      <location filename="../src/fsmodel.cpp" line="1197" />
       <source>Nombre</source>
       <translation>Name</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1177" />
+      <location filename="../src/fsmodel.cpp" line="1198" />
       <source>Tamaño</source>
       <translation>Size</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1178" />
+      <location filename="../src/fsmodel.cpp" line="1199" />
       <source>Ubicación</source>
       <translation>Location</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1178" />
+      <location filename="../src/fsmodel.cpp" line="1199" />
       <source>Tipo</source>
       <translation>Type</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1179" />
+      <location filename="../src/fsmodel.cpp" line="1200" />
       <source>Modificado</source>
       <translation>Modified</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1180" />
+      <location filename="../src/fsmodel.cpp" line="1201" />
       <source>Permisos</source>
       <translation>Permissions</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1181" />
+      <location filename="../src/fsmodel.cpp" line="1202" />
       <source>Propietario</source>
       <translation>Owner</translation>
     </message>

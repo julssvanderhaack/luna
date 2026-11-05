@@ -26,6 +26,8 @@ public:
 
 private:
     QIcon glyph(char32_t cp, const QColor &c);
+    QIcon unreadable(const QIcon &base);   // base with Nautilus's "can't read" X
+    QHash<qint64, QIcon> m_emblemed;
     QIcon themed(const QStringList &names);
     QString folderKind(const QString &path) const;
     QHash<QString, QIcon> m_cache;

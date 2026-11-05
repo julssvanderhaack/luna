@@ -109,6 +109,52 @@ QString gsettingsIconTheme()
 
 struct GlyphStyle { char32_t cp; int color; };
 
+// An icon with a small red disc and an X at its lower right, like
+// Nautilus's emblem-unreadable: you may not open what it shows.
+class EmblemEngine : public QIconEngine {
+public:
+    explicit EmblemEngine(QIcon base) : m_base(std::move(base)) {}
+    void paint(QPainter *p, const QRect &r, QIcon::Mode mode, QIcon::State state) override
+    {
+        p->drawPixmap(r, scaledPixmap(r.size(), mode, state, p->device()->devicePixelRatioF()));
+    }
+    QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override { return scaledPixmap(size, mode, state, 1.0); }
+    QPixmap scaledPixmap(const QSize &size, QIcon::Mode mode, QIcon::State state, qreal scale) override
+    {
+        if (m_gen != Theme::get().generation) {   // the disc takes the theme's red
+            m_gen = Theme::get().generation;
+            m_cache.clear();
+        }
+        return m_cache.get(size, scale, mode, [&] {
+            QPixmap px(size * scale);
+            px.setDevicePixelRatio(scale);
+            px.fill(Qt::transparent);
+            QPainter p(&px);
+            p.setRenderHint(QPainter::Antialiasing);
+            m_base.paint(&p, QRect(QPoint(), size), Qt::AlignCenter, mode, state);
+            const qreal d = std::max(7.0, size.height() * 0.42);
+            const QRectF disc(size.width() - d, size.height() - d, d, d);
+            const Theme &t = Theme::get();
+            QColor red = t.red.isValid() ? t.red : QColor(0xe0, 0x1b, 0x24), bg = t.bg.isValid() ? t.bg : QColor(Qt::white);
+            if (mode == QIcon::Disabled) red.setAlpha(110);
+            p.setPen(QPen(bg, std::max(1.0, d * 0.09)));   // a rim, so it stands out on any icon
+            p.setBrush(red);
+            p.drawEllipse(disc.adjusted(0.5, 0.5, -0.5, -0.5));
+            const qreal in = d * 0.31;
+            p.setPen(QPen(bg, std::max(1.2, d * 0.14), Qt::SolidLine, Qt::RoundCap));
+            p.drawLine(disc.topLeft() + QPointF(in, in), disc.bottomRight() - QPointF(in, in));
+            p.drawLine(disc.topRight() + QPointF(-in, in), disc.bottomLeft() + QPointF(in, -in));
+            return px;
+        });
+    }
+    QIconEngine *clone() const override { return new EmblemEngine(m_base); }
+
+private:
+    QIcon m_base;
+    int m_gen = -1;
+    PixmapCache m_cache;
+};
+
 // A theme icon recoloured to one flat colour (what GTK does to -symbolic).
 class TintEngine : public QIconEngine {
 public:
@@ -164,6 +210,7 @@ QStringList Icons::installedThemes()
 void Icons::reload()
 {
     m_cache.clear();
+    m_emblemed.clear();
     m_gtkTheme = Settings::get().iconTheme.isEmpty() ? gsettingsIconTheme() : Settings::get().iconTheme;
     QIcon::setThemeName(m_gtkTheme);
     QIcon::setFallbackThemeName("hicolor");
@@ -328,10 +375,23 @@ QIcon Icons::forMime(const QString &mime)
 
 QIcon Icons::forEntry(const FileEntry &e, const QString &path)
 {
-    if (e.isDir) return forFolder(path);
-    QString mime = e.mime;
-    if (Settings::get().iconStyle == 1 && (e.mode & S_IXUSR) && mime.startsWith("text/")) mime = "application/x-shellscript";
-    return forMime(mime);
+    QIcon icon;
+    if (e.isDir) icon = forFolder(path);
+    else {
+        QString mime = e.mime;
+        if (Settings::get().iconStyle == 1 && (e.mode & S_IXUSR) && mime.startsWith("text/")) mime = "application/x-shellscript";
+        icon = forMime(mime);
+    }
+    return e.unreadable ? unreadable(icon) : icon;
+}
+
+QIcon Icons::unreadable(const QIcon &base)
+{
+    auto it = m_emblemed.constFind(base.cacheKey());
+    if (it != m_emblemed.constEnd()) return *it;
+    const QIcon icon(new EmblemEngine(base));
+    m_emblemed.insert(base.cacheKey(), icon);
+    return icon;
 }
 
 QIcon Icons::ui(const QString &name)

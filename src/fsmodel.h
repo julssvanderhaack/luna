@@ -27,6 +27,7 @@ struct FileEntry {
     quint32 mode = 0;       // st_mode (of the target for symlinks)
     quint32 uid = 0, gid = 0;
     bool isDir = false, isLink = false, broken = false, hidden = false;
+    bool unreadable = false;   // you may not read it (a folder: list or enter it) — the X emblem
     QString mime;
     QString linkTarget;
 };
@@ -91,6 +92,8 @@ public:
     static QString mimeComment(const QString &mime);
     static bool listDirectory(const QString &path, std::vector<FileEntry> &out, QString *err, QStringList *deferMime = nullptr);
     static FileEntry statPath(const QString &path, bool *ok = nullptr);
+    // From the permission bits, as the kernel decides (ACLs aside); root reads all.
+    static bool mayRead(quint32 mode, quint32 uid, quint32 gid, bool isDir);
     static void shutdown();   // drop queued listings and wait for running ones
 
 signals:

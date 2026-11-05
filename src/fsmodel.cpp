@@ -25,6 +25,7 @@
 #include <QStandardPaths>
 #include <QThreadPool>
 #include <QUrl>
+#include <algorithm>
 #include <atomic>
 #include <dirent.h>
 #include <fcntl.h>
@@ -196,6 +197,7 @@ FileEntry fromStat(const QString &dirPath, const QString &name, int dirfd, const
     e.mode = st.st_mode;
     e.uid = st.st_uid;
     e.gid = st.st_gid;
+    e.unreadable = !e.broken && !FsModel::mayRead(st.st_mode, st.st_uid, st.st_gid, e.isDir);
     bool later = false;
     e.mime = e.broken ? QStringLiteral("inode/symlink") : mimeFor(dirPath, name, e.isDir, deferMime && S_ISREG(st.st_mode) ? &later : nullptr);
     if (later) deferMime->append(name);
@@ -303,6 +305,23 @@ bool FsModel::listDirectory(const QString &path, std::vector<FileEntry> &out, QS
     }
     closedir(d);
     return true;
+}
+
+bool FsModel::mayRead(quint32 mode, quint32 uid, quint32 gid, bool isDir)
+{
+    static const uid_t me = geteuid();
+    static const std::vector<gid_t> groups = [] {
+        std::vector<gid_t> g(std::max(getgroups(0, nullptr), 0) + 1);
+        g.resize(std::max(getgroups(int(g.size()) - 1, g.data()), 0));
+        g.push_back(getegid());
+        return g;
+    }();
+    if (me == 0) return true;
+    const quint32 need = isDir ? 05 : 04;   // r, and x to enter a folder
+    int shift = 0;   // others
+    if (uid == me) shift = 6;
+    else if (std::find(groups.begin(), groups.end(), gid_t(gid)) != groups.end()) shift = 3;
+    return ((mode >> shift) & need) == need;
 }
 
 FileEntry FsModel::statPath(const QString &path, bool *ok)
@@ -674,7 +693,8 @@ void FsModel::merge(Node *n, std::vector<FileEntry> &entries)
         have.insert(k->e.name);
         FileEntry &ne = entries[fresh.value(k->e.name)];
         if (k->e.isDir && ne.isDir && k->e.size >= 0) ne.size = k->e.size;   // keep the item count
-        if (ne.mtime != k->e.mtime || ne.size != k->e.size || ne.mode != k->e.mode || ne.isDir != k->e.isDir) {
+        if (ne.mtime != k->e.mtime || ne.size != k->e.size || ne.mode != k->e.mode || ne.isDir != k->e.isDir ||
+            ne.unreadable != k->e.unreadable) {
             const bool wasDir = k->e.isDir;
             const QString mime = k->e.mime;
             k->e = ne;
@@ -1087,6 +1107,7 @@ QVariant FsModel::data(const QModelIndex &idx, int role) const
     case Qt::ToolTipRole: {
         QString t = pathOf(n);
         if (e.isLink) t += QString::fromUtf8("\n→ ") + e.linkTarget;
+        if (e.unreadable) t += '\n' + (e.isDir ? i18n("No tienes permiso para ver esta carpeta.") : i18n("No tienes permiso para leer este archivo."));
         return t;
     }
     case Qt::TextAlignmentRole:
