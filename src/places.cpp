@@ -1,6 +1,7 @@
 #include "places.h"
 #include "i18n.h"
 #include "fileops.h"
+#include "admin.h"
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
@@ -25,6 +26,10 @@ QString Places::displayName(const QString &path)
     if (path == starred) return i18n("Destacados");
     if (path == FileOps::trashFiles()) return i18n("Papelera");
     if (path == QDir::homePath()) return i18n("Carpeta personal");
+    if (Admin::is(path)) {
+        const QString n = Admin::fileName(path);
+        return n.isEmpty() ? i18n("/ (administrador)") : n;
+    }
     const QString n = QFileInfo(path).fileName();
     return n.isEmpty() ? QStringLiteral("/") : n;
 }

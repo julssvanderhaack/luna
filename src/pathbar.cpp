@@ -1,4 +1,5 @@
 #include "pathbar.h"
+#include "admin.h"
 #include "i18n.h"
 #include "places.h"
 #include "fileops.h"
@@ -120,6 +121,12 @@ void PathBar::submit()
     QString t = m_edit->text().trimmed();
     if (t.isEmpty()) return;
     if (t.startsWith("file://")) t = QUrl(t).toLocalFile();
+    if (t.startsWith("admin:")) {   // admin:///etc, as in Nautilus
+        const QString p = Admin::fromUrl(QUrl(t));
+        showCrumbs();
+        if (!p.isEmpty()) emit navigate(p);
+        return;
+    }
     if (Places::isVirtual(t)) {
         showCrumbs();
         emit navigate(t);
@@ -186,6 +193,9 @@ void PathBar::rebuild()
     };
     if (Places::isVirtual(m_path)) {
         crumbs << Crumb{Places::displayName(m_path), m_path, Icons::get().place(m_path == Places::recent ? "recent" : "starred")};
+    } else if (Admin::is(m_path)) {
+        crumbs << Crumb{i18n("Administrador"), Admin::toAdmin("/"), Icons::get().ui("lock")};
+        tail(Admin::toAdmin("/").chopped(1), Admin::localPart(m_path));
     } else if (m_path == FileOps::trashFiles() || m_path.startsWith(FileOps::trashFiles() + '/')) {
         crumbs << Crumb{i18n("Papelera"), FileOps::trashFiles(), Icons::get().place("trash")};
         tail(FileOps::trashFiles(), m_path.mid(FileOps::trashFiles().size()));

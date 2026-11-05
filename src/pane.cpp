@@ -1,4 +1,7 @@
 #include "pane.h"
+#include "admin.h"
+#include "archives.h"
+#include "remote.h"
 #include "crypto.h"
 #include "gitmenu.h"
 #include "i18n.h"
@@ -57,6 +60,7 @@
 #include <QUrl>
 #include <QVBoxLayout>
 #include <sys/stat.h>
+#include <unistd.h>
 
 namespace {
 // Icon view items: icon on top, name wrapped to three lines (elided only on
@@ -292,7 +296,21 @@ Pane::Pane(QWidget *parent) : QFrame(parent)
     m_overlay->setAttribute(Qt::WA_TransparentForMouseEvents);
     m_overlay->setStyleSheet("background: transparent; font-size: 15px;");
     m_overlay->hide();
+    m_adminBtn = new QPushButton(body);
+    m_adminBtn->setIcon(Icons::get().ui("lock"));
+    m_adminBtn->hide();
+    connect(m_adminBtn, &QPushButton::clicked, this, [this] {
+        if (isAdmin()) m_model->setRoot(m_path);   // try again: polkit asks again
+        else openAsAdmin();
+    });
     body->installEventFilter(this);
+    // Root's folders are not watched (no inotify through GVFS): show what a
+    // copy, move or delete changed when it ends.
+    connect(&FileOps::get(), &FileOps::jobStarted, this, [this](Job *j) {
+        connect(j, &Job::finished, this, [this] {
+            if (isAdmin()) m_model->refresh();
+        });
+    });
 
     m_filterBar = new QWidget;
     auto *fb = new QHBoxLayout(m_filterBar);
@@ -531,6 +549,81 @@ bool Pane::isTrash() const { return m_path == FileOps::trashFiles(); }
 
 bool Pane::isVirtual() const { return Places::isVirtual(m_path); }
 
+bool Pane::isAdmin() const { return Admin::is(m_path); }
+
+void Pane::openAsAdmin(const QString &dir) { setPath(Admin::toAdmin(dir.isEmpty() ? m_path : dir)); }
+
+// What needs a real local path (terminal, git, archives, gpg, links, the
+// trash, image edits) is not offered in root's folders; shortcuts land here.
+bool Pane::notForAdmin()
+{
+    if (!isAdmin()) return false;
+    emit status(i18n("Eso no está disponible en una carpeta de administrador."));
+    return true;
+}
+
+// Root's files open as read-only copies in a private folder: the app sees
+// the file, and nothing it saves can change the original by accident.
+void Pane::openAdminCopies(const QStringList &paths, bool preview)
+{
+    if (paths.isEmpty()) return;
+    emit status(paths.size() == 1 ? i18n("Copiando «%1» para abrirlo…").arg(Admin::fileName(paths[0]))
+                                  : i18n("Copiando %1 archivos para abrirlos…").arg(paths.size()));
+    QPointer<Pane> self(this);
+    const QString noRoom = i18n("No hay sitio para la copia temporal.");
+    QThreadPool::globalInstance()->start([self, paths, preview, noRoom] {
+        QStringList copies, errors;
+        const QString dir = Archive::privateDir();
+        if (dir.isEmpty()) errors << noRoom;
+        else
+            for (const QString &p : paths) {
+                const QString local = dir + '/' + Archive::memberFileName(Admin::fileName(p));
+                if (!Admin::copy(p, local, {}, &errors)) continue;
+                QFile::setPermissions(local, QFile::ReadOwner);
+                copies << local;
+            }
+        QMetaObject::invokeMethod(qApp, [self, copies, errors, preview] {
+            if (!self) return;
+            if (!errors.isEmpty()) QMessageBox::warning(self, i18n("Abrir"), errors.join('\n'));
+            if (copies.isEmpty()) {
+                emit self->status({});
+                return;
+            }
+            emit self->status(i18n("Abierto como copia de solo lectura: lo que cambies no llega a la carpeta de administrador."));
+            if (preview) {
+                (new Preview(copies[0], [](int) { return QString(); }, self->window()))->show();
+                return;
+            }
+            const QStringList none = Apps::get().openDefault(copies);
+            if (none.isEmpty()) return;
+            OpenWithDialog d(none, self);
+            if (d.exec() == QDialog::Accepted) Apps::get().launch(d.chosen(), none);
+        }, Qt::QueuedConnection);
+    });
+}
+
+// A change in root's folder, off the GUI thread: polkit may ask for the
+// password again (it remembers it only a few minutes). op returns what it
+// made (selected and renamed in place), or "" on failure.
+void Pane::adminOp(std::function<QString(QString *error)> op, const QString &failText)
+{
+    QPointer<Pane> self(this);
+    QThreadPool::globalInstance()->start([self, op, failText] {
+        QString err;
+        const QString made = op(&err);
+        QMetaObject::invokeMethod(qApp, [self, made, err, failText] {
+            if (!self) return;
+            if (made.isEmpty()) {
+                emit self->status(failText.arg(err));
+                return;
+            }
+            self->m_pendingSelect = {made};
+            self->m_pendingEdit = true;
+            self->m_model->refresh();
+        }, Qt::QueuedConnection);
+    });
+}
+
 bool Pane::recursiveSearch() const { return m_recursive->isChecked() && !isVirtual(); }
 
 void Pane::setActive(bool a)
@@ -639,11 +732,11 @@ void Pane::zoom(int delta)
 
 void Pane::setPath(const QString &path0, bool record, const QStringList &select)
 {
-    QString path = Places::isVirtual(path0) ? path0 : QDir::cleanPath(path0);
+    QString path = Places::isVirtual(path0) ? path0 : Admin::clean(path0);
     if (path.isEmpty()) return;
     QFileInfo fi(path);
     QStringList sel = select;
-    if (!Places::isVirtual(path) && fi.exists() && !fi.isDir()) {   // a file: open its folder and select it
+    if (!Places::isVirtual(path) && !Admin::is(path) && fi.exists() && !fi.isDir()) {   // a file: open its folder and select it
         sel = {path};
         path = fi.absolutePath();
     }
@@ -655,7 +748,7 @@ void Pane::setPath(const QString &path0, bool record, const QStringList &select)
     m_path = path;
     updateTitle();
     m_trashBar->setVisible(isTrash());
-    m_recursive->setVisible(!isVirtual());
+    m_recursive->setVisible(!isVirtual() && !isAdmin());
     if (isVirtual()) m_model->setPaths(path, Places::contents(path));
     else m_model->setRoot(path);
     m_pendingSelect = sel;
@@ -664,7 +757,7 @@ void Pane::setPath(const QString &path0, bool record, const QStringList &select)
     // Free space comes from statvfs, which can stall on a dead network mount.
     m_freeBytes = -1;
     QPointer<Pane> self(this);
-    if (!isVirtual())
+    if (!isVirtual() && !isAdmin())
         QThreadPool::globalInstance()->start([self, path] {
             QStorageInfo si(path);
             const qint64 free = si.isValid() ? si.bytesAvailable() : -1;
@@ -724,6 +817,7 @@ void Pane::refreshGit()
 
 void Pane::runGit()
 {
+    if (notForAdmin()) return;
     if (m_gitRoot.isEmpty()) return;
     if (m_gitRunning) {   // one at a time; a change during it asks for one more
         m_gitAgain = true;
@@ -801,9 +895,9 @@ void Pane::forward()
 
 void Pane::up()
 {
-    if (m_path == "/") return;
+    if (Admin::localPart(m_path) == "/") return;
     const QString cur = m_path;
-    QString parent = isTrash() || isVirtual() ? QDir::homePath() : QFileInfo(m_path).absolutePath();
+    QString parent = isTrash() || isVirtual() ? QDir::homePath() : Admin::parent(m_path);
     setPath(parent, true, {cur});
 }
 
@@ -856,6 +950,13 @@ void Pane::activateIndex(const QModelIndex &ix, bool newTab)
         emit propertiesRequested({path});
         return;
     }
+    if (isAdmin()) {
+        QStringList files;
+        for (const QModelIndex &r : selectedItems())
+            if (!r.data(FsModel::IsDirRole).toBool()) files << r.data(FsModel::PathRole).toString();
+        openAdminCopies(files.contains(path) ? files : QStringList{path});
+        return;
+    }
     QStringList files;
     for (const QString &p : selectedPaths())
         if (!QFileInfo(p).isDir()) files << p;
@@ -865,6 +966,10 @@ void Pane::activateIndex(const QModelIndex &ix, bool newTab)
 
 void Pane::openFiles(const QStringList &paths)
 {
+    if (isAdmin()) {
+        openAdminCopies(paths);
+        return;
+    }
     QStringList toOpen;
     QMimeDatabase db;
     for (const QString &p : paths) {
@@ -947,7 +1052,7 @@ void Pane::openSelection(bool newTab)
 void Pane::openWithDialog()
 {
     QStringList paths = selectedPaths();
-    if (paths.isEmpty()) return;
+    if (paths.isEmpty() || notForAdmin()) return;
     OpenWithDialog d(paths, this);
     if (d.exec() != QDialog::Accepted) return;
     if (d.makeDefault()) Apps::get().setDefault(QMimeDatabase().mimeTypeForFile(paths[0]).name(), d.chosen());
@@ -1181,7 +1286,7 @@ void Pane::transferSelection(bool move, const QString &dest0)
     QString dest = dest0;
     if (dest.isEmpty()) {
         QFileDialog dlg(this, move ? i18n("Mover %1 elemento(s) a…").arg(sel.size()) : i18n("Copiar %1 elemento(s) a…").arg(sel.size()),
-                        m_path);
+                        isAdmin() ? QDir::homePath() : m_path);
         dlg.setFileMode(QFileDialog::Directory);
         dlg.setOptions(QFileDialog::ShowDirsOnly | QFileDialog::DontUseNativeDialog);
         dlg.setLabelText(QFileDialog::Accept, move ? i18n("Mover aquí") : i18n("Copiar aquí"));
@@ -1242,6 +1347,7 @@ void Pane::renameSelected()
 {
     QModelIndexList rows = selectedItems();
     if (rows.isEmpty() || isTrash()) return;
+    if (rows.size() > 1 && notForAdmin()) return;
     if (rows.size() == 1) {
         m_selection->setCurrentIndex(rows[0], QItemSelectionModel::NoUpdate);
         view()->edit(rows[0]);
@@ -1276,6 +1382,14 @@ void Pane::renameSelected()
 void Pane::newFolder()
 {
     if (isTrash() || m_model->searching()) return;
+    if (isAdmin()) {
+        const QString dir = m_path, base = i18n("Nueva carpeta");
+        adminOp([dir, base](QString *err) {
+            const QString p = dir + '/' + FileOps::uniqueName(dir, base);
+            return Admin::makeDir(p, err) ? p : QString();
+        }, i18n("No se pudo crear la carpeta: %1"));
+        return;
+    }
     const QString name = FileOps::uniqueName(m_path, i18n("Nueva carpeta"));
     if (!QDir(m_path).mkdir(name)) {
         emit status(i18n("No se pudo crear la carpeta (¿sin permisos?)."));
@@ -1290,6 +1404,14 @@ void Pane::newFolder()
 void Pane::newFile()
 {
     if (isTrash() || m_model->searching()) return;
+    if (isAdmin()) {
+        const QString dir = m_path, base = i18n("Archivo nuevo.txt");
+        adminOp([dir, base](QString *err) {
+            const QString p = dir + '/' + FileOps::uniqueName(dir, base);
+            return Admin::makeFile(p, err) ? p : QString();
+        }, i18n("No se pudo crear el archivo: %1"));
+        return;
+    }
     const QString name = FileOps::uniqueName(m_path, i18n("Archivo nuevo.txt"));
     QFile f(m_path + '/' + name);
     if (!f.open(QIODevice::WriteOnly)) {
@@ -1338,7 +1460,7 @@ void Pane::trashSelection()
 {
     QStringList p = selectedPaths();
     if (p.isEmpty()) return;
-    if (isTrash()) {
+    if (isTrash() || isAdmin()) {   // root's files have no trash
         deleteSelection();
         return;
     }
@@ -1359,9 +1481,9 @@ void Pane::deleteSelection()
 {
     QStringList p = selectedPaths();
     if (p.isEmpty()) return;
-    if (Settings::get().confirmDelete &&
+    if ((Settings::get().confirmDelete || isAdmin()) &&
         QMessageBox::warning(this, i18n("Eliminar definitivamente"),
-                             p.size() == 1 ? i18n("¿Eliminar definitivamente «%1»? No se puede deshacer.").arg(QFileInfo(p[0]).fileName())
+                             p.size() == 1 ? i18n("¿Eliminar definitivamente «%1»? No se puede deshacer.").arg(Admin::fileName(p[0]))
                                            : i18n("¿Eliminar definitivamente %1 elementos? No se puede deshacer.").arg(p.size()),
                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
         return;
@@ -1395,6 +1517,11 @@ void Pane::showPreview()
     }
     const QString path = cur.sibling(cur.row(), 0).data(FsModel::PathRole).toString();
     if (path.isEmpty() || Preview::isOpen()) return;
+    if (isAdmin()) {   // a read-only copy, one file at a time
+        if (cur.sibling(cur.row(), 0).data(FsModel::IsDirRole).toBool()) return;
+        openAdminCopies({path}, true);
+        return;
+    }
     // ←/→ in the preview walk the view: the selection follows, like Nautilus
     auto step = [this, v](int delta) -> QString {
         const QModelIndex at = v->currentIndex().sibling(v->currentIndex().row(), 0);
@@ -1412,6 +1539,7 @@ void Pane::showPreview()
 
 void Pane::openTerminal()
 {
+    if (notForAdmin()) return;
     QString dir = m_path;
     QStringList sel = selectedPaths();
     if (sel.size() == 1 && QFileInfo(sel[0]).isDir()) dir = sel[0];
@@ -1423,18 +1551,21 @@ void Pane::copyPath()
 {
     QStringList p = selectedPaths();
     if (p.isEmpty()) p = {m_path};
+    for (QString &x : p) x = Admin::localPart(x);
     QApplication::clipboard()->setText(p.join('\n'));
     emit status(i18n("Ruta copiada"));
 }
 
 void Pane::createLink()
 {
+    if (notForAdmin()) return;
     QStringList p = selectedPaths();
     if (!p.isEmpty() && !isVirtual()) FileOps::get().link(p, m_path);
 }
 
 void Pane::compressSelection()
 {
+    if (notForAdmin()) return;
     QStringList p = selectedPaths();
     if (p.isEmpty() || isVirtual()) return;
     QString base = p.size() == 1 ? QFileInfo(p[0]).completeBaseName() : QFileInfo(m_path).fileName();
@@ -1463,6 +1594,7 @@ void Pane::compressSelection()
 
 void Pane::extractSelection()
 {
+    if (notForAdmin()) return;
     if (isVirtual()) return;
     for (const QString &p : selectedPaths()) {
         QFileInfo fi(p);
@@ -1489,6 +1621,7 @@ void Pane::extractSelection()
 
 void Pane::encryptSelection()
 {
+    if (notForAdmin()) return;
     const QStringList sel = selectedPaths();
     if (sel.isEmpty() || isVirtual()) return;
     Crypto::encryptDialog(this, sel, m_path, [this](bool ok, const QString &msg, const QString &made) {
@@ -1504,6 +1637,7 @@ void Pane::encryptSelection()
 
 void Pane::decryptSelection()
 {
+    if (notForAdmin()) return;
     if (isVirtual()) return;
     for (const QString &p : selectedPaths()) {
         if (!Crypto::isEncrypted(p)) continue;
@@ -1521,9 +1655,20 @@ void Pane::decryptSelection()
 void Pane::handleDrop(const QList<QUrl> &urls, const QString &dest)
 {
     QStringList srcs;
+    bool admin = Admin::is(dest);
     for (const QUrl &u : urls)
-        if (u.isLocalFile()) srcs << u.toLocalFile();
-    if (srcs.isEmpty() || dest.startsWith(FileOps::trashFiles())) {
+        if (const QString p = Admin::fromUrl(u); !p.isEmpty()) {
+            srcs << p;
+            admin |= Admin::is(p);
+        }
+    if (srcs.isEmpty() || isVirtual()) return;
+    if (admin) {   // into or out of root's folders: copy, or move with Shift
+        if (dest.startsWith(FileOps::trashFiles())) return;
+        if (QApplication::keyboardModifiers() & Qt::ShiftModifier) FileOps::get().move(srcs, dest);
+        else FileOps::get().copy(srcs, dest);
+        return;
+    }
+    if (dest.startsWith(FileOps::trashFiles())) {
         if (!srcs.isEmpty() && dest.startsWith(FileOps::trashFiles())) {
             FileOps::get().trash(srcs);
             m_model->refresh();
@@ -1645,6 +1790,19 @@ void Pane::updateOverlay()
     m_overlay->setVisible(!text.isEmpty());
     m_overlay->setGeometry(m_overlay->parentWidget()->rect());
     m_overlay->raise();
+    // A folder only root can read: offer the password, like Nautilus.
+    const QString err = m_model->error();
+    const bool locked = !err.isEmpty() && !isAdmin() && !isVirtual() && !isTrash() && m_path.startsWith('/') &&
+                        !Remote::isRemotePath(m_path) && ::access(QFile::encodeName(m_path).constData(), R_OK | X_OK) != 0 && errno == EACCES;
+    const bool retry = !err.isEmpty() && isAdmin();
+    m_adminBtn->setVisible(locked || retry);
+    if (locked || retry) {
+        m_adminBtn->setText(locked ? i18n("Abrir como administrador") : i18n("Volver a intentarlo"));
+        m_adminBtn->adjustSize();
+        const QRect r = m_adminBtn->parentWidget()->rect();
+        m_adminBtn->move((r.width() - m_adminBtn->width()) / 2, r.height() / 2 + 24);
+        m_adminBtn->raise();
+    }
 }
 
 // ------------------------------------------------------------ context menu
@@ -1654,12 +1812,54 @@ void Pane::showFolderMenu(const QPoint &globalPos)
     contextMenu(globalPos, false);
 }
 
+// Items in root's folder: open (as copies), copy in and out, rename, delete.
+void Pane::adminMenu(QMenu &m, const QStringList &sel)
+{
+    Icons &ic = Icons::get();
+    bool allDirs = true, anyDir = false;
+    for (const QModelIndex &r : selectedItems()) {
+        const bool d = r.data(FsModel::IsDirRole).toBool();
+        allDirs &= d;
+        anyDir |= d;
+    }
+    if (allDirs) {
+        m.addAction(ic.ui("open"), i18n("Abrir"), this, [this] { openSelection(); });
+        m.addAction(ic.ui("newtab"), i18n("Abrir en pestaña nueva"), this, [this] { openSelection(true); });
+        if (sel.size() == 1) m.addAction(ic.ui("split"), i18n("Abrir en el otro panel"), this, [this, sel] { emit openInOtherPane(sel[0]); });
+    } else if (!anyDir) {
+        m.addAction(ic.ui("open"), i18n("Abrir una copia de solo lectura"), this, [this, sel] { openAdminCopies(sel); });
+        if (sel.size() == 1) m.addAction(ic.ui("info"), i18n("Vista previa"), QKeySequence("Space"), this, &Pane::showPreview);
+    }
+    m.addSeparator();
+    m.addAction(ic.ui("cut"), i18n("Cortar"), QKeySequence::Cut, this, &Pane::cutSelection);
+    m.addAction(ic.ui("copy"), i18n("Copiar"), QKeySequence::Copy, this, &Pane::copySelection);
+    if (sel.size() == 1 && allDirs)
+        m.addAction(ic.ui("paste"), i18n("Pegar dentro"), this, [sel] {
+            bool cut;
+            const QStringList s = FileOps::fromClipboard(&cut);
+            if (s.isEmpty()) return;
+            if (cut) FileOps::get().move(s, sel[0]);
+            else FileOps::get().copy(s, sel[0]);
+        })->setEnabled(!FileOps::fromClipboard(nullptr).isEmpty());
+    m.addAction(ic.ui("copy"), i18n("Copiar ruta"), this, &Pane::copyPath);
+    m.addSeparator();
+    m.addMenu(transferMenu(false, &m));
+    m.addSeparator();
+    if (sel.size() == 1) m.addAction(ic.ui("edit"), i18n("Renombrar…"), QKeySequence("F2"), this, &Pane::renameSelected);
+    m.addAction(ic.ui("cancel"), i18n("Eliminar definitivamente"), QKeySequence("Shift+Del"), this, &Pane::deleteSelection);
+}
+
 void Pane::contextMenu(const QPoint &pos, bool onItem)
 {
     QMenu m(this);
     Icons &ic = Icons::get();
     QStringList sel = selectedPaths();
     static const bool hyprland = qEnvironmentVariableIsSet("HYPRLAND_INSTANCE_SIGNATURE");
+    if (isAdmin() && onItem && !sel.isEmpty()) {
+        adminMenu(m, sel);
+        m.exec(pos);
+        return;
+    }
     if (onItem && !sel.isEmpty()) {
         bool allDirs = true, anyDir = false, archive = false;
         QMimeDatabase db;
@@ -1687,6 +1887,8 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             if (haveSonata()) m.addAction(ic.ui("play"), i18n("Reproducir en Sonata"), this, [sel] { playInSonata(sel); });
             if (haveDiskPanel() && sel.size() == 1 && !isVirtual())
                 m.addAction(ic.ui("disk"), i18n("Ver qué ocupa espacio"), this, [sel] { showDiskUsage(sel[0]); });
+            if (sel.size() == 1 && !isTrash() && !Remote::isRemotePath(sel[0]))
+                m.addAction(ic.ui("lock"), i18n("Abrir como administrador"), this, [this, sel] { openAsAdmin(sel[0]); });
         } else if (!anyDir) {
             const QString mime = db.mimeTypeForFile(sel[0]).name();
             const AppInfo *def = Apps::get().byId(Apps::get().defaultFor(mime));
@@ -1754,7 +1956,15 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
         m.addAction(ic.ui("restore"), u.undoText(), QKeySequence::Undo, &u, &Undo::undo)->setEnabled(u.canUndo());
         m.addAction(ic.ui("restore"), u.redoText(), QKeySequence("Ctrl+Shift+Z"), &u, &Undo::redo)->setEnabled(u.canRedo());
         m.addSeparator();
-        if (!isVirtual()) {
+        if (isAdmin()) {
+            m.addAction(ic.ui("newfolder"), i18n("Nueva carpeta"), QKeySequence("Ctrl+Shift+N"), this, &Pane::newFolder);
+            m.addAction(ic.ui("edit"), i18n("Nuevo archivo vacío"), this, &Pane::newFile);
+            m.addAction(ic.ui("paste"), i18n("Pegar"), QKeySequence::Paste, this, &Pane::paste)->setEnabled(!FileOps::fromClipboard(nullptr).isEmpty());
+            m.addSeparator();
+            m.addAction(ic.ui("copy"), i18n("Copiar ruta de la carpeta"), this, &Pane::copyPath);
+            m.addAction(ic.ui("restore"), i18n("Actualizar"), QKeySequence("F5"), this, &Pane::refresh);
+            m.addAction(ic.ui("unlock"), i18n("Salir del modo administrador"), this, [this] { setPath(Admin::localPart(m_path)); });
+        } else if (!isVirtual()) {
             m.addAction(ic.ui("newfolder"), i18n("Nueva carpeta"), QKeySequence("Ctrl+Shift+N"), this, &Pane::newFolder);
             m.addAction(ic.ui("edit"), i18n("Nuevo archivo vacío"), this, &Pane::newFile);
             m.addAction(ic.ui("paste"), i18n("Pegar"), QKeySequence::Paste, this, &Pane::paste)->setEnabled(!FileOps::fromClipboard(nullptr).isEmpty());
@@ -1763,6 +1973,8 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
             m.addAction(ic.ui("copy"), i18n("Copiar ruta de la carpeta"), this, &Pane::copyPath);
             if (haveSonata()) m.addAction(ic.ui("play"), i18n("Reproducir la carpeta en Sonata"), this, [this] { playInSonata({m_path}); });
             if (haveDiskPanel()) m.addAction(ic.ui("disk"), i18n("Ver qué ocupa espacio"), this, [this] { showDiskUsage(m_path); });
+            if (!isTrash() && !Remote::isRemotePath(m_path))
+                m.addAction(ic.ui("lock"), i18n("Abrir como administrador"), this, [this] { openAsAdmin(); });
             if (!m_gitRoot.isEmpty()) GitMenu::add(&m, this, m_gitRoot, m_path, {}, [this](const QString &s) { emit status(s); });
             else
                 GitMenu::addInit(&m, this, m_path, [this](const QString &s) {
@@ -1813,7 +2025,7 @@ void Pane::contextMenu(const QPoint &pos, bool onItem)
         });
         hid->setCheckable(true);
         hid->setChecked(Settings::get().showHidden);
-        if (!isVirtual()) {
+        if (!isVirtual() && !isAdmin()) {
             m.addSeparator();
             m.addAction(ic.ui("star"), i18n("Añadir carpeta a marcadores"), QKeySequence("Ctrl+D"), this,
                         [this] { emit bookmarkRequested(m_path); });

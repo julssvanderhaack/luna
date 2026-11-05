@@ -34,6 +34,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Svg)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MEDIA REQUIRED IMPORTED_TARGET libmediainfo exiv2 poppler-qt6)
 pkg_check_modules(LIBARCHIVE REQUIRED IMPORTED_TARGET libarchive)
+pkg_check_modules(GIO REQUIRED IMPORTED_TARGET gio-2.0)   # admin:// (root-only folders, like Nautilus)
 
 # Everything but main(): the executable and the tests link the same code.
 add_library(lunacore STATIC
@@ -48,6 +49,7 @@ add_library(lunacore STATIC
   src/places.h src/places.cpp
   src/pathbar.h src/pathbar.cpp
   src/remote.h src/remote.cpp
+  src/admin.h src/admin.cpp
   src/sidebar.h src/sidebar.cpp
   src/pane.h src/pane.cpp
   src/properties.h src/properties.cpp
@@ -65,7 +67,7 @@ add_library(lunacore STATIC
   src/clip.h src/clip.cpp
 )
 target_include_directories(lunacore PUBLIC src)
-target_link_libraries(lunacore PUBLIC Qt6::Widgets Qt6::Svg PkgConfig::MEDIA PkgConfig::LIBARCHIVE)
+target_link_libraries(lunacore PUBLIC Qt6::Widgets Qt6::Svg PkgConfig::MEDIA PkgConfig::LIBARCHIVE PkgConfig::GIO)
 
 # Docked terminal (F4): optional, only with libvterm (Arch: libvterm).
 option(LUNA_WITH_TERMINAL "Docked terminal (needs libvterm)" ON)

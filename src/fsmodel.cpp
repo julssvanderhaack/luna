@@ -1,4 +1,5 @@
 #include "fsmodel.h"
+#include "admin.h"
 #include "i18n.h"
 #include "icons.h"
 #include "remote.h"
@@ -250,7 +251,7 @@ public:
                 if (auto *app = QCoreApplication::instance())
                     QMetaObject::invokeMethod(app, [cb, mimes = std::move(mimes)]() mutable { cb(std::move(mimes)); }, Qt::QueuedConnection);
         }
-        if (!Settings::get().showItemCounts || dirs.isEmpty() || Remote::isRemotePath(m_path)) return;
+        if (!Settings::get().showItemCounts || dirs.isEmpty() || Remote::isRemotePath(m_path) || Admin::is(m_path)) return;
         QHash<QString, qint64> counts;
         t.restart();
         for (const QString &d : dirs) {
@@ -281,6 +282,7 @@ void FsModel::shutdown()
 // ------------------------------------------------------------- static helpers
 bool FsModel::listDirectory(const QString &path, std::vector<FileEntry> &out, QString *err, QStringList *deferMime)
 {
+    if (Admin::is(path)) return Admin::list(path, out, err);
     QByteArray p = QFile::encodeName(path);
     int fd = open(p.constData(), O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (fd < 0) {
@@ -525,10 +527,10 @@ void FsModel::setRoot(const QString &path)
     m_dirty.clear();
     m_root = std::make_unique<Node>();
     m_virtual = false;
-    m_rootPath = QDir::cleanPath(path);
+    m_rootPath = Admin::clean(path);
     m_root->fullPath = m_rootPath;
     m_root->e.isDir = true;
-    m_root->e.name = QFileInfo(m_rootPath).fileName();
+    m_root->e.name = Admin::fileName(m_rootPath);
     ++m_gen;
     m_error.clear();
     endResetModel();
@@ -1075,7 +1077,7 @@ QVariant FsModel::data(const QModelIndex &idx, int role) const
     case Qt::DecorationRole:
         if (idx.column() == Name) {
             const QString path = pathOf(n);
-            if (!e.isDir && Settings::get().thumbnails && Thumbs::canThumb(e.mime, e.size) && !Remote::isRemotePath(path)) {
+            if (!e.isDir && Settings::get().thumbnails && Thumbs::canThumb(e.mime, e.size) && !Remote::isRemotePath(path) && !Admin::is(path)) {
                 QPixmap px = Thumbs::get().thumbnail(path, e.mtime, e.mime);
                 if (!px.isNull()) return QIcon(px);
             }
@@ -1128,6 +1130,21 @@ bool FsModel::setData(const QModelIndex &idx, const QVariant &value, int role)
         return false;
     }
     const QString oldPath = pathOf(n);
+    if (Admin::is(oldPath)) {
+        // Through GVFS, off the GUI thread (polkit may ask again); GIO never
+        // renames over a taken name. The refresh shows the new name.
+        QPointer<FsModel> self(this);
+        QThreadPool::globalInstance()->start([self, oldPath, newName] {
+            QString err;
+            const bool ok = Admin::rename(oldPath, newName, &err);
+            QMetaObject::invokeMethod(qApp, [self, ok, err] {
+                if (!self) return;
+                if (!ok) emit self->errorOccurred(i18n("No se pudo renombrar: %1").arg(err));
+                self->refresh();
+            }, Qt::QueuedConnection);
+        });
+        return false;
+    }
     const QString newPath = QFileInfo(oldPath).path() + '/' + newName;
     if (QFileInfo::exists(newPath)) {
         emit errorOccurred(i18n("Ya existe «%1».").arg(newName));
@@ -1187,7 +1204,7 @@ QMimeData *FsModel::mimeData(const QModelIndexList &indexes) const
         const QString p = filePath(i);
         if (seen.contains(p)) continue;
         seen.insert(p);
-        urls << QUrl::fromLocalFile(p);
+        urls << Admin::url(p);
     }
     auto *m = new QMimeData;
     m->setUrls(urls);
@@ -1199,7 +1216,7 @@ bool FsModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int, in
     if (!data->hasUrls()) return false;
     QString dest = filePath(parent);
     const FileEntry *e = entry(parent);
-    if (e && !e->isDir) dest = QFileInfo(dest).path();
+    if (e && !e->isDir) dest = Admin::parent(dest);
     emit dropRequested(data->urls(), dest, action);
     return false;   // the copy/move happens asynchronously; views must not remove rows
 }

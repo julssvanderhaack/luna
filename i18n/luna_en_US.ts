@@ -4,6 +4,21 @@
   <context>
     <name>Luna</name>
     <message>
+      <location filename="../src/admin.cpp" line="38" />
+      <source>Sin la contraseña de administrador no se puede entrar.</source>
+      <translation>Without the administrator password it cannot be opened.</translation>
+    </message>
+    <message>
+      <location filename="../src/admin.cpp" line="40" />
+      <source>Cancelado.</source>
+      <translation>Canceled.</translation>
+    </message>
+    <message>
+      <location filename="../src/admin.cpp" line="347" />
+      <source>Ese nombre no vale.</source>
+      <translation>That name is not valid.</translation>
+    </message>
+    <message>
       <location filename="../src/apps.cpp" line="293" />
       <source>Abrir con…</source>
       <translation>Open With…</translation>
@@ -82,11 +97,6 @@
       <location filename="../src/crypto.cpp" line="85" />
       <source>No tienes la clave privada con la que se cifró.</source>
       <translation>You don't have the private key it was encrypted for.</translation>
-    </message>
-    <message>
-      <location filename="../src/crypto.cpp" line="86" />
-      <source>Cancelado.</source>
-      <translation>Canceled.</translation>
     </message>
     <message>
       <location filename="../src/crypto.cpp" line="87" />
@@ -306,222 +316,227 @@ and you can sign yours. The password protects the private key.</translation>
       <translation>Password for “%1”:</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="30" />
+      <location filename="../src/fileops.cpp" line="31" />
       <source>«%1»</source>
       <translation>“%1”</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="30" />
+      <location filename="../src/fileops.cpp" line="31" />
       <source>%1 elementos</source>
       <translation>%1 items</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="32" />
+      <location filename="../src/fileops.cpp" line="33" />
       <source>Copiando %1</source>
       <translation>Copying %1</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="33" />
+      <location filename="../src/fileops.cpp" line="34" />
       <source>Moviendo %1</source>
       <translation>Moving %1</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="34" />
+      <location filename="../src/fileops.cpp" line="35" />
       <source>Enlazando %1</source>
       <translation>Linking %1</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="35" />
+      <location filename="../src/fileops.cpp" line="36" />
       <source>Eliminando %1</source>
       <translation>Deleting %1</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="36" />
+      <location filename="../src/fileops.cpp" line="37" />
       <source>Vaciando la papelera</source>
       <translation>Emptying the trash</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="37" />
+      <location filename="../src/fileops.cpp" line="38" />
       <source>Restaurando %1</source>
       <translation>Restoring %1</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="101" />
+      <location filename="../src/fileops.cpp" line="107" />
       <source>No se puede copiar «%1» dentro de sí misma.</source>
       <translation>Can't copy “%1” into itself.</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="115" />
+      <location filename="../src/fileops.cpp" line="121" />
       <source>No se pudo mover «%1»: %2</source>
       <translation>Couldn't move “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="150" />
+      <location filename="../src/fileops.cpp" line="156" />
       <source>No se pudo crear el enlace a «%1»: %2</source>
       <translation>Couldn't create the link to “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="163" />
+      <location filename="../src/fileops.cpp" line="169" />
       <source>No se sabe de dónde vino «%1».</source>
       <translation>Don't know where “%1” came from.</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="176" />
+      <location filename="../src/fileops.cpp" line="182" />
       <source>No se pudo restaurar «%1»: %2</source>
       <translation>Couldn't restore “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="227" />
+      <location filename="../src/fileops.cpp" line="225" />
       <source>No se pudo leer «%1»: %2</source>
       <translation>Couldn't read “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="237" />
+      <location filename="../src/fileops.cpp" line="235" />
       <source>No se pudo escribir «%1»: %2</source>
       <translation>Couldn't write “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="272" />
+      <location filename="../src/fileops.cpp" line="270" />
       <source>Error copiando «%1»: %2</source>
       <translation>Error copying “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="297" />
+      <location filename="../src/fileops.cpp" line="295" />
       <source>«%1» ya no existe.</source>
       <translation>“%1” no longer exists.</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="305" />
+      <location filename="../src/fileops.cpp" line="303" />
       <source>No se pudo copiar el enlace «%1»: %2</source>
       <translation>Couldn't copy the link “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="311" />
+      <location filename="../src/fileops.cpp" line="309" />
       <source>No se pudo crear «%1»: %2</source>
       <translation>Couldn't create “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="348" />
+      <location filename="../src/fileops.cpp" line="370" />
       <source>No se pudo eliminar «%1»: %2</source>
       <translation>Couldn't delete “%1”: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="426" />
+      <location filename="../src/fileops.cpp" line="375" />
+      <source>«%1»: eso no se puede hacer en una carpeta de administrador.</source>
+      <translation>“%1”: that cannot be done in an administrator folder.</translation>
+    </message>
+    <message>
+      <location filename="../src/fileops.cpp" line="526" />
       <source>No se pudo mover a la papelera «%1»: %2</source>
       <translation>Couldn't move “%1” to the trash: %2</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="447" />
+      <location filename="../src/fileops.cpp" line="551" />
       <source> (copia)</source>
       <translation> (copy)</translation>
     </message>
     <message>
-      <location filename="../src/fileops.cpp" line="447" />
+      <location filename="../src/fileops.cpp" line="551" />
       <source> (copia %1)</source>
       <translation> (copy %1)</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="287" />
+      <location filename="../src/fsmodel.cpp" line="289" />
       <source>No tienes permiso para ver esta carpeta.</source>
       <translation>You don't have permission to view this folder.</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="288" />
+      <location filename="../src/fsmodel.cpp" line="290" />
       <source>No se puede abrir la carpeta: %1</source>
       <translation>Can't open the folder: %1</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="345" />
+      <location filename="../src/fsmodel.cpp" line="347" />
       <source>d MMM yyyy, HH:mm</source>
       <translation>MMM d, yyyy, h:mm AP</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="350" />
+      <location filename="../src/fsmodel.cpp" line="352" />
       <source>hoy, </source>
       <translation>today, </translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="350" />
+      <location filename="../src/fsmodel.cpp" line="352" />
       <source>HH:mm</source>
       <translation>h:mm AP</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="351" />
+      <location filename="../src/fsmodel.cpp" line="353" />
       <source>ayer, </source>
       <translation>yesterday, </translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="352" />
+      <location filename="../src/fsmodel.cpp" line="354" />
       <source>dddd, HH:mm</source>
       <translation>dddd, h:mm AP</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="353" />
+      <location filename="../src/fsmodel.cpp" line="355" />
       <source>d MMM</source>
       <translation>MMM d</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="354" />
+      <location filename="../src/fsmodel.cpp" line="356" />
       <source>d MMM yyyy</source>
       <translation>MMM d, yyyy</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="396" />
+      <location filename="../src/fsmodel.cpp" line="398" />
       <source>Carpeta</source>
       <translation>Folder</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1053" />
+      <location filename="../src/fsmodel.cpp" line="1055" />
       <source>1 elemento</source>
       <translation>1 item</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1127" />
+      <location filename="../src/fsmodel.cpp" line="1129" />
       <source>El nombre no puede contener «/».</source>
       <translation>The name can't contain “/”.</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1133" />
-      <source>Ya existe «%1».</source>
-      <translation>“%1” already exists.</translation>
-    </message>
-    <message>
-      <location filename="../src/fsmodel.cpp" line="1137" />
+      <location filename="../src/fsmodel.cpp" line="1142" />
       <source>No se pudo renombrar: %1</source>
       <translation>Couldn't rename: %1</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1159" />
+      <location filename="../src/fsmodel.cpp" line="1150" />
+      <source>Ya existe «%1».</source>
+      <translation>“%1” already exists.</translation>
+    </message>
+    <message>
+      <location filename="../src/fsmodel.cpp" line="1176" />
       <source>Nombre</source>
       <translation>Name</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1160" />
+      <location filename="../src/fsmodel.cpp" line="1177" />
       <source>Tamaño</source>
       <translation>Size</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1161" />
+      <location filename="../src/fsmodel.cpp" line="1178" />
       <source>Ubicación</source>
       <translation>Location</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1161" />
+      <location filename="../src/fsmodel.cpp" line="1178" />
       <source>Tipo</source>
       <translation>Type</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1162" />
+      <location filename="../src/fsmodel.cpp" line="1179" />
       <source>Modificado</source>
       <translation>Modified</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1163" />
+      <location filename="../src/fsmodel.cpp" line="1180" />
       <source>Permisos</source>
       <translation>Permissions</translation>
     </message>
     <message>
-      <location filename="../src/fsmodel.cpp" line="1164" />
+      <location filename="../src/fsmodel.cpp" line="1181" />
       <source>Propietario</source>
       <translation>Owner</translation>
     </message>
@@ -906,491 +921,491 @@ and you can sign yours. The password protects the private key.</translation>
       <translation>No matches</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="118" />
+      <location filename="../src/mainwindow.cpp" line="119" />
       <source>Atrás (Alt+←)</source>
       <translation>Back (Alt+←)</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="119" />
+      <location filename="../src/mainwindow.cpp" line="120" />
       <source>Adelante (Alt+→)</source>
       <translation>Forward (Alt+→)</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="120" />
+      <location filename="../src/mainwindow.cpp" line="121" />
       <source>Carpeta superior (Alt+↑)</source>
       <translation>Parent Folder (Alt+↑)</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="131" />
+      <location filename="../src/mainwindow.cpp" line="132" />
       <source>Buscar (Ctrl+F)</source>
       <translation>Search (Ctrl+F)</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="144" />
+      <location filename="../src/mainwindow.cpp" line="145" />
       <source>Modo de vista</source>
       <translation>View Mode</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="148" />
+      <location filename="../src/mainwindow.cpp" line="149" />
       <source>Iconos</source>
       <translation>Icons</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="148" />
+      <location filename="../src/mainwindow.cpp" line="149" />
       <source>Compacta</source>
       <translation>Compact</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="148" />
+      <location filename="../src/mainwindow.cpp" line="149" />
       <source>Lista</source>
       <translation>List</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="148" />
+      <location filename="../src/mainwindow.cpp" line="149" />
       <source>Lista detallada</source>
       <translation>Detailed List</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="148" />
+      <location filename="../src/mainwindow.cpp" line="149" />
       <source>Árbol</source>
       <translation>Tree</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="148" />
+      <location filename="../src/mainwindow.cpp" line="149" />
       <source>Columnas</source>
       <translation>Columns</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="164" />
+      <location filename="../src/mainwindow.cpp" line="165" />
       <source>Iconos más grandes</source>
       <translation>Larger Icons</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="165" />
+      <location filename="../src/mainwindow.cpp" line="166" />
       <source>Iconos más pequeños</source>
       <translation>Smaller Icons</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="166" />
+      <location filename="../src/mainwindow.cpp" line="167" />
       <source>Mostrar archivos ocultos</source>
       <translation>Show Hidden Files</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="174" />
+      <location filename="../src/mainwindow.cpp" line="175" />
       <source>Vista dividida (F3)</source>
       <translation>Split View (F3)</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="180" />
+      <location filename="../src/mainwindow.cpp" line="181" />
       <source>Barra lateral (F9)</source>
       <translation>Sidebar (F9)</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="191" />
+      <location filename="../src/mainwindow.cpp" line="192" />
       <source>Menú</source>
       <translation>Menu</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="195" />
+      <location filename="../src/mainwindow.cpp" line="196" />
       <source>Ventana nueva</source>
       <translation>New Window</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="196" />
+      <location filename="../src/mainwindow.cpp" line="197" />
       <source>Pestaña nueva</source>
       <translation>New Tab</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="197" />
+      <location filename="../src/mainwindow.cpp" line="198" />
       <source>Nueva carpeta</source>
       <translation>New Folder</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="199" />
+      <location filename="../src/mainwindow.cpp" line="200" />
       <source>Deshacer</source>
       <translation>Undo</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="200" />
+      <location filename="../src/mainwindow.cpp" line="201" />
       <source>Rehacer</source>
       <translation>Redo</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="214" />
+      <location filename="../src/mainwindow.cpp" line="215" />
       <source>Ir a la papelera</source>
       <translation>Go to Trash</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="215" />
+      <location filename="../src/mainwindow.cpp" line="216" />
       <source>Recientes</source>
       <translation>Recent</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="216" />
+      <location filename="../src/mainwindow.cpp" line="217" />
       <source>Destacados</source>
       <translation>Starred</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="217" />
+      <location filename="../src/mainwindow.cpp" line="218" />
       <source>Ir a una carpeta…</source>
       <translation>Go to a Folder…</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="218" />
+      <location filename="../src/mainwindow.cpp" line="219" />
       <source>Conectar a un servidor…</source>
       <translation>Connect to Server…</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="220" />
+      <location filename="../src/mainwindow.cpp" line="221" />
       <source>Barra superior…</source>
       <translation>Top Bar…</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="221" />
+      <location filename="../src/mainwindow.cpp" line="222" />
       <source>Ajustes</source>
       <translation>Settings</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="222" />
+      <location filename="../src/mainwindow.cpp" line="223" />
       <source>Atajos de teclado</source>
       <translation>Keyboard Shortcuts</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="223" />
+      <location filename="../src/mainwindow.cpp" line="224" />
       <source>Acerca de Luna</source>
       <translation>About Luna</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="275" />
+      <location filename="../src/mainwindow.cpp" line="276" />
       <source>Terminal (F4)</source>
       <translation>Terminal (F4)</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="382" />
+      <location filename="../src/mainwindow.cpp" line="388" />
       <source>Cerrar pestaña (Ctrl+W)</source>
       <translation>Close Tab (Ctrl+W)</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="450" />
+      <location filename="../src/mainwindow.cpp" line="456" />
       <source>Añadido a marcadores: %1</source>
       <translation>Added to bookmarks: %1</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="592" />
+      <location filename="../src/mainwindow.cpp" line="602" />
       <source>Atrás</source>
       <translation>Back</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="592" />
+      <location filename="../src/mainwindow.cpp" line="602" />
       <source>Adelante</source>
       <translation>Forward</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="592" />
+      <location filename="../src/mainwindow.cpp" line="602" />
       <source>Subir</source>
       <translation>Up</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="592" />
+      <location filename="../src/mainwindow.cpp" line="602" />
       <source>Buscar</source>
       <translation>Search</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="625" />
+      <location filename="../src/mainwindow.cpp" line="635" />
       <source>Estilo de la barra</source>
       <translation>Bar Style</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="626" />
+      <location filename="../src/mainwindow.cpp" line="636" />
       <source>Solo iconos</source>
       <translation>Icons Only</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="626" />
+      <location filename="../src/mainwindow.cpp" line="636" />
       <source>Iconos y texto</source>
       <translation>Icons and Text</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="626" />
+      <location filename="../src/mainwindow.cpp" line="636" />
       <source>Iconos juntos</source>
       <translation>Grouped Icons</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="635" />
+      <location filename="../src/mainwindow.cpp" line="645" />
       <source>Tamaño de los iconos</source>
       <translation>Icon Size</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="636" />
+      <location filename="../src/mainwindow.cpp" line="646" />
       <source>Pequeños</source>
       <translation>Small</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="636" />
+      <location filename="../src/mainwindow.cpp" line="646" />
       <source>Medianos</source>
       <translation>Medium</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="636" />
+      <location filename="../src/mainwindow.cpp" line="646" />
       <source>Grandes</source>
       <translation>Large</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="645" />
+      <location filename="../src/mainwindow.cpp" line="655" />
       <source>Botones</source>
       <translation>Buttons</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="647" />
+      <location filename="../src/mainwindow.cpp" line="657" />
       <source>Carpeta superior</source>
       <translation>Parent Folder</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="659" />
+      <location filename="../src/mainwindow.cpp" line="669" />
       <source>Ordenar y agrupar botones…</source>
       <translation>Arrange and Group Buttons…</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="661" />
+      <location filename="../src/mainwindow.cpp" line="671" />
       <source>Barra superior</source>
       <translation>Top Bar</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="759" />
+      <location filename="../src/mainwindow.cpp" line="769" />
       <source>%1 de %2</source>
       <translation>%1 of %2</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="766" />
+      <location filename="../src/mainwindow.cpp" line="776" />
       <source>Ya existe «%1»</source>
       <translation>“%1” already exists</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="767" />
+      <location filename="../src/mainwindow.cpp" line="777" />
       <source>En el destino ya hay un elemento llamado «%1».</source>
       <translation>There is already an item called “%1” at the destination.</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="769" />
+      <location filename="../src/mainwindow.cpp" line="779" />
       <source>Nuevo: %1, %2
 Existente: %3, %4</source>
       <translation>New: %1, %2
 Existing: %3, %4</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="770" />
+      <location filename="../src/mainwindow.cpp" line="780" />
       <source>d MMM yyyy HH:mm</source>
       <translation>MMM d, yyyy h:mm AP</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="772" />
+      <location filename="../src/mainwindow.cpp" line="782" />
       <source>Reemplazar</source>
       <translation>Replace</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="773" />
+      <location filename="../src/mainwindow.cpp" line="783" />
       <source>Omitir</source>
       <translation>Skip</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="774" />
+      <location filename="../src/mainwindow.cpp" line="784" />
       <source>Mantener ambos</source>
       <translation>Keep Both</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="776" />
+      <location filename="../src/mainwindow.cpp" line="786" />
       <source>Hacer lo mismo con los demás conflictos</source>
       <translation>Do the same for the other conflicts</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="787" />
+      <location filename="../src/mainwindow.cpp" line="797" />
       <source>Hubo problemas</source>
       <translation>There were problems</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="788" />
+      <location filename="../src/mainwindow.cpp" line="798" />
       <source>
 … y %1 más</source>
       <translation>
 … and %1 more</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="888" />
+      <location filename="../src/mainwindow.cpp" line="899" />
       <source>Modo de vista: </source>
       <translation>View mode: </translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="900" />
+      <location filename="../src/mainwindow.cpp" line="916" />
       <source>Conectando con %1…</source>
       <translation>Connecting to %1…</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="916" />
+      <location filename="../src/mainwindow.cpp" line="932" />
       <source>Alt+← / Alt+→ / Alt+↑</source>
       <translation>Alt+← / Alt+→ / Alt+↑</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="916" />
+      <location filename="../src/mainwindow.cpp" line="932" />
       <source>Atrás / adelante / carpeta superior</source>
       <translation>Back / forward / parent folder</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="916" />
+      <location filename="../src/mainwindow.cpp" line="932" />
       <source>Retroceso</source>
       <translation>Backspace</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="917" />
+      <location filename="../src/mainwindow.cpp" line="933" />
       <source>Escribir una ruta</source>
       <translation>Type a path</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="917" />
+      <location filename="../src/mainwindow.cpp" line="933" />
       <source>Ir a una carpeta (zoxide y marcadores)</source>
       <translation>Go to a folder (zoxide and bookmarks)</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="917" />
+      <location filename="../src/mainwindow.cpp" line="933" />
       <source>Ctrl+F o escribir</source>
       <translation>Ctrl+F or start typing</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="917" />
+      <location filename="../src/mainwindow.cpp" line="933" />
       <source>Filtrar; Intro busca en subcarpetas</source>
       <translation>Filter; Enter searches subfolders</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="918" />
+      <location filename="../src/mainwindow.cpp" line="934" />
       <source>Ctrl+T / Ctrl+W</source>
       <translation>Ctrl+T / Ctrl+W</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="918" />
+      <location filename="../src/mainwindow.cpp" line="934" />
       <source>Abrir / cerrar pestaña</source>
       <translation>Open / close tab</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="918" />
+      <location filename="../src/mainwindow.cpp" line="934" />
       <source>Siguiente pestaña</source>
       <translation>Next tab</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="919" />
+      <location filename="../src/mainwindow.cpp" line="935" />
       <source>Vista dividida / cambiar de panel</source>
       <translation>Split view / switch pane</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="919" />
+      <location filename="../src/mainwindow.cpp" line="935" />
       <source>Barra lateral</source>
       <translation>Sidebar</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="920" />
+      <location filename="../src/mainwindow.cpp" line="936" />
       <source>Ctrl+1 … Ctrl+6</source>
       <translation>Ctrl+1 … Ctrl+6</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="920" />
+      <location filename="../src/mainwindow.cpp" line="936" />
       <source>Iconos, compacta, lista, detallada, árbol, columnas</source>
       <translation>Icons, compact, list, detailed, tree, columns</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="920" />
+      <location filename="../src/mainwindow.cpp" line="936" />
       <source>Ctrl + rueda, Ctrl+/−</source>
       <translation>Ctrl + wheel, Ctrl+/−</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="921" />
+      <location filename="../src/mainwindow.cpp" line="937" />
       <source>Mostrar ocultos</source>
       <translation>Show hidden files</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="921" />
+      <location filename="../src/mainwindow.cpp" line="937" />
       <source>Renombrar (en lote si hay varios)</source>
       <translation>Rename (batch if several)</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="922" />
+      <location filename="../src/mainwindow.cpp" line="938" />
       <source>Supr / Mayús+Supr</source>
       <translation>Del / Shift+Del</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="922" />
+      <location filename="../src/mainwindow.cpp" line="938" />
       <source>Papelera / eliminar definitivamente</source>
       <translation>Trash / delete permanently</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="922" />
+      <location filename="../src/mainwindow.cpp" line="938" />
       <source>Ctrl+C / X / V</source>
       <translation>Ctrl+C / X / V</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="922" />
+      <location filename="../src/mainwindow.cpp" line="938" />
       <source>Copiar / cortar / pegar</source>
       <translation>Copy / cut / paste</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="923" />
+      <location filename="../src/mainwindow.cpp" line="939" />
       <source>Ctrl+Mayús+N</source>
       <translation>Ctrl+Shift+N</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="923" />
+      <location filename="../src/mainwindow.cpp" line="939" />
       <source>Alt+Intro</source>
       <translation>Alt+Enter</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="923" />
+      <location filename="../src/mainwindow.cpp" line="939" />
       <source>Propiedades</source>
       <translation>Properties</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="923" />
+      <location filename="../src/mainwindow.cpp" line="939" />
       <source>Terminal integrado</source>
       <translation>Docked terminal</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="923" />
+      <location filename="../src/mainwindow.cpp" line="939" />
       <source>Mayús+F4</source>
       <translation>Shift+F4</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="923" />
+      <location filename="../src/mainwindow.cpp" line="939" />
       <source>Terminal aparte</source>
       <translation>Separate terminal</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="924" />
+      <location filename="../src/mainwindow.cpp" line="940" />
       <source>Ctrl+Z / Ctrl+Mayús+Z</source>
       <translation>Ctrl+Z / Ctrl+Shift+Z</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="924" />
+      <location filename="../src/mainwindow.cpp" line="940" />
       <source>Deshacer / rehacer</source>
       <translation>Undo / redo</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="925" />
+      <location filename="../src/mainwindow.cpp" line="941" />
       <source>Añadir a marcadores</source>
       <translation>Add to Bookmarks</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="925" />
+      <location filename="../src/mainwindow.cpp" line="941" />
       <source>Arrastrar + Ctrl / Mayús / ambos</source>
       <translation>Drag + Ctrl / Shift / both</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="925" />
+      <location filename="../src/mainwindow.cpp" line="941" />
       <source>Copiar / mover / enlazar</source>
       <translation>Copy / move / link</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="938" />
+      <location filename="../src/mainwindow.cpp" line="954" />
       <source>&lt;h2&gt;Luna&lt;/h2&gt;Explorador de archivos para Omarchy.&lt;br&gt;Llamado así por Luna, la gata siamesa. 🐾</source>
       <translation>&lt;h2&gt;Luna&lt;/h2&gt;File manager for Omarchy.&lt;br&gt;Named after Luna, the Siamese cat. 🐾</translation>
     </message>
     <message>
-      <location filename="../src/mainwindow.cpp" line="939" />
+      <location filename="../src/mainwindow.cpp" line="955" />
       <source>C++ y Qt 6 · metadatos con libmediainfo y exiv2 · miniaturas con ffmpegthumbnailer y poppler</source>
       <translation>C++ and Qt 6 · metadata with libmediainfo and exiv2 · thumbnails with ffmpegthumbnailer and poppler</translation>
     </message>
@@ -1400,454 +1415,489 @@ Existing: %3, %4</translation>
       <translation>LibreOffice took too long.</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="203" />
+      <location filename="../src/pane.cpp" line="207" />
       <source>Papelera: los elementos se pueden restaurar a su ubicación original.</source>
       <translation>Trash: items can be restored to their original location.</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="206" />
+      <location filename="../src/pane.cpp" line="210" />
       <source>Vaciar papelera</source>
       <translation>Empty Trash</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="208" />
+      <location filename="../src/pane.cpp" line="212" />
       <source>¿Eliminar definitivamente todo lo que hay en la papelera?</source>
       <translation>Permanently delete everything in the trash?</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="304" />
+      <location filename="../src/pane.cpp" line="322" />
       <source>Filtrar por nombre (Intro busca en subcarpetas)</source>
       <translation>Filter by name (Enter searches subfolders)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="308" />
+      <location filename="../src/pane.cpp" line="326" />
       <source>Subcarpetas</source>
       <translation>Subfolders</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="311" />
+      <location filename="../src/pane.cpp" line="329" />
       <source>Buscar también dentro de las subcarpetas</source>
       <translation>Also search inside subfolders</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="314" />
+      <location filename="../src/pane.cpp" line="332" />
       <source>Contenido</source>
       <translation>Contents</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="316" />
+      <location filename="../src/pane.cpp" line="334" />
       <source>Buscar el texto dentro de los archivos (incluye subcarpetas)</source>
       <translation>Search for the text inside the files (includes subfolders)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="320" />
+      <location filename="../src/pane.cpp" line="338" />
       <source>Filtros</source>
       <translation>Filters</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="322" />
+      <location filename="../src/pane.cpp" line="340" />
       <source>Filtrar por fecha de modificación y tamaño</source>
       <translation>Filter by modification date and size</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="337" />
+      <location filename="../src/pane.cpp" line="355" />
       <source>En cualquier fecha</source>
       <translation>Any date</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="337" />
+      <location filename="../src/pane.cpp" line="355" />
       <source>Hoy</source>
       <translation>Today</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="337" />
+      <location filename="../src/pane.cpp" line="355" />
       <source>Últimos 7 días</source>
       <translation>Last 7 days</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="337" />
+      <location filename="../src/pane.cpp" line="355" />
       <source>Últimos 30 días</source>
       <translation>Last 30 days</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="337" />
+      <location filename="../src/pane.cpp" line="355" />
       <source>Este año</source>
       <translation>This year</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="338" />
+      <location filename="../src/pane.cpp" line="356" />
       <source>Cualquier tamaño</source>
       <translation>Any size</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="338" />
+      <location filename="../src/pane.cpp" line="356" />
       <source>Menos de 1 MB</source>
       <translation>Less than 1 MB</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="338" />
+      <location filename="../src/pane.cpp" line="356" />
       <source>Más de 1 MB</source>
       <translation>More than 1 MB</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="338" />
+      <location filename="../src/pane.cpp" line="356" />
       <source>Más de 100 MB</source>
       <translation>More than 100 MB</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="338" />
+      <location filename="../src/pane.cpp" line="356" />
       <source>Más de 1 GB</source>
       <translation>More than 1 GB</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="371" />
+      <location filename="../src/pane.cpp" line="389" />
       <source>Texto que contienen los archivos (aquí y en subcarpetas)</source>
       <translation>Text the files contain (here and in subfolders)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="398" />
+      <location filename="../src/pane.cpp" line="416" />
       <source>%1 resultados</source>
       <translation>%1 results</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="398" />
+      <location filename="../src/pane.cpp" line="416" />
       <source>Buscando… %1 resultados</source>
       <translation>Searching… %1 results</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="774" />
+      <location filename="../src/pane.cpp" line="561" />
+      <source>Eso no está disponible en una carpeta de administrador.</source>
+      <translation>That is not available in an administrator folder.</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="570" />
+      <source>Copiando «%1» para abrirlo…</source>
+      <translation>Copying “%1” to open it…</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="571" />
+      <source>Copiando %1 archivos para abrirlos…</source>
+      <translation>Copying %1 files to open them…</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="573" />
+      <source>No hay sitio para la copia temporal.</source>
+      <translation>There is no room for the temporary copy.</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="592" />
+      <source>Abierto como copia de solo lectura: lo que cambies no llega a la carpeta de administrador.</source>
+      <translation>Opened as a read-only copy: changes do not reach the administrator folder.</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="868" />
       <source>sin rama</source>
       <translation>no branch</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="778" />
+      <location filename="../src/pane.cpp" line="872" />
       <source>sin cambios</source>
       <translation>no changes</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="779" />
+      <location filename="../src/pane.cpp" line="873" />
       <source>1 cambio</source>
       <translation>1 change</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="780" />
+      <location filename="../src/pane.cpp" line="874" />
       <source>%1 cambios</source>
       <translation>%1 changes</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="834" />
+      <location filename="../src/pane.cpp" line="928" />
       <source>/…/</source>
       <translation>/…/</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="883" />
+      <location filename="../src/pane.cpp" line="988" />
       <source>Archivo ejecutable</source>
       <translation>Executable File</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="884" />
+      <location filename="../src/pane.cpp" line="989" />
       <source>«%1» es un programa. ¿Qué quieres hacer?</source>
       <translation>“%1” is a program. What do you want to do?</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="885" />
+      <location filename="../src/pane.cpp" line="990" />
       <source>Ejecutar</source>
       <translation>Run</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="886" />
+      <location filename="../src/pane.cpp" line="991" />
       <source>Ejecutar en terminal</source>
       <translation>Run in Terminal</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1003" />
+      <location filename="../src/pane.cpp" line="1108" />
       <source>Imagen</source>
       <translation>Image</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1017" />
+      <location filename="../src/pane.cpp" line="1122" />
       <source>%1 (%2 con errores)</source>
       <translation>%1 (%2 with errors)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1034" />
+      <location filename="../src/pane.cpp" line="1139" />
       <source>Imagen girada</source>
       <translation>Image rotated</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1034" />
+      <location filename="../src/pane.cpp" line="1139" />
       <source>%1 imágenes giradas</source>
       <translation>%1 images rotated</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1036" />
+      <location filename="../src/pane.cpp" line="1141" />
       <source>Girar a la derecha</source>
       <translation>Rotate Right</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1037" />
+      <location filename="../src/pane.cpp" line="1142" />
       <source>Girar a la izquierda</source>
       <translation>Rotate Left</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1040" />
+      <location filename="../src/pane.cpp" line="1145" />
       <source>Reducir tamaño (copia)</source>
       <translation>Reduce Size (copy)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1042" />
+      <location filename="../src/pane.cpp" line="1147" />
       <source>Máximo 3840 px (4K)</source>
       <translation>Maximum 3840 px (4K)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1042" />
+      <location filename="../src/pane.cpp" line="1147" />
       <source>Máximo 1920 px</source>
       <translation>Maximum 1920 px</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1043" />
+      <location filename="../src/pane.cpp" line="1148" />
       <source>Máximo 1280 px</source>
       <translation>Maximum 1280 px</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1043" />
+      <location filename="../src/pane.cpp" line="1148" />
       <source>La mitad (50 %)</source>
       <translation>Half (50 %)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1051" />
+      <location filename="../src/pane.cpp" line="1156" />
       <source>Copia reducida creada</source>
       <translation>Reduced copy created</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1051" />
+      <location filename="../src/pane.cpp" line="1156" />
       <source>%1 copias reducidas creadas</source>
       <translation>%1 reduced copies created</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1054" />
+      <location filename="../src/pane.cpp" line="1159" />
       <source>Convertir a (copia)</source>
       <translation>Convert to (copy)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1065" />
+      <location filename="../src/pane.cpp" line="1170" />
       <source>Imagen convertida a %1</source>
       <translation>Image converted to %1</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1066" />
+      <location filename="../src/pane.cpp" line="1171" />
       <source>%1 imágenes convertidas a %2</source>
       <translation>%1 images converted to %2</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1076" />
+      <location filename="../src/pane.cpp" line="1181" />
       <source>Abrir en el escritorio</source>
       <translation>Open on Workspace</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1096" />
+      <location filename="../src/pane.cpp" line="1201" />
       <source>Escritorio %1  ·  %2</source>
       <translation>Workspace %1  ·  %2</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1096" />
+      <location filename="../src/pane.cpp" line="1201" />
       <source>1 ventana</source>
       <translation>1 window</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1096" />
+      <location filename="../src/pane.cpp" line="1201" />
       <source>%1 ventanas</source>
       <translation>%1 windows</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1101" />
+      <location filename="../src/pane.cpp" line="1206" />
       <source>Escritorio nuevo (%1)</source>
       <translation>New workspace (%1)</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1108" />
+      <location filename="../src/pane.cpp" line="1213" />
       <source>Abrir con</source>
       <translation>Open With</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1121" />
+      <location filename="../src/pane.cpp" line="1226" />
       <source>Otra aplicación…</source>
       <translation>Other Application…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1128" />
+      <location filename="../src/pane.cpp" line="1233" />
       <source>Mover a</source>
       <translation>Move To</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1128" />
+      <location filename="../src/pane.cpp" line="1233" />
       <source>Copiar a</source>
       <translation>Copy To</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1140" />
+      <location filename="../src/pane.cpp" line="1245" />
       <source>Otro panel: %1</source>
       <translation>Other pane: %1</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1150" />
+      <location filename="../src/pane.cpp" line="1255" />
       <source>Carpeta personal</source>
       <translation>Home</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1152" />
+      <location filename="../src/pane.cpp" line="1257" />
       <source>Documentos</source>
       <translation>Documents</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1152" />
+      <location filename="../src/pane.cpp" line="1257" />
       <source>Descargas</source>
       <translation>Downloads</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1153" />
+      <location filename="../src/pane.cpp" line="1258" />
       <source>Música</source>
       <translation>Music</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1153" />
+      <location filename="../src/pane.cpp" line="1258" />
       <source>Imágenes</source>
       <translation>Pictures</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1154" />
+      <location filename="../src/pane.cpp" line="1259" />
       <source>Vídeos</source>
       <translation>Videos</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1154" />
+      <location filename="../src/pane.cpp" line="1259" />
       <source>Escritorio</source>
       <translation>Desktop</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1173" />
+      <location filename="../src/pane.cpp" line="1278" />
       <source>Elegir carpeta…</source>
       <translation>Choose Folder…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1183" />
+      <location filename="../src/pane.cpp" line="1288" />
       <source>Mover %1 elemento(s) a…</source>
       <translation>Move %1 item(s) to…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1183" />
+      <location filename="../src/pane.cpp" line="1288" />
       <source>Copiar %1 elemento(s) a…</source>
       <translation>Copy %1 item(s) to…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1187" />
+      <location filename="../src/pane.cpp" line="1292" />
       <source>Mover aquí</source>
       <translation>Move Here</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1187" />
+      <location filename="../src/pane.cpp" line="1292" />
       <source>Copiar aquí</source>
       <translation>Copy Here</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1189" />
+      <location filename="../src/pane.cpp" line="1294" />
       <source>Buscar en:</source>
       <translation>Look in:</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1190" />
+      <location filename="../src/pane.cpp" line="1295" />
       <source>Carpeta:</source>
       <translation>Folder:</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1199" />
+      <location filename="../src/pane.cpp" line="1304" />
       <source>Mover</source>
       <translation>Move</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1199" />
+      <location filename="../src/pane.cpp" line="1304" />
       <source>Copiar</source>
       <translation>Copy</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1199" />
+      <location filename="../src/pane.cpp" line="1304" />
       <source>No se puede meter «%1» dentro de sí misma.</source>
       <translation>Can't put “%1” inside itself.</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1209" />
+      <location filename="../src/pane.cpp" line="1314" />
       <source>%1 %2 elemento(s) a %3</source>
       <translation>%1 %2 item(s) to %3</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1209" />
+      <location filename="../src/pane.cpp" line="1314" />
       <source>Moviendo</source>
       <translation>Moving</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1209" />
+      <location filename="../src/pane.cpp" line="1314" />
       <source>Copiando</source>
       <translation>Copying</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1253" />
+      <location filename="../src/pane.cpp" line="1359" />
       <source>Nuevo nombre (# = número, se conserva la extensión):</source>
       <translation>New name (# = number, the extension is kept):</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1254" />
+      <location filename="../src/pane.cpp" line="1360" />
       <source>Archivo #</source>
       <translation>File #</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1272" />
+      <location filename="../src/pane.cpp" line="1378" />
       <source>Renombrar</source>
       <translation>Rename</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1272" />
+      <location filename="../src/pane.cpp" line="1378" />
       <source>No se pudieron renombrar:
 </source>
       <translation>Couldn't rename:
 </translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1281" />
+      <location filename="../src/pane.cpp" line="1390" />
+      <source>No se pudo crear la carpeta: %1</source>
+      <translation>Could not create the folder: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1395" />
       <source>No se pudo crear la carpeta (¿sin permisos?).</source>
       <translation>Couldn't create the folder (no permission?).</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1293" />
+      <location filename="../src/pane.cpp" line="1408" />
       <source>Archivo nuevo.txt</source>
       <translation>New file.txt</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1296" />
+      <location filename="../src/pane.cpp" line="1412" />
+      <source>No se pudo crear el archivo: %1</source>
+      <translation>Could not create the file: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1418" />
       <source>No se pudo crear el archivo (¿sin permisos?).</source>
       <translation>Couldn't create the file (no permission?).</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1311" />
+      <location filename="../src/pane.cpp" line="1433" />
       <source>%1 elemento(s) copiados al portapapeles</source>
       <translation>%1 item(s) copied to the clipboard</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1319" />
+      <location filename="../src/pane.cpp" line="1441" />
       <source>%1 elemento(s) cortados</source>
       <translation>%1 item(s) cut</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1346" />
+      <location filename="../src/pane.cpp" line="1468" />
       <source>Papelera</source>
       <translation>Trash</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1346" />
+      <location filename="../src/pane.cpp" line="1468" />
       <source>¿Mover %1 elemento(s) a la papelera?</source>
       <translation>Move %1 item(s) to the trash?</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1350" />
+      <location filename="../src/pane.cpp" line="1472" />
       <source>
 
 ¿Eliminarlos definitivamente?</source>
@@ -1856,349 +1906,384 @@ Existing: %3, %4</translation>
 Delete them permanently?</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1353" />
+      <location filename="../src/pane.cpp" line="1475" />
       <source>%1 elemento(s) movidos a la papelera</source>
       <translation>%1 item(s) moved to the trash</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1363" />
+      <location filename="../src/pane.cpp" line="1485" />
       <source>Eliminar definitivamente</source>
       <translation>Delete Permanently</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1364" />
+      <location filename="../src/pane.cpp" line="1486" />
       <source>¿Eliminar definitivamente «%1»? No se puede deshacer.</source>
       <translation>Permanently delete “%1”? This can't be undone.</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1365" />
+      <location filename="../src/pane.cpp" line="1487" />
       <source>¿Eliminar definitivamente %1 elementos? No se puede deshacer.</source>
       <translation>Permanently delete %1 items? This can't be undone.</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1427" />
+      <location filename="../src/pane.cpp" line="1556" />
       <source>Ruta copiada</source>
       <translation>Path copied</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1444" />
+      <location filename="../src/pane.cpp" line="1575" />
       <source>Comprimir</source>
       <translation>Compress</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1444" />
+      <location filename="../src/pane.cpp" line="1575" />
       <source>Formato de «%1»:</source>
       <translation>Format for “%1”:</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1453" />
+      <location filename="../src/pane.cpp" line="1584" />
       <source>Creado «%1»</source>
       <translation>Created “%1”</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1453" />
+      <location filename="../src/pane.cpp" line="1584" />
       <source>Error al comprimir</source>
       <translation>Error compressing</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1459" />
+      <location filename="../src/pane.cpp" line="1590" />
       <source>Comprimiendo…</source>
       <translation>Compressing…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1480" />
+      <location filename="../src/pane.cpp" line="1612" />
       <source>Extraído en «%1»</source>
       <translation>Extracted to “%1”</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1480" />
+      <location filename="../src/pane.cpp" line="1612" />
       <source>Error al extraer</source>
       <translation>Error extracting</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1484" />
+      <location filename="../src/pane.cpp" line="1616" />
       <source>Extrayendo…</source>
       <translation>Extracting…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1502" />
+      <location filename="../src/pane.cpp" line="1635" />
       <source>Cifrando…</source>
       <translation>Encrypting…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1552" />
+      <location filename="../src/pane.cpp" line="1697" />
       <source>hoy</source>
       <translation>today</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1552" />
+      <location filename="../src/pane.cpp" line="1697" />
       <source>7 días</source>
       <translation>7 days</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1552" />
+      <location filename="../src/pane.cpp" line="1697" />
       <source>30 días</source>
       <translation>30 days</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1552" />
+      <location filename="../src/pane.cpp" line="1697" />
       <source>este año</source>
       <translation>this year</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1557" />
+      <location filename="../src/pane.cpp" line="1702" />
       <source>Filtros: </source>
       <translation>Filters: </translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1601" />
+      <location filename="../src/pane.cpp" line="1746" />
       <source>Cargando…</source>
       <translation>Loading…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1613" />
+      <location filename="../src/pane.cpp" line="1758" />
       <source>«%1» seleccionado</source>
       <translation>“%1” selected</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1614" />
+      <location filename="../src/pane.cpp" line="1759" />
       <source>%1 de %2 seleccionados</source>
       <translation>%1 of %2 selected</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1624" />
+      <location filename="../src/pane.cpp" line="1769" />
       <source>  ·  modificado </source>
       <translation>  ·  modified </translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1628" />
+      <location filename="../src/pane.cpp" line="1773" />
       <source>  ·  %1 libres</source>
       <translation>  ·  %1 free</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1637" />
+      <location filename="../src/pane.cpp" line="1782" />
       <source>Sin resultados</source>
       <translation>No results</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1638" />
+      <location filename="../src/pane.cpp" line="1783" />
       <source>Nada coincide con «%1»</source>
       <translation>Nothing matches “%1”</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1639" />
+      <location filename="../src/pane.cpp" line="1784" />
       <source>Nada coincide con los filtros</source>
       <translation>Nothing matches the filters</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1640" />
+      <location filename="../src/pane.cpp" line="1785" />
       <source>No has abierto archivos últimamente</source>
       <translation>You haven't opened any files lately</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1641" />
+      <location filename="../src/pane.cpp" line="1786" />
       <source>Nada destacado todavía: clic derecho → Destacar</source>
       <translation>Nothing starred yet: right-click → Star</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1642" />
+      <location filename="../src/pane.cpp" line="1787" />
       <source>La papelera está vacía</source>
       <translation>The trash is empty</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1643" />
+      <location filename="../src/pane.cpp" line="1788" />
       <source>Carpeta vacía</source>
       <translation>Empty folder</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1674" />
-      <source>Restaurar</source>
-      <translation>Restore</translation>
+      <location filename="../src/pane.cpp" line="1800" />
+      <source>Abrir como administrador</source>
+      <translation>Open as Administrator</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1683" />
+      <location filename="../src/pane.cpp" line="1800" />
+      <source>Volver a intentarlo</source>
+      <translation>Try Again</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1827" />
       <source>Abrir en pestaña nueva</source>
       <translation>Open in New Tab</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1684" />
+      <location filename="../src/pane.cpp" line="1828" />
       <source>Abrir en el otro panel</source>
       <translation>Open in Other Pane</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1686" />
-      <source>Abrir terminal aquí</source>
-      <translation>Open Terminal Here</translation>
+      <location filename="../src/pane.cpp" line="1830" />
+      <source>Abrir una copia de solo lectura</source>
+      <translation>Open a Read-Only Copy</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1687" />
-      <source>Reproducir en Sonata</source>
-      <translation>Play in Sonata</translation>
+      <location filename="../src/pane.cpp" line="1831" />
+      <source>Vista previa</source>
+      <translation>Preview</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1689" />
-      <source>Ver qué ocupa espacio</source>
-      <translation>See What Takes Up Space</translation>
-    </message>
-    <message>
-      <location filename="../src/pane.cpp" line="1693" />
-      <source>Abrir con %1</source>
-      <translation>Open With %1</translation>
-    </message>
-    <message>
-      <location filename="../src/pane.cpp" line="1700" />
+      <location filename="../src/pane.cpp" line="1834" />
       <source>Cortar</source>
       <translation>Cut</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1703" />
+      <location filename="../src/pane.cpp" line="1837" />
       <source>Pegar dentro</source>
       <translation>Paste Into</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1710" />
+      <location filename="../src/pane.cpp" line="1844" />
       <source>Copiar ruta</source>
       <translation>Copy Path</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1713" />
-      <source>Abrir la carpeta que lo contiene</source>
-      <translation>Open Containing Folder</translation>
-    </message>
-    <message>
-      <location filename="../src/pane.cpp" line="1718" />
-      <source>Quitar de destacados</source>
-      <translation>Remove from Starred</translation>
-    </message>
-    <message>
-      <location filename="../src/pane.cpp" line="1719" />
-      <source>Destacar</source>
-      <translation>Star</translation>
-    </message>
-    <message>
-      <location filename="../src/pane.cpp" line="1724" />
+      <location filename="../src/pane.cpp" line="1848" />
       <source>Renombrar…</source>
       <translation>Rename…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1724" />
+      <location filename="../src/pane.cpp" line="1874" />
+      <source>Restaurar</source>
+      <translation>Restore</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1886" />
+      <source>Abrir terminal aquí</source>
+      <translation>Open Terminal Here</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1887" />
+      <source>Reproducir en Sonata</source>
+      <translation>Play in Sonata</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1889" />
+      <source>Ver qué ocupa espacio</source>
+      <translation>See What Takes Up Space</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1895" />
+      <source>Abrir con %1</source>
+      <translation>Open With %1</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1915" />
+      <source>Abrir la carpeta que lo contiene</source>
+      <translation>Open Containing Folder</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1920" />
+      <source>Quitar de destacados</source>
+      <translation>Remove from Starred</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1921" />
+      <source>Destacar</source>
+      <translation>Star</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1926" />
       <source>Renombrar en lote…</source>
       <translation>Batch Rename…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1726" />
+      <location filename="../src/pane.cpp" line="1928" />
       <source>Mover a la papelera</source>
       <translation>Move to Trash</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1730" />
+      <location filename="../src/pane.cpp" line="1932" />
       <source>Extraer aquí</source>
       <translation>Extract Here</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1731" />
+      <location filename="../src/pane.cpp" line="1933" />
       <source>Comprimir…</source>
       <translation>Compress…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1735" />
+      <location filename="../src/pane.cpp" line="1937" />
       <source>Descifrar aquí</source>
       <translation>Decrypt here</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1736" />
+      <location filename="../src/pane.cpp" line="1938" />
       <source>Comprimir y cifrar…</source>
       <translation>Compress and encrypt…</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1738" />
+      <location filename="../src/pane.cpp" line="1940" />
       <source>Crear enlace</source>
       <translation>Create Link</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1759" />
+      <location filename="../src/pane.cpp" line="1961" />
       <source>Nuevo archivo vacío</source>
       <translation>New Empty File</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1760" />
+      <location filename="../src/pane.cpp" line="1962" />
       <source>Pegar</source>
       <translation>Paste</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1763" />
+      <location filename="../src/pane.cpp" line="1964" />
       <source>Copiar ruta de la carpeta</source>
       <translation>Copy Folder Path</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1764" />
+      <location filename="../src/pane.cpp" line="1965" />
+      <source>Actualizar</source>
+      <translation>Reload</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1966" />
+      <source>Salir del modo administrador</source>
+      <translation>Leave Administrator Mode</translation>
+    </message>
+    <message>
+      <location filename="../src/pane.cpp" line="1974" />
       <source>Reproducir la carpeta en Sonata</source>
       <translation>Play Folder in Sonata</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1773" />
+      <location filename="../src/pane.cpp" line="1985" />
       <source>Seleccionar todo</source>
       <translation>Select All</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1775" />
+      <location filename="../src/pane.cpp" line="1987" />
       <source>Vista</source>
       <translation>View</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1787" />
+      <location filename="../src/pane.cpp" line="1999" />
       <source>Ordenar por</source>
       <translation>Sort By</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1788" />
+      <location filename="../src/pane.cpp" line="2000" />
       <source>Fecha de modificación</source>
       <translation>Modification Date</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1798" />
+      <location filename="../src/pane.cpp" line="2010" />
       <source>Descendente</source>
       <translation>Descending</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1804" />
+      <location filename="../src/pane.cpp" line="2016" />
       <source>Carpetas primero</source>
       <translation>Folders First</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1818" />
+      <location filename="../src/pane.cpp" line="2030" />
       <source>Añadir carpeta a marcadores</source>
       <translation>Add Folder to Bookmarks</translation>
     </message>
     <message>
-      <location filename="../src/pane.cpp" line="1820" />
+      <location filename="../src/pane.cpp" line="2032" />
       <source>Propiedades de la carpeta</source>
       <translation>Folder Properties</translation>
     </message>
     <message>
-      <location filename="../src/pathbar.cpp" line="43" />
+      <location filename="../src/pathbar.cpp" line="44" />
       <source>Ruta o dirección (sftp://usuario@servidor, smb://, ftp://)</source>
       <translation>Path or address (sftp://user@server, smb://, ftp://)</translation>
     </message>
     <message>
-      <location filename="../src/pathbar.cpp" line="55" />
+      <location filename="../src/pathbar.cpp" line="56" />
       <source>Conectar a un servidor (SSH, FTP, SMB…)</source>
       <translation>Connect to a server (SSH, FTP, SMB…)</translation>
     </message>
     <message>
-      <location filename="../src/pathbar.cpp" line="80" />
+      <location filename="../src/pathbar.cpp" line="81" />
       <source>Mostrar la ruta como botones</source>
       <translation>Show the path as buttons</translation>
     </message>
     <message>
-      <location filename="../src/pathbar.cpp" line="80" />
+      <location filename="../src/pathbar.cpp" line="81" />
       <source>Escribir la ruta (Ctrl+L)</source>
       <translation>Type the path (Ctrl+L)</translation>
     </message>
     <message>
-      <location filename="../src/preview.cpp" line="109" />
-      <source>Vista previa</source>
-      <translation>Preview</translation>
+      <location filename="../src/pathbar.cpp" line="197" />
+      <source>Administrador</source>
+      <translation>Administrator</translation>
+    </message>
+    <message>
+      <location filename="../src/places.cpp" line="31" />
+      <source>/ (administrador)</source>
+      <translation>/ (administrator)</translation>
     </message>
     <message>
       <location filename="../src/preview.cpp" line="186" />

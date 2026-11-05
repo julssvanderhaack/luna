@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "admin.h"
 #include "i18n.h"
 #include "apps.h"
 #include "fileops.h"
@@ -312,9 +313,14 @@ MainWindow::MainWindow(const QStringList &paths)
     });
     connect(m_sidebar, &Sidebar::dropOnPlace, this, [this](const QList<QUrl> &urls, const QString &dest) {
         QStringList srcs;
+        bool admin = false;
         for (const QUrl &u : urls)
-            if (u.isLocalFile()) srcs << u.toLocalFile();
+            if (const QString p = Admin::fromUrl(u); !p.isEmpty()) {
+                srcs << p;
+                admin |= Admin::is(p);
+            }
         if (srcs.isEmpty() || dest == Places::recent) return;
+        if (admin && (dest == Places::starred || dest == FileOps::trashFiles())) return;   // root's files: copy them, nothing else
         if (dest == Places::starred) {   // dropping on Destacados stars, like Nautilus
             Starred::get().add(srcs);
             return;
@@ -449,7 +455,11 @@ void MainWindow::wirePane(Pane *p)
         m_sidebar->addBookmark(path);
         m_status->setText(i18n("Añadido a marcadores: %1").arg(QFileInfo(path).fileName()));
     });
-    connect(p, &Pane::propertiesRequested, this, [this](const QStringList &paths) { (new PropertiesDialog(paths, this))->show(); });
+    connect(p, &Pane::propertiesRequested, this, [this](const QStringList &paths) {
+        for (const QString &x : paths)
+            if (Admin::is(x)) return;   // the dialog reads local files
+        (new PropertiesDialog(paths, this))->show();
+    });
 }
 
 void MainWindow::jump()
@@ -499,7 +509,7 @@ void MainWindow::syncHeader()
     if (!p) return;
     m_back->setEnabled(p->canBack());
     m_forward->setEnabled(p->canForward());
-    m_up->setEnabled(p->path() != "/");
+    m_up->setEnabled(Admin::localPart(p->path()) != "/");
     syncViewButton();
     m_pathbar->setPath(p->path());
     m_split->setChecked(page()->isSplit());
@@ -845,6 +855,7 @@ void MainWindow::addShortcuts()
     sc(QKeySequence("Ctrl+Shift+N"), [this] { pane()->newFolder(); });
     sc(QKeySequence("Ctrl+Shift+C"), [this] { pane()->copyPath(); });
     sc(QKeySequence("Alt+Return"), [this] {
+        if (pane()->isAdmin()) return;   // the dialog reads local files
         QStringList s = pane()->selectedPaths();
         (new PropertiesDialog(s.isEmpty() ? QStringList{pane()->path()} : s, this))->show();
     });
@@ -872,7 +883,7 @@ void MainWindow::addShortcuts()
         Settings::get().changed();
     });
     sc(QKeySequence("Ctrl+D"), [this] {
-        if (!pane()->isVirtual()) m_sidebar->addBookmark(pane()->path());
+        if (!pane()->isVirtual() && !pane()->isAdmin()) m_sidebar->addBookmark(pane()->path());
     });
     sc(QKeySequence("Ctrl+,"), [this] { SettingsDialog(this).exec(); });
     sc(QKeySequence("Ctrl+Q"), [] { qApp->closeAllWindows(); });
@@ -892,6 +903,11 @@ void MainWindow::syncViewButton()
 void MainWindow::connectServer(const QString &uri0)
 {
     QString uri = uri0;
+    if (uri.startsWith("admin:")) {   // "luna admin:///etc", or typed in the path bar
+        const QString p = Admin::fromUrl(QUrl(uri));
+        if (!p.isEmpty()) pane()->setPath(p);
+        return;
+    }
     if (uri.isEmpty()) {
         ConnectDialog d(this);
         if (d.exec() != QDialog::Accepted) return;
@@ -944,7 +960,8 @@ QStringList MainWindow::tabPaths() const
 {
     QStringList tabs;
     for (int i = 0; i < m_tabBar->count(); ++i)
-        if (auto *tp = qobject_cast<TabPage *>(m_tabBar->tabData(i).value<QWidget *>())) tabs << tp->first()->path();
+        // A root's folder comes back as the plain folder: no password at start-up.
+        if (auto *tp = qobject_cast<TabPage *>(m_tabBar->tabData(i).value<QWidget *>())) tabs << Admin::localPart(tp->first()->path());
     return tabs;
 }
 

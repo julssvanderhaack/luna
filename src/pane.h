@@ -6,6 +6,7 @@
 #include <QModelIndex>
 #include <QPointer>
 #include <QStringList>
+#include <functional>
 
 class FsModel;
 class SortProxy;
@@ -38,6 +39,8 @@ public:
     void setActive(bool a);
     bool isTrash() const;
     bool isVirtual() const;   // Recientes or Destacados
+    bool isAdmin() const;     // admin:///… : a folder of root's, through GVFS
+    void openAsAdmin(const QString &localDir = {});   // empty: this folder
     QStringList selectedPaths() const;
     void applySettings();
     void focusView();
@@ -111,6 +114,10 @@ private:
     void applyIconSizes();
     void adjustColumns(QTreeView *t);
     bool recursiveSearch() const;
+    bool notForAdmin();   // true (and says so) in an admin folder
+    void adminMenu(QMenu &m, const QStringList &sel);
+    void openAdminCopies(const QStringList &paths, bool preview = false);
+    void adminOp(std::function<QString(QString *error)> op, const QString &failText);
 
     QString m_path;
     QStringList m_back, m_forward;
@@ -136,6 +143,7 @@ private:
     QTimer *m_gitTimer = nullptr;
     bool m_gitRunning = false, m_gitAgain = false;
     QLabel *m_overlay = nullptr;
+    QPushButton *m_adminBtn = nullptr;   // under the overlay: "Abrir como administrador" / retry
     QStringList m_pendingSelect;
     bool m_pendingEdit = false;
     bool m_skipActivate = false;   // tree: the double click already toggled the folder

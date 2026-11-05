@@ -66,6 +66,11 @@ inventados) y el tema Cobalt2 de Omarchy.*
 - **Conectar a un servidor:** SFTP/SSH, FTP, FTPS, SMB y NFS a través de GVFS. Los
   servidores SFTP de la red aparecen solos en *Red*, también el móvil con
   [Luna Android](https://github.com/julssvanderhaack/luna-android) (avahi).
+- **Carpetas de root:** en una carpeta que no puedes leer, *Abrir como
+  administrador* pide la contraseña (polkit) y la abre como Nautilus, por
+  `admin://` de GVFS. Dentro se puede copiar hacia fuera y hacia dentro,
+  renombrar, crear y eliminar; los archivos se abren como copia de solo lectura.
+  También `luna admin:///etc` o escribirlo en la barra de ruta.
 - **Tus apps:** reproducir carpetas en Sonata y ver qué ocupa espacio con
   julss.disk, cuando están instalados.
 - **Rápido y ligero:** listado en hilos aparte, búsqueda recursiva a prioridad

@@ -1,4 +1,5 @@
 #include "fileops.h"
+#include "admin.h"
 #include "i18n.h"
 #include "undo.h"
 #include <QApplication>
@@ -50,6 +51,10 @@ void Job::start()
 
 void Job::scan(const QString &path)
 {
+    if (Admin::is(path)) {   // counted as it goes
+        ++m_totalFiles;
+        return;
+    }
     struct stat st;
     if (lstat(enc(path).constData(), &st) != 0) return;
     if (S_ISDIR(st.st_mode)) {
@@ -90,6 +95,7 @@ void Job::run()
     for (int i = 0; i < m_srcs.size(); ++i) {
         const QString &src = m_srcs[i];
         if (m_cancel) break;
+        if (adminItem(i)) continue;
         const QString name = QFileInfo(src).fileName();
         switch (m_kind) {
         case CopyTo:
@@ -194,15 +200,7 @@ QString Job::resolve(const QString &src, const QString &dst, bool &skip)
     // Merging a folder into an existing folder needs no question.
     struct stat ss;
     if (lstat(enc(src).constData(), &ss) == 0 && S_ISDIR(ss.st_mode) && S_ISDIR(st.st_mode)) return dst;
-    int answer = m_sticky;
-    if (answer < 0) {
-        bool all = false;
-        int a = Cancel;
-        emit conflict(src, dst, &a, &all);
-        answer = a;
-        if (all) m_sticky = a;
-    }
-    switch (answer) {
+    switch (answerFor(src, dst)) {
     case Replace:
         removeTree(dst);
         return dst;
@@ -335,6 +333,108 @@ bool Job::copyTree(const QString &src, const QString &dst, bool move)
     return ok;
 }
 
+int Job::answerFor(const QString &src, const QString &dst)
+{
+    if (m_sticky >= 0) return m_sticky;
+    bool all = false;
+    int a = Cancel;
+    emit conflict(src, dst, &a, &all);
+    if (all) m_sticky = a;
+    return a;
+}
+
+bool Job::touchesAdmin() const
+{
+    if (Admin::is(m_dest)) return true;
+    for (const QStringList *l : {&m_srcs, &m_targets})
+        for (const QString &p : *l)
+            if (Admin::is(p)) return true;
+    return false;
+}
+
+// Root's folders (admin://) go through GIO: the same rules as below (names
+// taken, folders merged, never into itself), other plumbing.
+bool Job::adminItem(int i)
+{
+    const QString &src = m_srcs[i];
+    const bool to = m_kind == CopyTo || m_kind == MoveTo;
+    const QString target = to ? m_targets.value(i) : m_dest;
+    if (!Admin::is(src) && !Admin::is(target)) return false;
+    const QString name = Admin::fileName(src);
+    auto step = [&] {
+        ++m_doneFiles;
+        emit progress(m_doneBytes, m_totalBytes, m_doneFiles, m_totalFiles, name);
+    };
+    if (m_kind == Delete) {
+        QString err;
+        if (!Admin::remove(src, &err)) m_errors << i18n("No se pudo eliminar «%1»: %2").arg(name, err);
+        step();
+        return true;
+    }
+    if (m_kind != Copy && m_kind != Move && !to) {   // links, the trash: not for root's files
+        m_errors << i18n("«%1»: eso no se puede hacer en una carpeta de administrador.").arg(name);
+        step();
+        return true;
+    }
+    const bool move = m_kind == Move || m_kind == MoveTo;
+    QString dst = to ? target : m_dest + '/' + name;
+    if (to && (dst.isEmpty() || dst == src)) return true;
+    if (!to && Admin::parent(src) == Admin::clean(m_dest)) {
+        if (move) return true;
+        dst = m_dest + '/' + FileOps::uniqueName(m_dest, name);
+    }
+    if ((dst + '/').startsWith(src + '/')) {
+        m_errors << i18n("No se puede copiar «%1» dentro de sí misma.").arg(name);
+        return true;
+    }
+    bool skip = false;
+    dst = resolveAdmin(src, dst, skip);
+    if (skip) return true;
+    qint64 lastEmit = 0;
+    Admin::CopyOptions o;
+    o.move = move;
+    o.cancel = &m_cancel;
+    o.resolve = [this](const QString &s, const QString &d, bool &sk) { return resolveAdmin(s, d, sk); };
+    o.progress = [&](qint64 n) {
+        m_doneBytes += n;
+        if (m_doneBytes - lastEmit < (4 << 20)) return;
+        lastEmit = m_doneBytes;
+        emit progress(m_doneBytes, m_totalBytes, m_doneFiles, m_totalFiles, name);
+    };
+    QStringList errors;
+    if (Admin::copy(src, dst, o, &errors)) done(src, dst);
+    m_errors << errors;
+    step();
+    return true;
+}
+
+QString Job::resolveAdmin(const QString &src, const QString &dst, bool &skip)
+{
+    skip = false;
+    bool dstDir = false, srcDir = false;
+    if (!Admin::exists(dst, &dstDir)) return dst;
+    if (dstDir && Admin::exists(src, &srcDir) && srcDir) return dst;   // folder into folder: merge
+    switch (answerFor(src, dst)) {
+    case Replace: {
+        QString err;
+        if (!Admin::remove(dst, &err)) {
+            m_errors << i18n("No se pudo eliminar «%1»: %2").arg(Admin::fileName(dst), err);
+            skip = true;
+        }
+        return dst;
+    }
+    case KeepBoth:
+        return Admin::parent(dst) + '/' + FileOps::uniqueName(Admin::parent(dst), Admin::fileName(dst));
+    case Skip:
+        skip = true;
+        return dst;
+    default:
+        m_cancel = true;
+        skip = true;
+        return dst;
+    }
+}
+
 bool Job::removeTree(const QString &path)
 {
     struct stat st;
@@ -372,7 +472,7 @@ Job *FileOps::startJob(Job *j)
     // Finished copies, moves, links and restores can be undone.
     static const QHash<int, Undo::Type> undoable = {
         {Job::Copy, Undo::Copy}, {Job::Move, Undo::Move}, {Job::Link, Undo::Link}, {Job::Restore, Undo::Restore}};
-    if (m_recording && undoable.contains(j->kind()))
+    if (m_recording && undoable.contains(j->kind()) && !j->touchesAdmin())
         connect(j, &Job::finished, &Undo::get(), [j, type = undoable.value(j->kind())] { Undo::get().record(type, j->pairs()); });
     emit jobStarted(j);
     j->start();
@@ -433,7 +533,11 @@ QStringList FileOps::trash(const QStringList &paths, QList<QPair<QString, QStrin
 
 QString FileOps::uniqueName(const QString &dir, const QString &name)
 {
-    if (!QFileInfo::exists(dir + '/' + name) && !QFileInfo(dir + '/' + name).isSymLink()) return name;
+    auto taken = [&dir](const QString &n) {
+        const QString p = dir + '/' + n;
+        return Admin::is(dir) ? Admin::exists(p) : QFileInfo::exists(p) || QFileInfo(p).isSymLink();
+    };
+    if (!taken(name)) return name;
     QString base = name, ext;
     QFileInfo fi(name);
     if (!name.startsWith('.') && !fi.suffix().isEmpty()) {
@@ -445,7 +549,7 @@ QString FileOps::uniqueName(const QString &dir, const QString &name)
     base.remove(copyRe);
     for (int i = 1;; ++i) {
         QString n = base + (i == 1 ? i18n(" (copia)") : i18n(" (copia %1)").arg(i)) + ext;
-        if (!QFileInfo::exists(dir + '/' + n)) return n;
+        if (!taken(n)) return n;
     }
 }
 
@@ -455,7 +559,7 @@ void FileOps::toClipboard(const QStringList &paths, bool cut)
     QList<QUrl> urls;
     QByteArray gnome = cut ? "cut" : "copy";
     for (const QString &p : paths) {
-        QUrl u = QUrl::fromLocalFile(p);
+        QUrl u = Admin::url(p);
         urls << u;
         gnome += "\n" + u.toEncoded();
     }
@@ -479,7 +583,7 @@ QStringList FileOps::fromClipboard(bool *cut)
         *cut = m->data("application/x-kde-cutselection") == "1";
     }
     for (const QUrl &u : m->urls())
-        if (u.isLocalFile()) out << u.toLocalFile();
+        if (const QString p = Admin::fromUrl(u); !p.isEmpty()) out << p;
     if (out.isEmpty() && m->hasText()) {
         for (const QString &l : m->text().split('\n', Qt::SkipEmptyParts)) {
             QString p = l.trimmed();

@@ -19,6 +19,7 @@ public:
     QStringList createdPaths() const { return m_created; }
     QList<QPair<QString, QString>> pairs() const { return m_pairs; }   // source -> what it became
     void setTargets(const QStringList &t) { m_targets = t; }
+    bool touchesAdmin() const;   // some path is admin:// (root's folders)
     void start();
     void cancel() { m_cancel = true; }
 
@@ -35,6 +36,9 @@ private:
     bool copyFile(const QString &src, const QString &dst);
     bool removeTree(const QString &path);
     QString resolve(const QString &src, const QString &dst, bool &skip);
+    int answerFor(const QString &src, const QString &dst);   // asks (or the "apply to all" answer)
+    bool adminItem(int i);   // false when item i is not about admin:// paths
+    QString resolveAdmin(const QString &src, const QString &dst, bool &skip);
 
     Kind m_kind;
     QStringList m_srcs, m_errors, m_created, m_targets;
