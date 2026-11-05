@@ -96,8 +96,8 @@ sudo pacman -S --needed qt6-base qt6-svg libmediainfo exiv2 poppler-qt6 libarchi
 # buscar dentro de archivos, imágenes, servidores de la red, Ctrl + P,
 # portadas de documentos de Office, cifrar y git
 sudo pacman -S --needed ffmpegthumbnailer gvfs gvfs-smb 7zip ripgrep imagemagick avahi zoxide libreoffice-fresh gnupg git
-unzip luna-1.2.0-linux-x86_64.zip
-cd luna-1.2.0-linux-x86_64
+unzip luna-1.3.0-linux-x86_64.zip
+cd luna-1.3.0-linux-x86_64
 ./install.sh            # en ~/.local (sin sudo)
 # sudo ./install.sh --system   # para todos los usuarios, en /usr/local
 ```
